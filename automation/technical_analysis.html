@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Automation System - Technical Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            color: #00d4ff;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        h2 {
+            color: #00d4ff;
+            font-size: 2rem;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        h3 {
+            color: #64b5f6;
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        h4 {
+            color: #90caf9;
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        h5 {
+            color: #bbdefb;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+
+        ul,
+        ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        code {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #00d4ff;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #a5d6ff;
+            font-size: 0.95em;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #0a0e27;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .highlight-box {
+            background: rgba(0, 212, 255, 0.05);
+            border-left: 4px solid #00d4ff;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: rgba(255, 152, 0, 0.05);
+            border-left: 4px solid #ff9800;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .info-card {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .info-card h4 {
+            margin-top: 0;
+            color: #00d4ff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .toc {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .toc h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .toc a {
+            color: #64b5f6;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: #00d4ff;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .feature-list li:before {
+            content: "✓ ";
+            color: #00d4ff;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        strong {
+            color: #00d4ff;
+        }
+
+        a {
+            color: #64b5f6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #00d4ff;
+            text-decoration: underline;
+        }
+
+        .diagram-placeholder {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            padding: 3rem;
+            text-align: center;
+            color: #64b5f6;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Address Automation System</h1>
+        <p style="text-align: center; font-size: 1.2rem; color: #64b5f6; margin-bottom: 2rem;">Technical Analysis &
+            Documentation</p>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Project Overview</a></li>
+                <li><a href="#architecture">2. Architecture</a></li>
+                <li><a href="#tech-stack">3. Technology Stack</a></li>
+                <li><a href="#database">4. Database Schema</a></li>
+                <li><a href="#backend">5. Backend Components</a></li>
+                <li><a href="#agents">6. CrewAI Agents & MCP Tools</a></li>
+                <li><a href="#api">7. API Endpoints</a></li>
+                <li><a href="#frontend">8. Frontend</a></li>
+                <li><a href="#data-flow">9. Data Flow</a></li>
+                <li><a href="#docker">10. Docker Infrastructure</a></li>
+            </ul>
+        </div>
+
+        <div class="section" id="overview">
+            <h2>1. Project Overview</h2>
+            <p>This is a German public administration automation system for processing address change requests. The
+                system uses AI-powered agents (CrewAI), OCR for document extraction, and a Human-in-the-Loop (HITL)
+                mechanism for quality assurance.</p>
+
+            <h3>Key Features</h3>
+            <ul class="feature-list">
+                <li>Automated document processing with OCR (Tesseract + GPT-4)</li>
+                <li>Multi-agent workflow orchestration using CrewAI</li>
+                <li>MCP (Model Context Protocol) tools for database operations</li>
+                <li>PostgreSQL database for case management</li>
+                <li>React-based admin dashboard and user portal</li>
+                <li>Email notifications via SendGrid</li>
+                <li>HITL mechanism for low-confidence cases</li>
+            </ul>
+        </div>
+
+        <div class="section" id="architecture">
+            <h2>2. Architecture</h2>
+
+            <div class="diagram-placeholder">
+                <h3>High-Level Architecture Diagram</h3>
+                <p>User Portal & Admin Dashboard → FastAPI Backend → CrewAI Orchestrator → MCP Tools → PostgreSQL
+                    Database</p>
+                <p style="margin-top: 1rem;">7 Sequential Agents: Ingest → Verification → Quality → Business Rules →
+                    Registry Update → Certificate → Audit</p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Frontend Layer</h4>
+                    <p>React-based user portal and admin dashboard with glassmorphic design</p>
+                </div>
+                <div class="info-card">
+                    <h4>API Layer</h4>
+                    <p>FastAPI with 8 REST endpoints for case management</p>
+                </div>
+                <div class="info-card">
+                    <h4>AI Orchestration</h4>
+                    <p>7 CrewAI agents with sequential workflow execution</p>
+                </div>
+                <div class="info-card">
+                    <h4>Data Layer</h4>
+                    <p>PostgreSQL with cases and audit_logs tables</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="tech-stack">
+            <h2>3. Technology Stack</h2>
+
+            <h3>Backend</h3>
+            <div style="margin-bottom: 1rem;">
+                <span class="badge">FastAPI</span>
+                <span class="badge">CrewAI 0.67+</span>
+                <span class="badge">OpenAI GPT-4o-mini</span>
+                <span class="badge">FastMCP</span>
+                <span class="badge">Tesseract OCR</span>
+                <span class="badge">psycopg2</span>
+                <span class="badge">SendGrid</span>
+                <span class="badge">reportlab</span>
+            </div>
+
+            <h3>Frontend</h3>
+            <div style="margin-bottom: 1rem;">
+                <span class="badge">React</span>
+                <span class="badge">Vite</span>
+                <span class="badge">Axios</span>
+                <span class="badge">Custom CSS</span>
+            </div>
+
+            <h3>Infrastructure</h3>
+            <div style="margin-bottom: 1rem;">
+                <span class="badge">Docker</span>
+                <span class="badge">Docker Compose</span>
+                <span class="badge">PostgreSQL 16</span>
+                <span class="badge">Uvicorn</span>
+            </div>
+
+            <h3>Environment Variables</h3>
+            <pre><code>OPENAI_API_KEY=sk-xxx
+SENDGRID_API_KEY=SG.xxx
+SENDER_EMAIL=no-reply@cityadmin.de
+DATABASE_URL=postgresql://app_user:app_pass@db:5432/address_db
+VITE_API_URL=http://localhost:8000</code></pre>
+        </div>
+
+        <div class="section" id="database">
+            <h2>4. Database Schema</h2>
+
+            <h3>cases Table</h3>
+            <p>Stores all address change case information.</p>
+            <pre><code>CREATE TABLE IF NOT EXISTS cases (
+    id                SERIAL PRIMARY KEY,
+    case_id           TEXT UNIQUE,          -- e.g. "Case ID: 1"
+    citizen_name      TEXT NOT NULL,
+    dob               DATE NOT NULL,
+    email             TEXT NOT NULL,
+    old_address_raw   TEXT NOT NULL,
+    new_address_raw   TEXT NOT NULL,
+    move_in_date_raw  TEXT NOT NULL,
+    landlord_name     TEXT,
+    canonical_address TEXT,                 -- Normalized by quality agent
+    registry_exists   BOOLEAN,              -- Verified by identity agent
+    status            TEXT NOT NULL,        -- Workflow status
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</code></pre>
+
+            <h4>Status Values</h4>
+            <ul>
+                <li><code>INGESTED</code> - Case created, initial data stored</li>
+                <li><code>WAITING_FOR_HUMAN</code> - HITL required (low confidence or rule violation)</li>
+                <li><code>VERIFIED</code> - Identity verified</li>
+                <li><code>QUALITY_CHECKED</code> - Address normalized and quality assessed</li>
+                <li><code>RULES_PASSED</code> - Business rules validated</li>
+                <li><code>REGISTRY_UPDATED</code> - Address updated in registry</li>
+                <li><code>CLOSED</code> - Certificate generated and sent</li>
+            </ul>
+
+            <h3>audit_logs Table</h3>
+            <p>Tracks all operations performed on each case.</p>
+            <pre><code>CREATE TABLE IF NOT EXISTS audit_logs (
+    id         SERIAL PRIMARY KEY,
+    case_id    TEXT NOT NULL REFERENCES cases(case_id) ON DELETE CASCADE,
+    timestamp  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    message    TEXT NOT NULL
+);</code></pre>
+        </div>
+
+        <div class="section" id="backend">
+            <h2>5. Backend Components</h2>
+
+            <h3>1. Main Entry Point (main.py)</h3>
+            <div class="highlight-box">
+                <p><strong>Purpose:</strong> Workflow orchestration entry point</p>
+                <p><strong>Key Function:</strong></p>
+                <pre><code>def run_address_change_workflow(citizen_data: dict):
+    crew_instance = AddressChangeMain()
+    result = crew_instance.crew().kickoff(
+        inputs={"citizen_data": citizen_data}
+    )
+    return result</code></pre>
+            </div>
+
+            <h3>2. API Layer (api.py)</h3>
+            <p><strong>Purpose:</strong> FastAPI REST API for frontend integration</p>
+            <p><strong>Models:</strong> AddressChangeRequest, CaseDetails, AuditLogEntry</p>
+
+            <h3>3. Database Layer (db.py)</h3>
+            <p><strong>Purpose:</strong> PostgreSQL database operations</p>
+            <p><strong>Key Functions:</strong></p>
+            <ul>
+                <li><code>create_case()</code> - Insert new case</li>
+                <li><code>fetch_case_by_id()</code> - Retrieve case details</li>
+                <li><code>update_case_status()</code> - Update workflow status</li>
+                <li><code>set_canonical_address()</code> - Store normalized address</li>
+                <li><code>add_audit_entry()</code> - Log operations</li>
+                <li><code>get_audit_entries()</code> - Retrieve audit trail</li>
+            </ul>
+
+            <h3>4. OCR Service (ocr_service.py)</h3>
+            <p><strong>Purpose:</strong> Extract structured data from PDF documents</p>
+            <p><strong>Pipeline:</strong></p>
+            <ol>
+                <li>PDF → Images (<code>pdf2image</code>)</li>
+                <li>Images → Text (<code>pytesseract</code>)</li>
+                <li>Text → Structured Data (GPT-4 parsing)</li>
+            </ol>
+
+            <h3>5. Email Service (email_service.py)</h3>
+            <p><strong>Purpose:</strong> Send address change certificates via SendGrid</p>
+            <p>Sends professional HTML emails with PDF certificate attachments</p>
+        </div>
+
+        <div class="section" id="agents">
+            <h2>6. CrewAI Agents & MCP Tools</h2>
+
+            <p>The system uses <strong>7 specialized agents</strong> orchestrated by CrewAI in a <strong>sequential
+                    workflow</strong>.</p>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>1. Ingest Case Agent</h4>
+                    <p><strong>Tool:</strong> ingest_case_tool</p>
+                    <p>Creates new case, assigns ID, extracts data from documents</p>
+                </div>
+
+                <div class="info-card">
+                    <h4>2. Verification Officer</h4>
+                    <p><strong>Tool:</strong> verify_identity_tool</p>
+                    <p>Verifies citizen identity against registry</p>
+                </div>
+
+                <div class="info-card">
+                    <h4>3. Quality Officer</h4>
+                    <p><strong>Tool:</strong> assess_quality_tool</p>
+                    <p>Normalizes addresses, computes confidence scores, triggers HITL if needed</p>
+                </div>
+
+                <div class="info-card">
+                    <h4>4. Business Rules Officer</h4>
+                    <p><strong>Tool:</strong> check_business_rules_tool</p>
+                    <p>Validates business rules and regulatory compliance</p>
+                </div>
+
+                <div class="info-card">
+                    <h4>5. Registry Update Officer</h4>
+                    <p><strong>Tool:</strong> update_registry_tool</p>
+                    <p>Updates official registry with validated address</p>
+                </div>
+
+                <div class="info-card">
+                    <h4>6. Certificate Officer</h4>
+                    <p><strong>Tool:</strong> generate_certificate_tool</p>
+                    <p>Generates PDF certificate and sends via email</p>
+                </div>
+
+                <div class="info-card">
+                    <h4>7. Audit Officer</h4>
+                    <p><strong>Tool:</strong> get_audit_log_tool</p>
+                    <p>Collects and presents complete audit trail</p>
+                </div>
+            </div>
+
+            <h3>MCP Tools Architecture</h3>
+            <div class="highlight-box">
+                <p><strong>MCP (Model Context Protocol)</strong> tools are the interface between CrewAI agents and the
+                    database/business logic.</p>
+                <p><strong>Implementation:</strong> FastMCP server with direct imports (Docker-compatible)</p>
+                <p><strong>Pattern:</strong> Agent calls CrewAI wrapper → Wrapper calls MCP function → MCP function
+                    performs DB operations</p>
+            </div>
+
+            <h3>HITL Mechanism</h3>
+            <div class="warning-box">
+                <h4>Human-in-the-Loop Trigger</h4>
+                <p>The Quality Officer triggers HITL when:</p>
+                <ul>
+                    <li>Address confidence score &lt; 0.8</li>
+                    <li>Business rule violations detected</li>
+                </ul>
+                <p><strong>Process:</strong> Case status → WAITING_FOR_HUMAN → Admin provides correction → Workflow
+                    resumes from registry update</p>
+            </div>
+        </div>
+
+        <div class="section" id="api">
+            <h2>7. API Endpoints</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Method</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/</code></td>
+                        <td>GET</td>
+                        <td>Health check</td>
+                    </tr>
+                    <tr>
+                        <td><code>/submit-case</code></td>
+                        <td>POST</td>
+                        <td>User PDF upload and OCR processing</td>
+                    </tr>
+                    <tr>
+                        <td><code>/admin/cases/pending</code></td>
+                        <td>GET</td>
+                        <td>List cases awaiting approval</td>
+                    </tr>
+                    <tr>
+                        <td><code>/admin/cases/completed</code></td>
+                        <td>GET</td>
+                        <td>List closed cases</td>
+                    </tr>
+                    <tr>
+                        <td><code>/admin/cases/hitl</code></td>
+                        <td>GET</td>
+                        <td>List cases needing human review</td>
+                    </tr>
+                    <tr>
+                        <td><code>/admin/approve/{case_id}</code></td>
+                        <td>POST</td>
+                        <td>Trigger workflow for ingested case</td>
+                    </tr>
+                    <tr>
+                        <td><code>/admin/resolve-hitl/{case_id}</code></td>
+                        <td>POST</td>
+                        <td>Provide corrected data for HITL case</td>
+                    </tr>
+                    <tr>
+                        <td><code>/case/{case_id}</code></td>
+                        <td>GET</td>
+                        <td>Fetch full case information</td>
+                    </tr>
+                    <tr>
+                        <td><code>/audit-log/{case_id}</code></td>
+                        <td>GET</td>
+                        <td>Retrieve audit trail for case</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" id="frontend">
+            <h2>8. Frontend</h2>
+
+            <h3>User Portal (UserPortal.jsx)</h3>
+            <p><strong>Purpose:</strong> Citizen-facing PDF submission interface</p>
+            <p><strong>Features:</strong></p>
+            <ul>
+                <li>Email input</li>
+                <li>PDF file upload (landlord confirmation + address change docs)</li>
+                <li>Form validation</li>
+                <li>Success/error messaging</li>
+                <li>Branded "Powered by" section</li>
+            </ul>
+
+            <h3>Admin Dashboard (AdminDashboard.jsx)</h3>
+            <p><strong>Purpose:</strong> Admin interface for case management</p>
+            <p><strong>Tabs:</strong></p>
+            <ol>
+                <li>Pending Cases - Awaiting approval</li>
+                <li>Completed Cases - Closed cases</li>
+                <li>HITL Cases - Needing human review</li>
+            </ol>
+            <p><strong>Actions:</strong></p>
+            <ul>
+                <li>Approve Case - Triggers workflow</li>
+                <li>Resolve HITL - Provide corrected data</li>
+                <li>View Audit Log - Shows case timeline</li>
+            </ul>
+
+            <h3>Design</h3>
+            <p>Premium dark glassmorphic UI with gradient backgrounds, blur effects, and smooth animations</p>
+        </div>
+
+        <div class="section" id="data-flow">
+            <h2>9. Data Flow</h2>
+
+            <h3>1. User Submission Flow</h3>
+            <div class="highlight-box">
+                <ol>
+                    <li>User uploads PDFs via User Portal</li>
+                    <li>API saves PDFs to /app/uploads/</li>
+                    <li>OCR Service extracts text (Tesseract) and parses with GPT-4</li>
+                    <li>Structured data inserted into database (status: INGESTED)</li>
+                    <li>Returns case_id to user</li>
+                </ol>
+            </div>
+
+            <h3>2. Admin Approval & Workflow Flow</h3>
+            <div class="highlight-box">
+                <ol>
+                    <li>Admin approves case via dashboard</li>
+                    <li>API fetches case data from database</li>
+                    <li>Triggers <code>run_address_change_workflow()</code></li>
+                    <li>7 agents execute sequentially, each calling their MCP tool</li>
+                    <li>MCP tools perform database operations and business logic</li>
+                    <li>Certificate generated and emailed to citizen</li>
+                    <li>Case status updated to CLOSED</li>
+                    <li>Audit log compiled</li>
+                </ol>
+            </div>
+
+            <h3>3. HITL Flow (Low Confidence)</h3>
+            <div class="warning-box">
+                <ol>
+                    <li>Quality Agent detects low confidence (&lt; 0.8)</li>
+                    <li>Status updated to WAITING_FOR_HUMAN</li>
+                    <li>Workflow pauses</li>
+                    <li>Admin reviews case and provides corrected address</li>
+                    <li>Workflow resumes from registry update step</li>
+                    <li>Remaining agents execute</li>
+                    <li>Case closed successfully</li>
+                </ol>
+            </div>
+
+            <h3>Agent Execution Order</h3>
+            <p>Ingest → Verification → Quality → Business Rules → Registry Update → Certificate → Audit</p>
+        </div>
+
+        <div class="section" id="docker">
+            <h2>10. Docker Infrastructure</h2>
+
+            <h3>Services</h3>
+
+            <h4>1. PostgreSQL Database (db)</h4>
+            <ul>
+                <li>Image: postgres:16</li>
+                <li>Port: 5432</li>
+                <li>Initializes schema from init.sql</li>
+                <li>Persistent volume: db-data</li>
+            </ul>
+
+            <h4>2. FastAPI Backend (backend)</h4>
+            <ul>
+                <li>Port: 8000</li>
+                <li>Command: uvicorn src.automation.api:app</li>
+                <li>Volumes: Code mount + uploads volume</li>
+                <li>Environment: OpenAI, SendGrid, Database credentials</li>
+            </ul>
+
+            <h4>3. React Frontend (frontend)</h4>
+            <ul>
+                <li>Port: 3000 (maps to 5173)</li>
+                <li>Vite dev server with hot reload</li>
+                <li>Environment: VITE_API_URL</li>
+            </ul>
+
+            <h3>Networking</h3>
+            <p>All services on <code>address_auto_main_default</code> network</p>
+            <ul>
+                <li>Frontend: http://localhost:3000</li>
+                <li>Backend API: http://localhost:8000</li>
+                <li>Database: localhost:5432 (for debugging)</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Key Design Decisions</h2>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Direct MCP Tool Import</h4>
+                    <p>Import MCP functions directly instead of stdio for Docker compatibility</p>
+                </div>
+
+                <div class="info-card">
+                    <h4>Sequential Process</h4>
+                    <p>Each agent depends on previous step's data - maintains clear workflow</p>
+                </div>
+
+                <div class="info-card">
+                    <h4>HITL Mechanism</h4>
+                    <p>Pause workflow for low-confidence cases - ensures data quality</p>
+                </div>
+
+                <div class="info-card">
+                    <h4>Status Polling</h4>
+                    <p>Frontend polls every 2s during workflow - simple and effective</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Summary</h2>
+
+            <p>This system demonstrates a production-ready AI-powered workflow automation for government services:</p>
+
+            <ul class="feature-list">
+                <li>Multi-agent AI orchestration (CrewAI)</li>
+                <li>MCP tool architecture for database operations</li>
+                <li>OCR + LLM pipeline for document extraction</li>
+                <li>HITL mechanism for quality assurance</li>
+                <li>Full audit trail for compliance</li>
+                <li>Dockerized microservices architecture</li>
+                <li>Modern React dashboard with real-time updates</li>
+            </ul>
+
+            <div class="highlight-box" style="margin-top: 2rem;">
+                <h3>Complete Data Flow</h3>
+                <p><strong>User submits PDFs → OCR extraction → Admin approval → 7-agent sequential workflow → PDF
+                        certificate + email → Case closed + audit log</strong></p>
+
+                <p style="margin-top: 1rem;"><strong>Database:</strong> PostgreSQL with <code>cases</code> (case data)
+                    and <code>audit_logs</code> (compliance trail) tables</p>
+
+                <p><strong>Agents ↔ Tools:</strong> Each agent has dedicated MCP tool that performs database CRUD
+                    operations and business logic</p>
+
+                <p><strong>Where MCPs are used:</strong> CrewAI agents call MCP tools wrapped as @tool decorators, which
+                    invoke FastMCP server functions that interact with PostgreSQL</p>
+
+                <p><strong>How data is stored:</strong> All case data and status updates go through MCP tools → db.py
+                    functions → PostgreSQL tables with timestamps and foreign key relationships</p>
+
+                <p><strong>How data is fetched:</strong> Admin dashboard calls FastAPI endpoints → Direct database
+                    queries via db.py → Returns case lists/details/audit logs as JSON</p>
+            </div>
+        </div>
+
+        <footer
+            style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); color: #64b5f6;">
+            <p>Address Automation System - Technical Analysis</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Generated: November 26, 2025</p>
+        </footer>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: address_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_pass
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: .
+    restart: "no"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://app_user:app_pass@db:5432/address_db
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      SENDER_EMAIL: ${SENDER_EMAIL}
+    working_dir: /app
+    command: [ "uvicorn", "src.automation.api:app", "--host", "0.0.0.0", "--port", "8000" ]
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - uploads:/app/uploads
+
+  frontend:
+    build: ./frontend
+    restart: "no"
+    depends_on:
+      - backend
+    ports:
+      - "3000:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+volumes:
+  db-data:
+  uploads:

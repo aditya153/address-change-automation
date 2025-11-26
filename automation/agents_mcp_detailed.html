@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrewAI Agents & MCP Tools - Deep Dive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            color: #00d4ff;
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            color: #64b5f6;
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            color: #00d4ff;
+            font-size: 2rem;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        h3 {
+            color: #64b5f6;
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        h4 {
+            color: #90caf9;
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #e0e0e0;
+        }
+
+        ul,
+        ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        code {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #00d4ff;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #a5d6ff;
+            font-size: 0.95em;
+        }
+
+        .agent-card {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(100, 181, 246, 0.05));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-left: 4px solid #00d4ff;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 16px rgba(0, 212, 255, 0.1);
+        }
+
+        .agent-card h3 {
+            margin-top: 0;
+            color: #00d4ff;
+            font-size: 1.8rem;
+        }
+
+        .agent-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #0a0e27;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+
+        .tool-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #64b5f6;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+
+        .highlight-box {
+            background: rgba(0, 212, 255, 0.08);
+            border-left: 4px solid #00d4ff;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: rgba(255, 152, 0, 0.08);
+            border-left: 4px solid #ff9800;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: rgba(76, 175, 80, 0.08);
+            border-left: 4px solid #4caf50;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .flow-diagram {
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            display: inline-block;
+            min-width: 200px;
+        }
+
+        .arrow {
+            color: #00d4ff;
+            font-size: 2rem;
+            margin: 0.5rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #0a0e27;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge-warning {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+
+        .badge-success {
+            background: linear-gradient(135deg, #4caf50, #388e3c);
+        }
+
+        strong {
+            color: #00d4ff;
+        }
+
+        .toc {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .toc ul {
+            list-style: none;
+            margin-left: 1rem;
+        }
+
+        .toc a {
+            color: #64b5f6;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: #00d4ff;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🤖 CrewAI Agents & MCP Tools</h1>
+        <p class="subtitle">Deep Dive into Agent Architecture and Tool Integration</p>
+
+        <div class="toc">
+            <h2>📋 Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#architecture">2. Architecture & Workflow Pattern</a></li>
+                <li><a href="#mcp-layer">3. MCP Layer Architecture</a></li>
+                <li><a href="#agents">4. The 7 Agents in Detail</a></li>
+                <li><a href="#data-flow">5. Data Flow Between Agents</a></li>
+                <li><a href="#hitl">6. Human-in-the-Loop (HITL) Mechanism</a></li>
+                <li><a href="#code">7. Code Implementation</a></li>
+            </ul>
+        </div>
+
+        <div class="section" id="overview">
+            <h2>1. Overview</h2>
+
+            <p>The address automation system uses a sophisticated multi-agent architecture where <strong>7 specialized
+                    CrewAI agents</strong> work in sequence, each using dedicated <strong>MCP (Model Context Protocol)
+                    tools</strong> to perform database operations and business logic.</p>
+
+            <div class="highlight-box">
+                <h3>Key Components</h3>
+                <ul>
+                    <li><strong>CrewAI Framework:</strong> Orchestrates agent execution in a sequential workflow</li>
+                    <li><strong>7 Specialized Agents:</strong> Each handles a specific domain (ingestion, verification,
+                        quality, rules, etc.)</li>
+                    <li><strong>7 MCP Tools:</strong> Database-backed tools that agents use to perform operations</li>
+                    <li><strong>Tool Wrapper Layer:</strong> Adapts MCP tools for CrewAI compatibility</li>
+                    <li><strong>LLM (GPT-4o-mini):</strong> Powers agent reasoning and decision-making</li>
+                </ul>
+            </div>
+
+            <h3>Why This Architecture?</h3>
+            <div class="grid-2">
+                <div class="success-box">
+                    <h4>✓ Separation of Concerns</h4>
+                    <p>Each agent has a single, well-defined responsibility</p>
+                </div>
+                <div class="success-box">
+                    <h4>✓ Sequential Processing</h4>
+                    <p>Each step depends on the previous, ensuring data consistency</p>
+                </div>
+                <div class="success-box">
+                    <h4>✓ Database-Backed State</h4>
+                    <p>All operations persist to PostgreSQL for audit and recovery</p>
+                </div>
+                <div class="success-box">
+                    <h4>✓ HITL Integration</h4>
+                    <p>Workflow can pause for human review and resume seamlessly</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="architecture">
+            <h2>2. Architecture & Workflow Pattern</h2>
+
+            <h3>Sequential Workflow Execution</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <strong>Kickoff</strong><br>
+                    <code>citizen_data</code> input
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Agent 1</strong><br>
+                    Calls <code>ingest_case_tool</code>
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Agent 2</strong><br>
+                    Calls <code>verify_identity_tool</code>
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Agent 3</strong><br>
+                    Calls <code>assess_quality_tool</code>
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Agents 4-7</strong><br>
+                    Continue sequentially
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Result</strong><br>
+                    Workflow output
+                </div>
+            </div>
+
+            <h3>Agent Configuration</h3>
+            <pre><code>@CrewBase
+class AddressChangeMain:
+    agents_config = "config/agents.yaml"
+    tasks_config = "config/tasks.yaml"
+    
+    llm = LLM(
+        model="gpt-4o-mini",
+        temperature=0.1  # Low for deterministic outputs
+    )
+    
+    @agent
+    def ingest_case_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["ingest_case_agent"],
+            llm=self.llm,
+            verbose=True,
+            tools=[ingest_case_tool]  # ← MCP tool binding
+        )
+    
+    @crew
+    def crew(self) -> Crew:
+        return Crew(
+            agents=self.agents,        # All 7 agents
+            tasks=self.tasks,          # All 7 tasks
+            process=Process.sequential # Sequential execution
+        )</code></pre>
+
+            <div class="highlight-box">
+                <h4>How Agent Execution Works</h4>
+                <ol>
+                    <li><strong>Kickoff:</strong> <code>crew.kickoff(inputs={"citizen_data": {...}})</code> starts the
+                        workflow</li>
+                    <li><strong>Agent Reads Task:</strong> Agent receives task description from <code>tasks.yaml</code>
+                    </li>
+                    <li><strong>Agent Reasons:</strong> LLM determines which tool to call and with what parameters</li>
+                    <li><strong>Tool Execution:</strong> Agent calls its assigned MCP tool</li>
+                    <li><strong>Output Propagation:</strong> Tool output becomes input for next agent</li>
+                    <li><strong>Sequential Flow:</strong> Next agent starts with previous agent's output in context</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section" id="mcp-layer">
+            <h2>3. MCP Layer Architecture</h2>
+
+            <h3>What is MCP (Model Context Protocol)?</h3>
+            <p>MCP is a protocol for tools that AI agents can use to interact with external systems. In this project,
+                MCP tools provide the interface between CrewAI agents and the PostgreSQL database.</p>
+
+            <h3>Three-Layer Architecture</h3>
+
+            <div class="tool-section">
+                <h4>Layer 1: MCP Server Functions (mcp_server.py)</h4>
+                <p>Core business logic and database operations</p>
+                <pre><code>@server.tool()
+def ingest_case(input: IngestCaseInput) -> IngestCaseOutput:
+    # Business logic
+    case_id = create_case(extracted_data)
+    add_audit_entry(case_id, "Case ingested")
+    
+    return IngestCaseOutput(
+        case_id=case_id,
+        extracted_data=extracted,
+        status="INGESTED"
+    )</code></pre>
+            </div>
+
+            <div class="tool-section">
+                <h4>Layer 2: CrewAI Tool Wrappers (crewai_tools.py)</h4>
+                <p>Adapts MCP functions for CrewAI compatibility</p>
+                <pre><code>from crewai.tools import tool
+
+@tool("ingest_case")
+def ingest_case_tool(
+    citizen_name: str,
+    dob: str,
+    email: str,
+    # ... other params
+) -> Dict:
+    """CrewAI-compatible wrapper"""
+    input_data = IngestCaseInput(...)
+    result = ingest_case(input_data)  # ← Calls MCP function
+    return result.model_dump()        # ← Returns dict for CrewAI</code></pre>
+            </div>
+
+            <div class="tool-section">
+                <h4>Layer 3: Database Layer (db.py)</h4>
+                <p>PostgreSQL CRUD operations</p>
+                <pre><code>def create_case(data: dict) -> str:
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("INSERT INTO cases (...) VALUES (...)")
+        row = cur.fetchone()
+        case_id = f"Case ID: {row['id']}"
+        return case_id</code></pre>
+            </div>
+
+            <h3>Why Direct Import (Not Stdio)?</h3>
+            <div class="warning-box">
+                <p><strong>Docker Compatibility:</strong> The MCP server functions are imported directly instead of
+                    using stdio communication:</p>
+                <ul>
+                    <li>✓ Avoids stdio bottlenecks in Docker containers</li>
+                    <li>✓ Single-process simplicity</li>
+                    <li>✓ MCP structure preserved for future HTTP deployment</li>
+                    <li>✓ Direct function calls = faster execution</li>
+                </ul>
+            </div>
+
+            <h3>Tool Input/Output Models</h3>
+            <p>All MCP tools use Pydantic models for type safety and validation:</p>
+            <pre><code>class IngestCaseInput(BaseModel):
+    citizen_name: str
+    dob: str
+    email: str
+    old_address_raw: str
+    new_address_raw: str
+    move_in_date_raw: str
+    landlord_name: Optional[str] = None
+    case_id: Optional[str] = None
+
+class IngestCaseOutput(BaseModel):
+    case_id: str
+    extracted_data: Dict
+    status: str</code></pre>
+        </div>
+
+        <div class="section" id="agents">
+            <h2>4. The 7 Agents in Detail</h2>
+
+            <!-- Agent 1 -->
+            <div class="agent-card">
+                <h3><span class="agent-number">1</span>Ingest Case Agent</h3>
+
+                <p><strong>Role:</strong> Case Ingestion & OCR Agent</p>
+                <p><strong>Tool:</strong> <code>ingest_case_tool</code></p>
+
+                <h4>Task Description (from tasks.yaml)</h4>
+                <pre><code>Use the MCP tool `ingest_case` with citizen data provided in Crew inputs.
+Read all values from `citizen_data` and call the tool exactly once.
+Take the returned `case_id` and keep it in context for next tasks.</code></pre>
+
+                <h4>How It Works</h4>
+                <ol>
+                    <li>Receives <code>citizen_data</code> from workflow kickoff</li>
+                    <li>LLM extracts all required fields</li>
+                    <li>Calls <code>ingest_case_tool</code> with parameters</li>
+                    <li>Tool creates database entry (or uses existing case)</li>
+                    <li>Returns <code>case_id</code> (e.g., "Case ID: 1")</li>
+                </ol>
+
+                <h4>MCP Tool: ingest_case</h4>
+                <div class="tool-section">
+                    <p><strong>Input:</strong> All citizen data fields</p>
+                    <p><strong>Output:</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "extracted_data": { /* all input data */ },
+    "status": "INGESTED"
+}</code></pre>
+                    <p><strong>Database Operations:</strong></p>
+                    <ul>
+                        <li>INSERT into <code>cases</code> table OR use existing case</li>
+                        <li>INSERT into <code>audit_logs</code>: "Case ingested"</li>
+                        <li>SET status = <code>INGESTED</code></li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box">
+                    <p><strong>Critical:</strong> The <code>case_id</code> returned by this agent is used by ALL
+                        subsequent agents. It's the primary key that links the entire workflow.</p>
+                </div>
+            </div>
+
+            <!-- Agent 2 -->
+            <div class="agent-card">
+                <h3><span class="agent-number">2</span>Verification Officer</h3>
+
+                <p><strong>Role:</strong> Identity Verification Officer</p>
+                <p><strong>Tool:</strong> <code>verify_identity_tool</code></p>
+
+                <h4>Task Description</h4>
+                <pre><code>Take `case_id` from previous task's tool result.
+Take `citizen_name` and `dob` from extracted data.
+Call MCP tool `verify_identity` to check registry.</code></pre>
+
+                <h4>How It Works</h4>
+                <ol>
+                    <li>Reads <code>case_id</code> from Agent 1's output</li>
+                    <li>Extracts <code>citizen_name</code> and <code>dob</code></li>
+                    <li>Calls <code>verify_identity_tool</code></li>
+                    <li>Tool checks against registry (mock implementation)</li>
+                    <li>Returns verification result</li>
+                </ol>
+
+                <h4>MCP Tool: verify_identity</h4>
+                <div class="tool-section">
+                    <p><strong>Input:</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "citizen_name": "Max Mustermann",
+    "dob": "1990-05-15"
+}</code></pre>
+                    <p><strong>Output:</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "exists": true,
+    "reasons": ["Citizen found in demo registry (stub)."]
+}</code></pre>
+                    <p><strong>Database Operations:</strong></p>
+                    <ul>
+                        <li>UPDATE <code>cases</code> SET <code>registry_exists = true</code></li>
+                        <li>INSERT audit log: "Identity verification run. exists=true"</li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <p><strong>Mock Implementation:</strong> Currently simulates registry lookup. In production, this
+                        would connect to an external registry system.</p>
+                </div>
+            </div>
+
+            <!-- Agent 3 -->
+            <div class="agent-card">
+                <h3><span class="agent-number">3</span>Quality & Confidence Officer</h3>
+
+                <p><strong>Role:</strong> Data Quality & Confidence Officer</p>
+                <p><strong>Tool:</strong> <code>assess_quality_tool</code></p>
+
+                <span class="badge-warning">HITL Trigger Point</span>
+
+                <h4>Task Description</h4>
+                <pre><code>Extract case_id and new_address_raw from citizen_data.
+Call `assess_quality` tool to normalize address and compute confidence.
+If confidence < 0.8, sets needs_hitl = true.</code></pre>
+
+                <h4>How It Works</h4>
+                <ol>
+                    <li>Reads <code>case_id</code> and <code>new_address_raw</code></li>
+                    <li>Calls <code>assess_quality_tool</code></li>
+                    <li>Tool normalizes address to canonical format</li>
+                    <li>Computes confidence score based on address completeness</li>
+                    <li><strong>If confidence < 0.8:</strong> Triggers HITL workflow</li>
+                    <li><strong>If confidence ≥ 0.8:</strong> Continues to next agent</li>
+                </ol>
+
+                <h4>MCP Tool: assess_quality</h4>
+                <div class="tool-section">
+                    <p><strong>Input:</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "new_address_raw": "Musterstr 12a, 67264 KL"
+}</code></pre>
+                    <p><strong>Output (High Confidence):</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "canonical_address": "Musterstr 12A, 67264 KL",
+    "confidence": 0.95,
+    "needs_hitl": false,
+    "hitl_task_id": null
+}</code></pre>
+                    <p><strong>Output (Low Confidence - HITL Triggered):</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "canonical_address": "Unclear Address",
+    "confidence": 0.4,
+    "needs_hitl": true,
+    "hitl_task_id": "HITL-Case ID: 1"
+}</code></pre>
+                    <p><strong>Database Operations:</strong></p>
+                    <ul>
+                        <li>UPDATE <code>cases</code> SET <code>canonical_address</code></li>
+                        <li>IF needs_hitl: UPDATE <code>status = 'WAITING_FOR_HUMAN'</code></li>
+                        <li>INSERT audit log with confidence score and reason</li>
+                    </ul>
+                </div>
+
+                <h4>Confidence Calculation Logic</h4>
+                <pre><code># Check for abbreviated city names (e.g., "KL", "DL")
+has_abbreviation = bool(re.search(r'\b[A-Z]{2,3}\b', raw))
+
+# Check for postal code
+has_postal_code = bool(re.search(r'\b\d{5}\b', raw))
+
+if has_abbreviation:
+    confidence = 0.4  # Low - needs human review
+elif has_comma and has_digit and has_postal_code and min_length:
+    confidence = 0.95  # High - proceed automatically
+else:
+    confidence = 0.5 to 0.7  # Medium</code></pre>
+
+                <div class="warning-box">
+                    <h4>⚠️ HITL Trigger Conditions</h4>
+                    <ul>
+                        <li>Confidence score < 0.8</li>
+                        <li>Abbreviations detected (e.g., "KL" instead of "Kaiserslautern")</li>
+                        <li>Missing postal code</li>
+                        <li>Incomplete address format</li>
+                    </ul>
+                    <p><strong>When triggered:</strong> Workflow pauses, admin must provide corrected address, then
+                        workflow resumes from registry update step.</p>
+                </div>
+            </div>
+
+            <!-- Agent 4 -->
+            <div class="agent-card">
+                <h3><span class="agent-number">4</span>Business Rules Officer</h3>
+
+                <p><strong>Role:</strong> Business Rules & Compliance Officer</p>
+                <p><strong>Tool:</strong> <code>check_business_rules_tool</code></p>
+
+                <h4>Task Description</h4>
+                <pre><code>Take case_id, canonical_address from assess_quality output.
+Take move_in_date_raw from extracted data.
+Call `check_business_rules` to validate compliance.</code></pre>
+
+                <h4>How It Works</h4>
+                <ol>
+                    <li>Checks if case is in HITL state - if yes, returns early</li>
+                    <li>Validates move-in date format and value</li>
+                    <li>Validates address format compliance</li>
+                    <li>Checks document completeness</li>
+                    <li>Returns pass/fail status per rule</li>
+                </ol>
+
+                <h4>MCP Tool: check_business_rules</h4>
+                <div class="tool-section">
+                    <p><strong>Input:</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "move_in_date_raw": "2025-03-01",
+    "canonical_address": "Musterstr 12A, 67264 KL",
+    "documents_ok": true
+}</code></pre>
+                    <p><strong>Output (All Rules Passed):</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "overall_status": "passed",
+    "needs_hitl": false,
+    "rule_results": {
+        "move_in_date": "ok",
+        "address_format_compliance": "passed",
+        "documents": "ok"
+    },
+    "hitl_task_id": null
+}</code></pre>
+                    <p><strong>Database Operations:</strong></p>
+                    <ul>
+                        <li>IF rules pass: UPDATE <code>status = 'RULES_PASSED'</code></li>
+                        <li>IF rules fail: UPDATE <code>status = 'WAITING_FOR_HUMAN'</code></li>
+                        <li>INSERT audit log with rule results</li>
+                    </ul>
+                </div>
+
+                <h4>Business Rules Validated</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rule</th>
+                            <th>Validation</th>
+                            <th>On Fail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Move-in Date Format</td>
+                            <td>Must be valid ISO date (YYYY-MM-DD)</td>
+                            <td>Trigger HITL</td>
+                        </tr>
+                        <tr>
+                            <td>Move-in Date Range</td>
+                            <td>Between -365 days and +30 days from today</td>
+                            <td>Trigger HITL</td>
+                        </tr>
+                        <tr>
+                            <td>Address Format</td>
+                            <td>Must have comma and digit</td>
+                            <td>Trigger HITL</td>
+                        </tr>
+                        <tr>
+                            <td>Documents</td>
+                            <td>Must be present and valid</td>
+                            <td>Trigger HITL</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight-box">
+                    <p><strong>Skip Condition:</strong> If case status is <code>WAITING_FOR_HUMAN</code>, this agent
+                        returns early without validation, allowing the workflow to pause gracefully.</p>
+                </div>
+            </div>
+
+            <!-- Agent 5 -->
+            <div class="agent-card">
+                <h3><span class="agent-number">5</span>Registry Update Officer</h3>
+
+                <p><strong>Role:</strong> Registry Update Officer</p>
+                <p><strong>Tool:</strong> <code>update_registry_tool</code></p>
+
+                <h4>Task Description</h4>
+                <pre><code>Assuming verification and rules passed:
+Take case_id and canonical_address.
+Call `update_registry` to update official registry.</code></pre>
+
+                <h4>How It Works</h4>
+                <ol>
+                    <li>Checks if case is in HITL state - if yes, skips</li>
+                    <li>Simulates update to external registry system</li>
+                    <li>Updates database with new canonical address</li>
+                    <li>Returns success/failure status</li>
+                </ol>
+
+                <h4>MCP Tool: update_registry</h4>
+                <div class="tool-section">
+                    <p><strong>Input:</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "citizen_id": "CIT-DEMO-001",
+    "new_address": "Musterstr 12A, 67264 Kaiserslautern"
+}</code></pre>
+                    <p><strong>Output:</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "citizen_id": "CIT-DEMO-001",
+    "update_status": "success",
+    "message": "Registry updated in Postgres (demo)."
+}</code></pre>
+                    <p><strong>Database Operations:</strong></p>
+                    <ul>
+                        <li>UPDATE <code>status = 'UPDATED'</code></li>
+                        <li>UPDATE <code>canonical_address</code></li>
+                        <li>INSERT audit log: "Registry updated for citizen_id"</li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <p><strong>Production Note:</strong> In a real system, this would make an API call to the external
+                        government registry system (e.g., Bürgerbüro database).</p>
+                </div>
+            </div>
+
+            <!-- Agent 6 -->
+            <div class="agent-card">
+                <h3><span class="agent-number">6</span>Certificate Officer</h3>
+
+                <p><strong>Role:</strong> Certificate & Notification Officer</p>
+                <p><strong>Tool:</strong> <code>generate_certificate_tool</code></p>
+
+                <h4>Task Description</h4>
+                <pre><code>Take case_id, email, citizen_name, dob, move_in_date, new_address.
+Call `generate_certificate` to create PDF and send email.
+IMPORTANT: If tool returns 'skipped_hitl_pending', this is VALID (HITL case).</code></pre>
+
+                <h4>How It Works</h4>
+                <ol>
+                    <li>Checks if case is in HITL state - if yes, returns skip message</li>
+                    <li>Generates professional PDF certificate using reportlab</li>
+                    <li>Sends email with PDF attachment via SendGrid</li>
+                    <li>Updates case status to CLOSED</li>
+                    <li>Returns certificate path and email status</li>
+                </ol>
+
+                <h4>MCP Tool: generate_certificate</h4>
+                <div class="tool-section">
+                    <p><strong>Input:</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "email": "citizen@example.com",
+    "citizen_name": "Max Mustermann",
+    "dob": "1990-05-15",
+    "move_in_date": "2025-03-01",
+    "new_address": "Musterstr 12A, 67264 Kaiserslautern"
+}</code></pre>
+                    <p><strong>Output (Success):</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "certificate_path": "/app/uploads/Case_ID_1_certificate.pdf",
+    "email_status": "sent to citizen@example.com",
+    "case_status": "CLOSED"
+}</code></pre>
+                    <p><strong>Output (HITL Pending):</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "certificate_path": "skipped_hitl_pending",
+    "email_status": "skipped",
+    "case_status": "WAITING_FOR_HUMAN"
+}</code></pre>
+                    <p><strong>Database Operations:</strong></p>
+                    <ul>
+                        <li>UPDATE <code>status = 'CLOSED'</code></li>
+                        <li>INSERT audit log: "PDF certificate generated, email sent"</li>
+                    </ul>
+                </div>
+
+                <h4>PDF Certificate Content</h4>
+                <div class="highlight-box">
+                    <p>The certificate is an official-looking PDF document with:</p>
+                    <ul>
+                        <li>German government header ("BUNDESREPUBLIK DEUTSCHLAND")</li>
+                        <li>Title: "MELDEBESCHEINIGUNG" (Registration Certificate)</li>
+                        <li>Citizen details: Name, DOB, new address, move-in date</li>
+                        <li>Case reference number</li>
+                        <li>Official stamp and footer</li>
+                    </ul>
+                    <p><strong>Location:</strong> <code>/app/uploads/{case_id}_certificate.pdf</code></p>
+                </div>
+            </div>
+
+            <!-- Agent 7 -->
+            <div class="agent-card">
+                <h3><span class="agent-number">7</span>Audit Officer</h3>
+
+                <p><strong>Role:</strong> Audit & Reporting Officer</p>
+                <p><strong>Tool:</strong> <code>get_audit_log_tool</code></p>
+
+                <h4>Task Description</h4>
+                <pre><code>Call `get_audit_log` with the same case_id.
+Retrieve full audit trail and present chronologically.</code></pre>
+
+                <h4>How It Works</h4>
+                <ol>
+                    <li>Reads <code>case_id</code> from workflow context</li>
+                    <li>Calls <code>get_audit_log_tool</code></li>
+                    <li>Tool queries <code>audit_logs</code> table</li>
+                    <li>Returns chronologically ordered entries</li>
+                    <li>Agent formats for human readability</li>
+                </ol>
+
+                <h4>MCP Tool: get_audit_log</h4>
+                <div class="tool-section">
+                    <p><strong>Input:</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1"
+}</code></pre>
+                    <p><strong>Output:</strong></p>
+                    <pre><code>{
+    "case_id": "Case ID: 1",
+    "entries": [
+        "2025-11-26T10:30:00Z - Case ingested",
+        "2025-11-26T10:31:00Z - Identity verified: exists=true",
+        "2025-11-26T10:32:00Z - Address quality OK. confidence=0.95",
+        "2025-11-26T10:33:00Z - Business rules passed",
+        "2025-11-26T10:34:00Z - Registry updated",
+        "2025-11-26T10:35:00Z - PDF certificate generated, email sent"
+    ]
+}</code></pre>
+                    <p><strong>Database Operations:</strong></p>
+                    <ul>
+                        <li>SELECT from <code>audit_logs</code> WHERE <code>case_id</code></li>
+                        <li>ORDER BY <code>timestamp ASC</code></li>
+                    </ul>
+                </div>
+
+                <div class="success-box">
+                    <p><strong>Output Files:</strong> This agent generates <code>output/audit_log.md</code> with a
+                        formatted timeline of all operations.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="data-flow">
+            <h2>5. Data Flow Between Agents</h2>
+
+            <h3>How Data Propagates Through the Workflow</h3>
+
+            <div class="highlight-box">
+                <h4>Context Sharing Mechanism</h4>
+                <p>Each agent's output becomes part of the <strong>shared context</strong> for subsequent agents. CrewAI
+                    automatically manages this context propagation.</p>
+            </div>
+
+            <h3>Step-by-Step Data Flow</h3>
+
+            <pre><code># 1. Workflow Kickoff
+inputs = {"citizen_data": {
+    "citizen_name": "Max Mustermann",
+    "dob": "1990-05-15",
+    "email": "max@example.com",
+    "old_address_raw": "Hauptstraße 10, Berlin",
+    "new_address_raw": "Musterstr 12A, 67264 KL",
+    "move_in_date_raw": "2025-03-01",
+    "landlord_name": "Landlord GmbH"
+}}
+
+# 2. Agent 1 (Ingest) Output
+agent1_output = {
+    "case_id": "Case ID: 1",
+    "extracted_data": {/* citizen_data */},
+    "status": "INGESTED"
+}
+# ↓ case_id now in context for all agents
+
+# 3. Agent 2 (Verification) uses case_id
+agent2_input = {
+    "case_id": "Case ID: 1",  # ← From Agent 1 output
+    "citizen_name": "Max Mustermann",  # ← From original input
+    "dob": "1990-05-15"
+}
+
+# 4. Agent 3 (Quality) uses case_id
+agent3_output = {
+    "case_id": "Case ID: 1",
+    "canonical_address": "Musterstr 12A, 67264 KL",  # ← Normalized
+    "confidence": 0.95,
+    "needs_hitl": false
+}
+# ↓ canonical_address now available
+
+# 5. Agent 4 (Rules) uses both case_id and canonical_address
+agent4_input = {
+    "case_id": "Case ID: 1",
+    "canonical_address": "Musterstr 12A, 67264 KL",  # ← From Agent 3
+    "move_in_date_raw": "2025-03-01"  # ← From original input
+}
+
+# ... continues for remaining agents</code></pre>
+
+            <div class="flow-diagram">
+                <h3>Critical Data Elements</h3>
+                <div class="flow-step">
+                    <strong>case_id</strong><br>
+                    Propagates through ALL agents<br>
+                    Generated by Agent 1
+                </div>
+                <div class="flow-step">
+                    <strong>canonical_address</strong><br>
+                    Used by Agents 4, 5, 6<br>
+                    Generated by Agent 3
+                </div>
+                <div class="flow-step">
+                    <strong>Original Input</strong><br>
+                    Available to all agents<br>
+                    From kickoff inputs
+                </div>
+            </div>
+
+            <h3>Database as Ground Truth</h3>
+            <p>While agents pass data through context, the <strong>PostgreSQL database</strong> serves as the single
+                source of truth:</p>
+            <ul>
+                <li>Each MCP tool reads/writes to database</li>
+                <li>If workflow crashes, state can be recovered from database</li>
+                <li>Audit logs provide complete operation history</li>
+                <li>HITL resolution updates database directly</li>
+            </ul>
+        </div>
+
+        <div class="section" id="hitl">
+            <h2>6. Human-in-the-Loop (HITL) Mechanism</h2>
+
+            <div class="warning-box">
+                <h3>Why HITL is Critical for Government Workflows</h3>
+                <p>German public administration requires high accuracy and legal compliance. HITL ensures:</p>
+                <ul>
+                    <li>✓ Low-quality data is reviewed before processing</li>
+                    <li>✓ Compliance with data protection regulations</li>
+                    <li>✓ Audit trail shows human oversight</li>
+                    <li>✓ Prevents incorrect registry updates</li>
+                </ul>
+            </div>
+
+            <h3>HITL Trigger Points</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Agent</th>
+                        <th>Trigger Condition</th>
+                        <th>Status Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Quality Officer (Agent 3)</td>
+                        <td>Address confidence < 0.8</td>
+                        <td>WAITING_FOR_HUMAN</td>
+                    </tr>
+                    <tr>
+                        <td>Quality Officer (Agent 3)</td>
+                        <td>Abbreviated city names detected</td>
+                        <td>WAITING_FOR_HUMAN</td>
+                    </tr>
+                    <tr>
+                        <td>Business Rules (Agent 4)</td>
+                        <td>Invalid move-in date</td>
+                        <td>WAITING_FOR_HUMAN</td>
+                    </tr>
+                    <tr>
+                        <td>Business Rules (Agent 4)</td>
+                        <td>Address format compliance failed</td>
+                        <td>WAITING_FOR_HUMAN</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>HITL Workflow</h3>
+
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <strong>Step 1: Detection</strong><br>
+                    Agent detects low confidence
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Step 2: Pause</strong><br>
+                    Status → WAITING_FOR_HUMAN
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Step 3: Notification</strong><br>
+                    Admin sees case in HITL tab
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Step 4: Human Review</strong><br>
+                    Admin corrects address
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Step 5: Resume</strong><br>
+                    POST /admin/resolve-hitl/{case_id}
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Step 6: Continue</strong><br>
+                    Agents 5-7 execute normally
+                </div>
+            </div>
+
+            <h3>Skip Logic in Agents</h3>
+            <p>Agents 4, 5, and 6 check HITL status before executing:</p>
+
+            <pre><code># In each tool's implementation
+from ..db import fetch_case_by_id
+
+case_row = fetch_case_by_id(input.case_id)
+
+if case_row and case_row.get("status") == "WAITING_FOR_HUMAN":
+    # Skip execution, return paused status
+    return ToolOutput(
+        status="skipped_hitl_pending",
+        message="Waiting for human correction"
+    )
+
+# Otherwise, proceed with normal logic...</code></pre>
+
+            <h3>HITL Resolution API</h3>
+            <pre><code>POST /admin/resolve-hitl/{case_id}
+Content-Type: application/x-www-form-urlencoded
+
+corrected_address=Musterstraße 12A, 67264 Kaiserslautern
+
+# Backend logic:
+1. Update cases SET canonical_address = 'corrected_address'
+2. Update cases SET status = 'RULES_PASSED'
+3. Resume workflow from Agent 5 (Registry Update)
+4. Agents 5, 6, 7 execute with corrected data
+5. Return final status to admin</code></pre>
+        </div>
+
+        <div class="section" id="code">
+            <h2>7. Code Implementation</h2>
+
+            <h3>Complete Agent Definition</h3>
+            <pre><code># crew.py - Full agent and task setup
+
+from crewai import Agent, Crew, Process, Task, LLM
+from crewai.project import CrewBase, agent, crew, task
+
+from src.automation.tools.crewai_tools import (
+    ingest_case_tool,
+    verify_identity_tool,
+    assess_quality_tool,
+    check_business_rules_tool,
+    update_registry_tool,
+    generate_certificate_tool,
+    get_audit_log_tool,
+)
+
+@CrewBase
+class AddressChangeMain:
+    agents_config = "config/agents.yaml"
+    tasks_config = "config/tasks.yaml"
+    
+    llm = LLM(model="gpt-4o-mini", temperature=0.1)
+    
+    # Agent Definitions
+    @agent
+    def ingest_case_agent(self) -> Agent:
+        return Agent(
+            config=self.agents_config["ingest_case_agent"],
+            llm=self.llm,
+            verbose=True,
+            tools=[ingest_case_tool]
+        )
+    
+    @agent
+    def verification_officer(self) -> Agent:
+        return Agent(
+            config=self.agents_config["verification_officer"],
+            llm=self.llm,
+            verbose=True,
+            tools=[verify_identity_tool]
+        )
+    
+    # ... 5 more agent definitions
+    
+    # Task Definitions
+    @task
+    def ingest_case_task(self) -> Task:
+        return Task(config=self.tasks_config["ingest_case_task"])
+    
+    # ... 6 more task definitions
+    
+    # Crew Assembly
+    @crew
+    def crew(self) -> Crew:
+        return Crew(
+            agents=self.agents,
+            tasks=self.tasks,
+            process=Process.sequential,
+            verbose=False
+        )</code></pre>
+
+            <h3>Tool Wrapper Example</h3>
+            <pre><code># crewai_tools.py - MCP tool wrapper
+
+from crewai.tools import tool
+from src.automation.tools.mcp_server import (
+    assess_quality,
+    AssessQualityInput
+)
+
+@tool("assess_quality")
+def assess_quality_tool(
+    case_id: str,
+    new_address_raw: str
+) -> Dict:
+    """Assess address quality and compute confidence score.
+    
+    Args:
+        case_id: The case ID
+        new_address_raw: Raw address string to assess
+    
+    Returns:
+        Dict with canonical_address, confidence, needs_hitl
+    """
+    input_data = AssessQualityInput(
+        case_id=case_id,
+        new_address_raw=new_address_raw
+    )
+    result = assess_quality(input_data)  # ← Calls MCP function
+    return result.model_dump()  # ← Returns dict for CrewAI</code></pre>
+
+            <h3>MCP Server Function Example</h3>
+            <pre><code># mcp_server.py - MCP tool implementation
+
+@server.tool()
+def assess_quality(input: AssessQualityInput) -> AssessQualityOutput:
+    # Normalize address
+    canonical = input.new_address_raw.strip().title()
+    
+    # Check for quality indicators
+    has_abbreviation = bool(re.search(r'\b[A-Z]{2,3}\b', input.new_address_raw))
+    has_postal_code = bool(re.search(r'\b\d{5}\b', input.new_address_raw))
+    
+    # Calculate confidence
+    if has_abbreviation:
+        confidence = 0.4
+    elif has_postal_code and len(canonical) > 20:
+        confidence = 0.95
+    else:
+        confidence = 0.7
+    
+    # Determine HITL requirement
+    needs_hitl = confidence < 0.8
+    
+    if needs_hitl:
+        update_case_status(input.case_id, "WAITING_FOR_HUMAN")
+        add_audit_entry(
+            input.case_id,
+            f"HITL required. confidence={confidence}"
+        )
+    else:
+        update_case_status(input.case_id, "QUALITY_OK")
+    
+    # Store canonical address
+    set_canonical_address(input.case_id, canonical)
+    
+    return AssessQualityOutput(
+        case_id=input.case_id,
+        canonical_address=canonical,
+        confidence=confidence,
+        needs_hitl=needs_hitl,
+        hitl_task_id=f"HITL-{input.case_id}" if needs_hitl else None
+    )</code></pre>
+
+            <h3>Workflow Execution</h3>
+            <pre><code># main.py - Workflow entrypoint
+
+from .crew import AddressChangeMain
+
+def run_address_change_workflow(citizen_data: dict):
+    """Execute the full 7-agent workflow."""
+    crew_instance = AddressChangeMain()
+    
+    result = crew_instance.crew().kickoff(
+        inputs={"citizen_data": citizen_data}
+    )
+    
+    return result
+
+# API calls this function:
+# result = run_address_change_workflow({
+#     "citizen_name": "Max Mustermann",
+#     "dob": "1990-05-15",
+#     ...
+# })</code></pre>
+        </div>
+
+        <div class="section">
+            <h2>Summary</h2>
+
+            <div class="success-box">
+                <h3>✓ How Agents Work</h3>
+                <ul>
+                    <li><strong>Sequential Execution:</strong> Agents execute one after another in a defined order</li>
+                    <li><strong>LLM-Powered Reasoning:</strong> GPT-4o-mini determines tool calls and parameters</li>
+                    <li><strong>Context Propagation:</strong> Each agent's output becomes input for next agent</li>
+                    <li><strong>Tool Binding:</strong> Each agent has exactly ONE MCP tool</li>
+                </ul>
+            </div>
+
+            <div class="success-box">
+                <h3>✓ How Agents Use MCP Tools</h3>
+                <ul>
+                    <li><strong>Wrapper Layer:</strong> CrewAI tool decorators wrap MCP server functions</li>
+                    <li><strong>Direct Import:</strong> MCP functions imported directly (not stdio) for Docker
+                        compatibility</li>
+                    <li><strong>Database-Backed:</strong> All tools persist state to PostgreSQL</li>
+                    <li><strong>Audit Logging:</strong> Every tool operation logged for compliance</li>
+                </ul>
+            </div>
+
+            <div class="success-box">
+                <h3>✓ Key Architectural Decisions</h3>
+                <ul>
+                    <li><strong>One Tool Per Agent:</strong> Clear separation of concerns</li>
+                    <li><strong>Sequential Process:</strong> Ensures data consistency and dependencies</li>
+                    <li><strong>HITL Integration:</strong> Graceful pause/resume for human review</li>
+                    <li><strong>Database as Truth:</strong> All state persisted, workflow can recover from crashes</li>
+                </ul>
+            </div>
+
+            <h3>Agent → Tool → Database Flow</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <strong>Agent (CrewAI)</strong><br>
+                    LLM reasons about task<br>
+                    Decides to call tool
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Tool Wrapper</strong><br>
+                    Convert params to Pydantic model<br>
+                    Call MCP function
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>MCP Function</strong><br>
+                    Execute business logic<br>
+                    Call database functions
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Database (PostgreSQL)</strong><br>
+                    INSERT/UPDATE cases<br>
+                    INSERT audit_logs
+                </div>
+                <div class="arrow">↓</div>
+                <div class="flow-step">
+                    <strong>Return to Agent</strong><br>
+                    MCP output → Dict<br>
+                    Added to agent context
+                </div>
+            </div>
+        </div>
+
+        <footer
+            style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); color: #64b5f6;">
+            <p>CrewAI Agents & MCP Tools - Deep Dive Documentation</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Address Automation System</p>
+            <p style="font-size: 0.9rem;">Generated: November 26, 2025</p>
+        </footer>
+    </div>
+</body>
+
+</html>

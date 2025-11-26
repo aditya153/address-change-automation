@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>German Address Change System - Complete Documentation</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav a {
+            display: inline-block;
+            margin-right: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        nav a:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .content {
+            padding: 3rem 2rem;
+        }
+        
+        section {
+            margin-bottom: 4rem;
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        h3 {
+            color: #764ba2;
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem;
+        }
+        
+        h4 {
+            color: #555;
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem;
+        }
+        
+        p {
+            margin: 1rem 0;
+            line-height: 1.8;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+        }
+        
+        li {
+            margin: 0.5rem 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+        }
+        
+        table th {
+            background: #667eea;
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            padding: 1.5rem;
+            border-left: 4px solid #667eea;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0 0.5rem 0.5rem 0;
+        }
+        
+        .success { background: #10b981; }
+        .warning { background: #f59e0b; }
+        .error { background: #ef4444; }
+        .info { background: #3b82f6; }
+        
+        hr {
+            border: none;
+            border-top: 2px solid #e9ecef;
+            margin: 2rem 0;
+        }
+        
+        footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        @media print {
+            nav { display: none; }
+            .mermaid { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏛️ German Address Change System</h1>
+            <p>Complete Architecture & Technical Documentation</p>
+        </header>
+        
+        <nav>
+            <a href="#overview">Overview</a>
+            <a href="#architecture">Architecture</a>
+            <a href="#workflow">Workflow</a>
+            <a href="#implementation">Implementation</a>
+            <a href="#database">Database</a>
+            <a href="#deployment">Deployment</a>
+        </nav>
+        
+        <div class="content">
+            <!-- ARCHITECTURE DOCUMENT -->
+            <section id="overview">
+                <h2>📋 System Overview</h2>
+                <p>This system automates the German public administration's address change workflow using AI agents, OCR, and Human-in-the-Loop (HITL) verification.</p>
+                
+                <div class="highlight">
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>✅ <strong>Automated OCR</strong> - GPT-4 Vision extracts data from PDF documents</li>
+                        <li>✅ <strong>AI Agent Workflow</strong> - 7 sequential tasks executed by specialized agents</li>
+                        <li>✅ <strong>HITL Quality Check</strong> - Human review for low-confidence addresses</li>
+                        <li>✅ <strong>Real-time Status Updates</strong> - Frontend polls for workflow progress</li>
+                        <li>✅ <strong>Automated Certificate Generation</strong> - PDF creation and email delivery</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section id="architecture">
+                <h2>🏗️ System Architecture</h2>
+                
+                <div class="mermaid">
+graph TB
+    subgraph "Frontend Layer"
+        UI[User Portal<br/>React + Vite]
+        ADMIN[Admin Dashboard<br/>React + Vite]
+    end
+    
+    subgraph "Backend Layer - FastAPI"
+        API[API Endpoints<br/>api.py]
+        OCR[OCR Service<br/>ocr_service.py]
+        EMAIL[Email Service<br/>email_service.py]
+    end
+    
+    subgraph "AI Agent Layer - CrewAI"
+        CREW[Crew Orchestrator<br/>crew.py]
+        AGENTS[7 AI Agents<br/>agents.yaml]
+        TASKS[7 Sequential Tasks<br/>tasks.yaml]
+    end
+    
+    subgraph "MCP Tools Layer"
+        MCP[MCP Server<br/>mcp_server.py]
+        TOOLS[8 Tool Functions]
+    end
+    
+    subgraph "Data Layer"
+        DB[(PostgreSQL<br/>Database)]
+        FILES[/PDF Files<br/>Certificates/]
+    end
+    
+    subgraph "External Services"
+        OPENAI[OpenAI GPT-4]
+        SENDGRID[SendGrid Email]
+    end
+    
+    UI --> API
+    ADMIN --> API
+    API --> OCR
+    API --> CREW
+    API --> DB
+    OCR --> OPENAI
+    CREW --> AGENTS
+    AGENTS --> TASKS
+    TASKS --> MCP
+    MCP --> DB
+    MCP --> FILES
+    MCP --> OPENAI
+    EMAIL --> SENDGRID
+    MCP --> EMAIL
+                </div>
+                
+                <h3>Technology Stack</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Technology</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge">Frontend</span></td>
+                            <td>React 18 + Vite</td>
+                            <td>UI framework</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge">Styling</span></td>
+                            <td>Vanilla CSS</td>
+                            <td>Glassmorphic design</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge">Backend</span></td>
+                            <td>FastAPI + Uvicorn</td>
+                            <td>REST API server</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge info">AI Orchestration</span></td>
+                            <td>CrewAI</td>
+                            <td>Multi-agent workflow</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge info">AI Model</span></td>
+                            <td>OpenAI GPT-4</td>
+                            <td>OCR + Address normalization</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge info">Tools</span></td>
+                            <td>MCP Protocol</td>
+                            <td>Agent-to-function interface</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge">Database</span></td>
+                            <td>PostgreSQL</td>
+                            <td>Data persistence</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge">PDF Generation</span></td>
+                            <td>ReportLab</td>
+                            <td>Certificate creation</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge">Email</span></td>
+                            <td>SendGrid</td>
+                            <td>Email delivery</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge">Deployment</span></td>
+                            <td>Docker Compose</td>
+                            <td>Containerization</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="workflow">
+                <h2>📊 Complete End-to-End Workflow</h2>
+                
+                <h3>Phase 1: Case Submission (User Portal)</h3>
+                <div class="mermaid">
+sequenceDiagram
+    participant Citizen
+    participant UserPortal
+    participant API
+    participant OCR
+    participant GPT4
+    participant DB
+    
+    Citizen->>UserPortal: Fill form + Upload PDF
+    UserPortal->>API: POST /submit-case
+    API->>DB: Create case (PENDING_APPROVAL)
+    API->>OCR: extract_data_from_pdf()
+    OCR->>GPT4: Analyze PDF with vision
+    GPT4-->>OCR: Structured JSON data
+    OCR-->>API: Citizen data extracted
+    API->>DB: Update case with OCR data
+    API-->>UserPortal: Case ID + Confirmation
+    UserPortal-->>Citizen: "Submitted! Awaiting approval"
+                </div>
+                
+                <h3>Phase 2: Admin Approval</h3>
+                <div class="mermaid">
+sequenceDiagram
+    participant Admin
+    participant Dashboard
+    participant API
+    participant CrewAI
+    participant DB
+    
+    Admin->>Dashboard: View pending cases
+    Dashboard->>API: GET /admin/pending-cases
+    API->>DB: Fetch PENDING_APPROVAL cases
+    DB-->>API: Case list
+    API-->>Dashboard: Display cases
+    Admin->>Dashboard: Click "Approve"
+    Dashboard->>API: POST /admin/approve-case/{id}
+    API->>DB: Update status to PROCESSING
+    API->>CrewAI: Kickoff workflow (background thread)
+    API-->>Dashboard: "Processing started"
+    Dashboard->>Dashboard: Poll status every 5s
+                </div>
+                
+                <h3>Phase 3: AI Agent Workflow (7 Tasks)</h3>
+                <div class="mermaid">
+graph LR
+    A[1. Ingest Case] --> B[2. Verify Identity]
+    B --> C[3. Assess Quality]
+    C --> D{Confidence ≥ 0.8?}
+    D -->|No| E[HITL Required]
+    D -->|Yes| F[4. Check Rules]
+    F --> G[5. Update Registry]
+    G --> H[6. Generate Certificate]
+    H --> I[7. Audit Log]
+    E -.Admin Corrects.-> F
+    I --> J[END: CLOSED]
+    E --> K[END: WAITING_FOR_HUMAN]
+    
+    style E fill:#f59e0b
+    style J fill:#10b981
+    style K fill:#f59e0b
+                </div>
+                
+                <div class="highlight">
+                    <h4>Task Breakdown:</h4>
+                    <ol>
+                        <li><strong>Ingest Case</strong> - Fetch case data from database</li>
+                        <li><strong>Verify Identity</strong> - Validate citizen name and DOB</li>
+                        <li><strong>Assess Quality</strong> - Normalize address, check confidence
+                            <ul>
+                                <li>If confidence &lt; 0.8 → Trigger HITL (pause workflow)</li>
+                                <li>If confidence ≥ 0.8 → Continue normally</li>
+                            </ul>
+                        </li>
+                        <li><strong>Check Business Rules</strong> - Validate move-in date, documents</li>
+                        <li><strong>Update Registry</strong> - Store new address in citizen registry</li>
+                        <li><strong>Generate Certificate</strong> - Create PDF, send email</li>
+                        <li><strong>Audit Log</strong> - Fetch complete audit trail</li>
+                    </ol>
+                </div>
+                
+                <h3>Phase 4: HITL Resolution</h3>
+                <div class="mermaid">
+sequenceDiagram
+    participant Admin
+    participant Dashboard
+    participant API
+    participant CrewAI
+    participant DB
+    
+    Note over Dashboard: Case appears in "Needs Review" tab
+    Admin->>Dashboard: Switch to "Needs Review" tab
+    Dashboard->>API: GET /admin/hitl-cases
+    API->>DB: Fetch WAITING_FOR_HUMAN cases
+    DB-->>API: HITL cases
+    API-->>Dashboard: Display cases with warning
+    
+    Admin->>Dashboard: Enter corrected address
+    Admin->>Dashboard: Click "Correct & Resume"
+    Dashboard->>API: POST /admin/resolve-hitl/{id}
+    API->>DB: Update canonical_address
+    API->>DB: Update status to QUALITY_OK
+    API->>DB: Add audit entry
+    API->>CrewAI: Re-run FULL workflow (background)
+    Note over CrewAI: Uses corrected address
+    API-->>Dashboard: "Workflow resuming..."
+    
+    CrewAI->>CrewAI: Re-execute all 7 tasks
+    CrewAI->>DB: Update status to CLOSED
+    CrewAI->>Admin: Send certificate email
+                </div>
+            </section>
+
+            <section id="implementation">
+                <h2>🔧 Technical Implementation</h2>
+                
+                <h3>Project Structure</h3>
+                <pre><code>automation/
+├── frontend/                          # React frontend
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── UserPortal.jsx        # Citizen form
+│   │   │   └── AdminDashboard.jsx    # Admin interface
+│   │   ├── App.jsx                   
+│   │   ├── App.css                   # Glassmorphic styles
+│   │   └── main.jsx                  
+│   ├── package.json                  
+│   └── vite.config.js                
+│
+├── src/automation/                    # Backend Python
+│   ├── api.py                        # FastAPI endpoints
+│   ├── crew.py                       # CrewAI orchestration
+│   ├── ocr_service.py                # PDF OCR
+│   ├── email_service.py              # SendGrid integration
+│   ├── db.py                         # PostgreSQL ops
+│   ├── main.py                       
+│   │
+│   ├── config/
+│   │   ├── agents.yaml               # Agent definitions
+│   │   └── tasks.yaml                # Task definitions
+│   │
+│   └── tools/
+│       └── mcp_server.py             # MCP tool implementations
+│
+├── docker-compose.yml                
+├── Dockerfile.backend                
+├── Dockerfile.frontend               
+└── render.yaml                       
+</code></pre>
+                
+                <h3>Key Components</h3>
+                
+                <h4>1. MCP Server (Tool Implementations)</h4>
+                <p><strong>Location:</strong> <code>src/automation/tools/mcp_server.py</code></p>
+                <p>Contains 8 tool functions that AI agents can call:</p>
+                <ul>
+                    <li><code>ingest_case()</code> - Fetch case data</li>
+                    <li><code>verify_identity()</code> - Validate citizen info</li>
+                    <li><code>assess_quality()</code> - Normalize address, compute confidence</li>
+                    <li><code>check_business_rules()</code> - Validate business logic</li>
+                    <li><code>update_registry()</code> - Store address in registry</li>
+                    <li><code>generate_certificate()</code> - Create PDF + send email</li>
+                    <li><code>get_audit_log()</code> - Fetch audit trail</li>
+                </ul>
+                
+                <h4>2. CrewAI Connection to MCP</h4>
+                <p><strong>Location:</strong> <code>src/automation/crew.py</code></p>
+                <p>Tools are bound to agents like this:</p>
+                <pre><code>from .tools.mcp_server import assess_quality, check_business_rules
+
+@agent
+def quality_confidence_officer(self) -> Agent:
+    return Agent(
+        config=self.agents_config['quality_confidence_officer'],
+        tools=[assess_quality],  # ← Tool binding
+        verbose=True
+    )</code></pre>
+                
+                <h4>3. Database Operations</h4>
+                <p><strong>Location:</strong> <code>src/automation/db.py</code></p>
+                <p>PostgreSQL connection and CRUD operations:</p>
+                <ul>
+                    <li><code>get_conn()</code> - Context manager for connections</li>
+                    <li><code>update_case_status()</code> - Change case status</li>
+                    <li><code>set_canonical_address()</code> - Store normalized address</li>
+                    <li><code>add_audit_entry()</code> - Log workflow events</li>
+                    <li><code>fetch_case_by_id()</code> - Retrieve case details</li>
+                </ul>
+                
+                <h4>4. Frontend Components</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Location</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>User Portal</td>
+                            <td><code>frontend/src/pages/UserPortal.jsx</code></td>
+                            <td>Citizen submission form</td>
+                        </tr>
+                        <tr>
+                            <td>Admin Dashboard</td>
+                            <td><code>frontend/src/pages/AdminDashboard.jsx</code></td>
+                            <td>Case management + HITL resolution</td>
+                        </tr>
+                        <tr>
+                            <td>Styles</td>
+                            <td><code>frontend/src/App.css</code></td>
+                            <td>Glassmorphic dark theme</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="database">
+                <h2>🗄️ Database Schema</h2>
+                
+                <div class="mermaid">
+erDiagram
+    CASES ||--o{ AUDIT_LOGS : has
+    
+    CASES {
+        string case_id PK
+        string email
+        string citizen_name
+        date dob
+        string old_address_raw
+        string new_address_raw
+        string canonical_address
+        date move_in_date_raw
+        string landlord_name
+        string status
+        string certificate_path
+        timestamp submitted_at
+        timestamp updated_at
+    }
+    
+    AUDIT_LOGS {
+        int id PK
+        string case_id FK
+        string message
+        timestamp timestamp
+    }
+                </div>
+                
+                <h3>Case Status Flow</h3>
+                <div class="highlight">
+                    <ol>
+                        <li><span class="badge warning">PENDING_APPROVAL</span> - Initial submission</li>
+                        <li><span class="badge info">PROCESSING</span> - Admin approved, workflow running</li>
+                        <li><span class="badge warning">WAITING_FOR_HUMAN</span> - HITL triggered (low confidence)</li>
+                        <li><span class="badge info">QUALITY_OK</span> - HITL resolved, re-processing</li>
+                        <li><span class="badge success">CLOSED</span> - Workflow completed successfully</li>
+                        <li><span class="badge error">ERROR</span> - Workflow failed</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section id="deployment">
+                <h2>🚀 Deployment Architecture</h2>
+                
+                <div class="mermaid">
+graph TB
+    subgraph "Docker Compose Stack"
+        subgraph "Container: frontend"
+            FE[Vite Dev Server<br/>Port 5173]
+        end
+        
+        subgraph "Container: backend"
+            BE[FastAPI + Uvicorn<br/>Port 8000]
+            CREW_PROC[CrewAI Background Threads]
+        end
+        
+        subgraph "Container: db"
+            PG[(PostgreSQL<br/>Port 5432)]
+        end
+    end
+    
+    subgraph "External"
+        OPENAI_API[OpenAI API]
+        SENDGRID_API[SendGrid API]
+    end
+    
+    FE -->|HTTP| BE
+    BE --> PG
+    BE --> OPENAI_API
+    BE --> SENDGRID_API
+    CREW_PROC --> PG
+    CREW_PROC --> OPENAI_API
+                </div>
+                
+                <h3>Environment Variables</h3>
+                <pre><code># Database
+DATABASE_URL=postgresql://user:pass@db:5432/address_db
+
+# AI Services
+OPENAI_API_KEY=sk-...
+
+# Email
+SENDGRID_API_KEY=SG...
+
+# Feature Flags
+USE_DEMO_DATA=false
+
+# Frontend
+VITE_API_URL=http://localhost:8000
+</code></pre>
+                
+                <h3>Key Design Decisions</h3>
+                <div class="highlight">
+                    <h4>1. HITL Workflow Pause Strategy</h4>
+                    <p><strong>Challenge:</strong> CrewAI doesn't natively support mid-workflow pausing</p>
+                    <p><strong>Solution:</strong> Tools check case status before executing. If <code>WAITING_FOR_HUMAN</code>, return "skipped". Resume by re-running full workflow with corrected data.</p>
+                    
+                    <h4>2. Workflow Resumption</h4>
+                    <p><strong>Initial approach:</strong> Create partial workflow starting from quality check</p>
+                    <p><strong>Problem:</strong> Agents couldn't find case_id in context</p>
+                    <p><strong>Final solution:</strong> Re-run FULL workflow from beginning with corrected address</p>
+                    
+                    <h4>3. Status Polling</h4>
+                    <p><strong>Problem:</strong> "Processing" status stayed even after completion</p>
+                    <p><strong>Solution:</strong> Frontend polls case status every 5s, updates message when status changes</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🎯 Testing Workflow</h2>
+                
+                <h3>To Test HITL:</h3>
+                <ol>
+                    <li>Submit case with abbreviated address: <code>"Musterstr 12A, 12345 KL, Deutschland"</code></li>
+                    <li>Approve case</li>
+                    <li>Wait for "Needs Review" notification</li>
+                    <li>Navigate to "Needs Review" tab</li>
+                    <li>Enter corrected: <code>"Musterstraße 12A, 12345 Kaiserslautern, Deutschland"</code></li>
+                    <li>Click "Correct & Resume"</li>
+                    <li>Verify workflow completes and certificate sent ✅</li>
+                </ol>
+                
+                <h3>To Test Normal Flow:</h3>
+                <ol>
+                    <li>Submit case with full address: <code>"Hauptstrasse 22, 67655 Kaiserslautern, Deutschland"</code></li>
+                    <li>Approve case</li>
+                    <li>Verify immediate completion ✅</li>
+                    <li>Check email for certificate</li>
+                </ol>
+            </section>
+        </div>
+        
+        <footer>
+            <p>🏛️ German Address Change Automation System</p>
+            <p>Complete Documentation - Generated with Mermaid Diagrams</p>
+            <p style="margin-top: 1rem; opacity: 0.7;">Created: November 2025</p>
+        </footer>
+    </div>
+    
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#764ba2',
+                lineColor: '#667eea',
+                secondaryColor: '#764ba2',
+                tertiaryColor: '#f8f9fa'
+            }
+        });
+    </script>
+</body>
+</html>

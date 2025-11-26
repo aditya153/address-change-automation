@@ -1,0 +1,16 @@
+crewai
+litellm
+modelcontextprotocol
+pydantic
+python-dotenv
+psycopg2-binary
+fastapi
+uvicorn[standard]
+email-validator
+python-multipart
+pytesseract
+pdf2image
+Pillow
+sendgrid
+openai
+reportlab

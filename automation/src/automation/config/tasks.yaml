@@ -1,0 +1,137 @@
+ingest_case_task:
+  description: |
+    Use the MCP tool `ingest_case` with the citizen data provided in the
+    Crew inputs under the key `citizen_data`.
+    
+    Here is the data: {citizen_data}
+
+    The object has fields:
+    - citizen_name
+    - dob
+    - email
+    - old_address_raw
+    - new_address_raw
+    - move_in_date_raw
+    - landlord_name (optional)
+
+    1. Read all these values from the provided `citizen_data`.
+    2. Call the tool `ingest_case` exactly once with those values.
+    3. Take the returned `case_id` (for example "Case ID: 1") and
+       `extracted_data` and keep them in context for the next tasks
+       in the pipeline. Do not invent or change the case_id.
+  expected_output: >
+    A structured JSON summary of the case with case_id and all extracted
+    fields, ready for verification.
+  agent: ingest_case_agent
+
+verify_identity_task: 
+  description: |
+    Using the same case created in the previous task:
+    1. Take `case_id` directly from the tool result of `ingest_case`
+       (e.g. "Case ID 1"). Do not invent a new case id.
+    2. Take `citizen_name` and `dob` from the ingested data.
+    3. Call the MCP tool `verify_identity` with:
+       - case_id: <the case_id returned by ingest_case>
+       - citizen_name: <citizen_name from extracted_data>
+       - dob: <dob from extracted_data>
+    4. Decide if the citizen exists and whether the credentials are consistent.
+    5. Do not modify the data yourself, just report the result.
+  expected_output: >
+    A verification result JSON including exists flag, registry match status,
+    and any warnings or mismatch reasons.
+  agent: verification_officer
+
+assess_quality_task:
+  description: |
+    You have been provided with citizen_data containing all case information.
+    
+    Extract the following from the provided citizen_data:
+    - case_id from citizen_data['case_id']
+    - new_address_raw from citizen_data['new_address_raw']
+    
+    Call the MCP tool `assess_quality` with these exact values (do NOT use placeholder text):
+       - case_id: the actual case_id value from citizen_data
+       - new_address_raw: the actual new_address_raw value from citizen_data
+    
+    The tool will normalize the address and compute a confidence score.
+    If confidence is below 0.8, it will set needs_hitl = true.
+  expected_output: >
+    A JSON object that includes normalized address, confidence score,
+    and a flag needs_hitl (true/false). If HITL is triggered, it should
+    reference the created hitl_task_id.
+  agent: quality_confidence_officer
+  #human_input: true
+
+check_business_rules_task:
+  description: |
+    For the same case:
+    1. Take `case_id` from the ingested data.
+    2. Take `canonical_address` from the final answer of the
+       `assess_quality_task` (this may already include human correction).
+    3. Call the MCP tool `check_business_rules` with:
+       - case_id: <the same case_id>
+       - move_in_date_raw: <move_in_date_raw from extracted_data>
+       - canonical_address: <canonical_address from assess_quality_task>
+       - documents_ok: true   # demo assumption
+    4. Summarize which rules passed or failed and whether HITL is required.
+  expected_output: >
+    A structured validation report with rule_results (per rule),
+    overall_status (passed/failed), and a needs_hitl flag. If HITL is
+    triggered, include the hitl_task_id.
+  agent: business_rules_officer
+  
+
+update_registry_task:
+  description: |
+    Assuming identity verification and business rules have passed:
+    1. Take the same `case_id` used in previous tasks.
+    2. Take `canonical_address` from the final answer of the
+       `assess_quality_task` (this may already include human correction).
+    3. Call the MCP tool `update_registry` with:
+       - case_id: <the same case_id>
+       - citizen_id: "CIT-DEMO-001"
+       - new_address: <canonical_address from assess_quality_task>
+    4. Confirm that the registry update succeeded.
+  expected_output: >
+    A confirmation response including citizen_id, case_id, new_address and
+    registry_update_status (success/failed) plus any error message.
+  agent: registry_update_officer
+
+generate_certificate_task:
+  description: |
+    Finally, for the same case:
+    1. Take `case_id` used in previous tasks.
+    2. Take `citizen_name`, `dob`, `email`, `move_in_date_raw` (as move_in_date), and
+       `new_address_raw` (as new_address) from the ingested data.
+    3. Call the MCP tool `generate_certificate` with:
+       - case_id: <the same case_id>
+       - email: <email from extracted_data>
+       - citizen_name: <citizen_name from extracted_data>
+       - dob: <dob from extracted_data>
+       - move_in_date: <move_in_date_raw from extracted_data>
+       - new_address: <new_address_raw from extracted_data>
+    
+    IMPORTANT: If the tool returns certificate_path='skipped_hitl_pending' or 
+    case_status='WAITING_FOR_HUMAN', this is VALID and means the case is waiting 
+    for human review. Accept this response and do NOT retry the tool call.
+    
+    If certificate generation succeeds, confirm the PDF was created and email sent.
+  expected_output: >
+    A summary indicating whether the certificate was generated and emailed successfully,
+    OR if it was skipped due to HITL (which is a valid outcome).
+  agent: certificate_officer
+  output_file: output/address_change_summary.md
+
+generate_audit_log_task:
+  description: |
+    For the same case:
+    1. Call the MCP tool `get_audit_log` with:
+       - case_id: <the same case_id used in previous tasks>.
+    2. Retrieve the full audit trail recorded by the MCP layer, including
+       each step and its timestamp.
+    3. Present the audit log in chronological order in a human-readable way.
+  expected_output: >
+    A chronological list of audit log entries with timestamps and a short
+    explanation of what each step did.
+  agent: audit_officer
+  output_file: output/audit_log.md

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Deployment Plan - Address Automation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            color: #00d4ff;
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            color: #64b5f6;
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            color: #00d4ff;
+            font-size: 2rem;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        h3 {
+            color: #64b5f6;
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        h4 {
+            color: #90caf9;
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p,
+        li {
+            color: #e0e0e0;
+        }
+
+        ul,
+        ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .architecture-diagram {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 3rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .service-box {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(100, 181, 246, 0.1));
+            border: 2px solid rgba(0, 212, 255, 0.4);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem;
+            display: inline-block;
+            min-width: 280px;
+            vertical-align: top;
+        }
+
+        .service-box h4 {
+            margin-top: 0;
+            color: #00d4ff;
+            font-size: 1.3rem;
+        }
+
+        .arrow-down {
+            color: #00d4ff;
+            font-size: 2rem;
+            margin: 0.5rem 0;
+        }
+
+        .arrow-right {
+            color: #00d4ff;
+            font-size: 2rem;
+            display: inline-block;
+            margin: 0 1rem;
+            vertical-align: middle;
+        }
+
+        .highlight-box {
+            background: rgba(0, 212, 255, 0.08);
+            border-left: 4px solid #00d4ff;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background: rgba(255, 152, 0, 0.08);
+            border-left: 4px solid #ff9800;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .success-box {
+            background: rgba(76, 175, 80, 0.08);
+            border-left: 4px solid #4caf50;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .step-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid #64b5f6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #0a0e27;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+
+        code {
+            background: rgba(0, 212, 255, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #00d4ff;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: #a5d6ff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #0a0e27;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .url-box {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            color: #00d4ff;
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: #00d4ff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 Complete Deployment Plan</h1>
+        <p class="subtitle">Comprehensive Guide: Where Everything is Deployed</p>
+
+        <div class="success-box">
+            <h3>✓ Quick Answer</h3>
+            <p><strong>Your app will be deployed to 3 separate Render services:</strong></p>
+            <ul>
+                <li><strong>Frontend (React):</strong> Render Web Service →
+                    <code>https://address-automation-frontend.onrender.com</code></li>
+                <li><strong>Backend (FastAPI):</strong> Render Web Service →
+                    <code>https://address-automation-backend.onrender.com</code></li>
+                <li><strong>Database (PostgreSQL):</strong> Render PostgreSQL → Internal connection only</li>
+            </ul>
+        </div>
+
+        <h2>📊 Deployment Architecture</h2>
+
+        <div class="architecture-diagram">
+            <h3 style="color: #00d4ff; margin-bottom: 2rem;">Complete System Architecture</h3>
+
+            <div class="service-box">
+                <h4>👤 Users & Supervisors</h4>
+                <p>Access via Browser</p>
+                <p style="font-size: 0.9em; color: #90caf9;">Chrome, Firefox, Safari, etc.</p>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <div style="margin: 2rem 0;">
+                <div class="service-box">
+                    <h4>🌐 Frontend Service</h4>
+                    <span class="badge">Render Web Service</span>
+                    <p><strong>What:</strong> React + Vite</p>
+                    <p><strong>Port:</strong> 5173 (internal)</p>
+                    <p><strong>URL:</strong></p>
+                    <div class="url-box">https://address-automation-frontend.onrender.com</div>
+                    <p style="margin-top: 1rem;"><strong>Features:</strong></p>
+                    <ul style="text-align: left; font-size: 0.9em;">
+                        <li>User Portal (PDF upload)</li>
+                        <li>Admin Dashboard</li>
+                        <li>Real-time status updates</li>
+                    </ul>
+                </div>
+
+                <span class="arrow-right">→</span>
+
+                <div class="service-box">
+                    <h4>⚙️ Backend Service</h4>
+                    <span class="badge">Render Web Service</span>
+                    <p><strong>What:</strong> FastAPI + CrewAI</p>
+                    <p><strong>Port:</strong> 8000 (internal)</p>
+                    <p><strong>URL:</strong></p>
+                    <div class="url-box">https://address-automation-backend.onrender.com</div>
+                    <p style="margin-top: 1rem;"><strong>Features:</strong></p>
+                    <ul style="text-align: left; font-size: 0.9em;">
+                        <li>REST API endpoints</li>
+                        <li>7 CrewAI agents</li>
+                        <li>OCR processing</li>
+                        <li>Email service</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="arrow-down">↓</div>
+
+            <div class="service-box">
+                <h4>🗄️ Database Service</h4>
+                <span class="badge">Render PostgreSQL</span>
+                <p><strong>What:</strong> PostgreSQL 16</p>
+                <p><strong>Access:</strong> Internal only</p>
+                <p><strong>Connection:</strong></p>
+                <div class="url-box" style="font-size: 0.8em;">postgresql://user:pass@oregon-postgres.render.com/db_name
+                </div>
+                <p style="margin-top: 1rem;"><strong>Tables:</strong></p>
+                <ul style="text-align: left; font-size: 0.9em;">
+                    <li>cases (case data)</li>
+                    <li>audit_logs (compliance trail)</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(0, 212, 255, 0.3);">
+                <h4 style="color: #00d4ff;">External Services</h4>
+                <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;">
+                    <div style="text-align: center;">
+                        <p><strong>OpenAI API</strong></p>
+                        <p style="font-size: 0.9em;">GPT-4o-mini for agents</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <p><strong>SendGrid API</strong></p>
+                        <p style="font-size: 0.9em;">Email delivery</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>🎯 Detailed Deployment Breakdown</h2>
+
+        <h3>1. Frontend Deployment (React App)</h3>
+
+        <div class="highlight-box">
+            <h4>Where: Render Web Service</h4>
+            <p><strong>Service Type:</strong> Docker-based web service</p>
+            <p><strong>Dockerfile:</strong> <code>automation/frontend/Dockerfile</code></p>
+            <p><strong>Build Process:</strong></p>
+            <ol>
+                <li>Render pulls your code from GitHub/GitLab</li>
+                <li>Builds Docker image using <code>frontend/Dockerfile</code></li>
+                <li>Runs <code>npm run dev</code> (Vite dev server)</li>
+                <li>Exposes on HTTPS with automatic SSL certificate</li>
+            </ol>
+        </div>
+
+        <h4>What Users See</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>URL Path</th>
+                    <th>What It Shows</th>
+                    <th>Who Uses It</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>/</code></td>
+                    <td>User Portal (PDF upload form)</td>
+                    <td>Citizens submitting address changes</td>
+                </tr>
+                <tr>
+                    <td><code>/admin</code></td>
+                    <td>Admin Dashboard</td>
+                    <td>Supervisors reviewing cases</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Environment Variables (Frontend)</h4>
+        <pre><code>VITE_API_URL=https://address-automation-backend.onrender.com</code></pre>
+        <p>This tells the frontend where to send API requests</p>
+
+        <h3>2. Backend Deployment (FastAPI + CrewAI)</h3>
+
+        <div class="highlight-box">
+            <h4>Where: Render Web Service</h4>
+            <p><strong>Service Type:</strong> Docker-based web service</p>
+            <p><strong>Dockerfile:</strong> <code>automation/Dockerfile</code></p>
+            <p><strong>Build Process:</strong></p>
+            <ol>
+                <li>Render pulls your code from GitHub/GitLab</li>
+                <li>Builds Docker image with Python dependencies</li>
+                <li>Runs <code>uvicorn src.automation.api:app --host 0.0.0.0 --port 8000</code></li>
+                <li>Exposes on HTTPS with automatic SSL certificate</li>
+            </ol>
+        </div>
+
+        <h4>What Runs in Backend</h4>
+        <ul>
+            <li><strong>FastAPI:</strong> REST API server</li>
+            <li><strong>CrewAI:</strong> 7 sequential agents</li>
+            <li><strong>MCP Tools:</strong> Database operations</li>
+            <li><strong>OCR Service:</strong> Tesseract + GPT-4 parsing</li>
+            <li><strong>Email Service:</strong> SendGrid integration</li>
+            <li><strong>PDF Generation:</strong> reportlab for certificates</li>
+        </ul>
+
+        <h4>Environment Variables (Backend)</h4>
+        <pre><code>DATABASE_URL=postgresql://... (from Render PostgreSQL)
+OPENAI_API_KEY=sk-proj-your-key
+SENDGRID_API_KEY=SG.your-key
+SENDER_EMAIL=no-reply@yourdomain.com</code></pre>
+
+        <h3>3. Database Deployment (PostgreSQL)</h3>
+
+        <div class="highlight-box">
+            <h4>Where: Render PostgreSQL</h4>
+            <p><strong>Service Type:</strong> Managed PostgreSQL database</p>
+            <p><strong>Version:</strong> PostgreSQL 16</p>
+            <p><strong>Initialization:</strong> Runs <code>docker/postgres/init.sql</code> on first start</p>
+        </div>
+
+        <h4>Database Tables</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Table</th>
+                    <th>Purpose</th>
+                    <th>Key Columns</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>cases</code></td>
+                    <td>Store all case data</td>
+                    <td>case_id, citizen_name, status, canonical_address</td>
+                </tr>
+                <tr>
+                    <td><code>audit_logs</code></td>
+                    <td>Track all operations</td>
+                    <td>case_id, timestamp, message</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Database Connection</h4>
+        <ul>
+            <li><strong>From Backend:</strong> Uses <code>DATABASE_URL</code> env variable (internal connection)</li>
+            <li><strong>From Outside:</strong> Only accessible via Render internal network (secure)</li>
+            <li><strong>Connection String:</strong> Provided automatically by Render</li>
+        </ul>
+
+        <h2>📝 Complete Deployment Steps</h2>
+
+        <div class="step-card">
+            <h3><span class="step-number">1</span>Prepare Your Code</h3>
+            <pre><code># Navigate to project
+cd "/Users/adityanirgude/Documents/Studies/Software Project/address_auto_main"
+
+# Verify .env file has your API keys
+cat automation/.env
+
+# Make sure Docker is running
+docker-compose up -d</code></pre>
+        </div>
+
+        <div class="step-card">
+            <h3><span class="step-number">2</span>Push to GitHub</h3>
+            <pre><code># Initialize git (if not already)
+git init
+
+# Add all files
+git add .
+
+# Commit
+git commit -m "Initial commit: Address automation system"
+
+# Add GitHub remote (replace USERNAME/REPO)
+git remote add origin https://github.com/USERNAME/REPO.git
+
+# Push
+git push -u origin main</code></pre>
+        </div>
+
+        <div class="step-card">
+            <h3><span class="step-number">3</span>Create Render Account</h3>
+            <ol>
+                <li>Go to <a href="https://render.com/register" style="color: #00d4ff;">https://render.com/register</a>
+                </li>
+                <li>Sign up with GitHub account</li>
+                <li>Authorize Render to access your repositories</li>
+            </ol>
+        </div>
+
+        <div class="step-card">
+            <h3><span class="step-number">4</span>Deploy Database First</h3>
+            <ol>
+                <li>Render Dashboard → "New +" → "PostgreSQL"</li>
+                <li>Settings:
+                    <ul>
+                        <li>Name: <code>address-automation-db</code></li>
+                        <li>Database: <code>address_db</code></li>
+                        <li>Region: Choose closest to you</li>
+                        <li>Plan: <strong>Free</strong></li>
+                    </ul>
+                </li>
+                <li>Click "Create Database"</li>
+                <li><strong>IMPORTANT:</strong> Copy the "Internal Database URL" (you'll need it for backend)</li>
+            </ol>
+        </div>
+
+        <div class="step-card">
+            <h3><span class="step-number">5</span>Deploy Backend</h3>
+            <ol>
+                <li>Render Dashboard → "New +" → "Web Service"</li>
+                <li>Connect your GitHub repository</li>
+                <li>Settings:
+                    <ul>
+                        <li>Name: <code>address-automation-backend</code></li>
+                        <li>Environment: <strong>Docker</strong></li>
+                        <li>Dockerfile Path: <code>automation/Dockerfile</code></li>
+                        <li>Region: Same as database</li>
+                        <li>Plan: <strong>Free</strong></li>
+                    </ul>
+                </li>
+                <li>Add Environment Variables:
+                    <ul>
+                        <li><code>DATABASE_URL</code> = (paste from step 4)</li>
+                        <li><code>OPENAI_API_KEY</code> = your OpenAI key</li>
+                        <li><code>SENDGRID_API_KEY</code> = your SendGrid key</li>
+                        <li><code>SENDER_EMAIL</code> = your verified sender email</li>
+                    </ul>
+                </li>
+                <li>Click "Create Web Service"</li>
+                <li>Wait 5-10 minutes for deployment</li>
+                <li><strong>COPY the service URL</strong> (e.g.,
+                    <code>https://address-automation-backend.onrender.com</code>)</li>
+            </ol>
+        </div>
+
+        <div class="step-card">
+            <h3><span class="step-number">6</span>Deploy Frontend</h3>
+            <ol>
+                <li>Render Dashboard → "New +" → "Web Service"</li>
+                <li>Connect same GitHub repository</li>
+                <li>Settings:
+                    <ul>
+                        <li>Name: <code>address-automation-frontend</code></li>
+                        <li>Environment: <strong>Docker</strong></li>
+                        <li>Dockerfile Path: <code>automation/frontend/Dockerfile</code></li>
+                        <li>Region: Same as backend</li>
+                        <li>Plan: <strong>Free</strong></li>
+                    </ul>
+                </li>
+                <li>Add Environment Variable:
+                    <ul>
+                        <li><code>VITE_API_URL</code> = (paste backend URL from step 5)</li>
+                    </ul>
+                </li>
+                <li>Click "Create Web Service"</li>
+                <li>Wait 5-10 minutes for deployment</li>
+                <li><strong>THIS IS YOUR APP URL!</strong> (e.g.,
+                    <code>https://address-automation-frontend.onrender.com</code>)</li>
+            </ol>
+        </div>
+
+        <div class="step-card">
+            <h3><span class="step-number">7</span>Initialize Database Schema</h3>
+            <p>The database needs the tables created. You have two options:</p>
+
+            <h4>Option A: Using Render Shell (Recommended)</h4>
+            <ol>
+                <li>Render Dashboard → Backend Service → "Shell" tab</li>
+                <li>Run:
+                    <pre><code>psql $DATABASE_URL -f docker/postgres/init.sql</code></pre>
+                </li>
+            </ol>
+
+            <h4>Option B: Submit First Case (Auto-creates on error)</h4>
+            <p>The application will create tables on first database error (less reliable)</p>
+        </div>
+
+        <div class="step-card">
+            <h3><span class="step-number">8</span>Test Your Deployment!</h3>
+            <ol>
+                <li>Visit your frontend URL</li>
+                <li>Try submitting a test case</li>
+                <li>Check admin dashboard (<code>/admin</code>)</li>
+                <li>Approve a case and watch it process</li>
+                <li>Check if email arrives</li>
+            </ol>
+        </div>
+
+        <h2>🌐 Final URLs & Access</h2>
+
+        <div class="success-box">
+            <h3>Share These URLs with Supervisors & Friends</h3>
+
+            <h4>User Portal (Main Access)</h4>
+            <div class="url-box">https://address-automation-frontend.onrender.com/</div>
+            <p>Citizens upload PDFs and submit address change requests here</p>
+
+            <h4>Admin Dashboard</h4>
+            <div class="url-box">https://address-automation-frontend.onrender.com/admin</div>
+            <p>Supervisors review, approve cases, and handle HITL corrections here</p>
+
+            <h4>Backend API (For Developers)</h4>
+            <div class="url-box">https://address-automation-backend.onrender.com/docs</div>
+            <p>Interactive API documentation (Swagger UI)</p>
+        </div>
+
+        <h2>⚠️ Important Notes</h2>
+
+        <div class="warning-box">
+            <h3>Free Tier Limitations</h3>
+            <ul>
+                <li><strong>Services Sleep:</strong> After 15 minutes of inactivity, free tier services sleep. First
+                    request takes 30-60 seconds to wake up.</li>
+                <li><strong>Database Size:</strong> Free PostgreSQL has 1GB storage limit</li>
+                <li><strong>Build Minutes:</strong> 500 free build minutes/month</li>
+                <li><strong>No Custom Domain:</strong> Free tier uses <code>.onrender.com</code> subdomain</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <h3>API Cost Warning</h3>
+            <p><strong>OpenAI API costs money!</strong> Each case triggers:</p>
+            <ul>
+                <li>1 OCR parsing call (GPT-4o-mini)</li>
+                <li>7 agent reasoning calls (one per agent)</li>
+                <li>Estimated cost: <strong>$0.10 - $0.20 per case</strong></li>
+            </ul>
+            <p>With public deployment, <strong>anyone can submit cases and use your API credits!</strong></p>
+            <p><strong>Recommendation:</strong> Monitor usage at <a href="https://platform.openai.com/usage"
+                    style="color: #00d4ff;">https://platform.openai.com/usage</a></p>
+        </div>
+
+        <h2>🔍 How to Monitor Your Deployment</h2>
+
+        <h4>Check Service Health</h4>
+        <pre><code># Render Dashboard shows:
+✓ Live (green) = Service running
+○ Deploying (yellow) = Building/starting
+✕ Failed (red) = Deployment error</code></pre>
+
+        <h4>View Logs</h4>
+        <ol>
+            <li>Render Dashboard → Select Service</li>
+            <li>Click "Logs" tab</li>
+            <li>Real-time logs show all API requests and errors</li>
+        </ol>
+
+        <h4>Check Database Status</h4>
+        <ol>
+            <li>Render Dashboard → PostgreSQL Service</li>
+            <li>See connection count, storage used</li>
+            <li>Can connect via psql for manual queries</li>
+        </ol>
+
+        <h2>🎓 For Supervisors & Demo</h2>
+
+        <div class="success-box">
+            <h3>What to Show in Your Presentation</h3>
+            <ol>
+                <li><strong>Live Application:</strong> Share frontend URL, demonstrate PDF upload</li>
+                <li><strong>Admin Dashboard:</strong> Show case approval workflow</li>
+                <li><strong>Agent Logs:</strong> Show Render backend logs during workflow execution</li>
+                <li><strong>Email Delivery:</strong> Show received certificate email</li>
+                <li><strong>Database:</strong> Show audit logs table with full compliance trail</li>
+                <li><strong>GitHub/GitLab:</strong> Show version-controlled codebase</li>
+                <li><strong>Documentation:</strong> Share technical analysis HTML files</li>
+            </ol>
+        </div>
+
+        <h2>📊 Deployment Architecture Summary</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Deployed Where</th>
+                    <th>Technology</th>
+                    <th>URL</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Frontend</td>
+                    <td>Render Web Service</td>
+                    <td>React + Vite (Docker)</td>
+                    <td><code>https://*-frontend.onrender.com</code></td>
+                </tr>
+                <tr>
+                    <td>Backend</td>
+                    <td>Render Web Service</td>
+                    <td>FastAPI + CrewAI (Docker)</td>
+                    <td><code>https://*-backend.onrender.com</code></td>
+                </tr>
+                <tr>
+                    <td>Database</td>
+                    <td>Render PostgreSQL</td>
+                    <td>PostgreSQL 16</td>
+                    <td>Internal only (not public)</td>
+                </tr>
+                <tr>
+                    <td>OpenAI</td>
+                    <td>External API</td>
+                    <td>GPT-4o-mini</td>
+                    <td>api.openai.com</td>
+                </tr>
+                <tr>
+                    <td>SendGrid</td>
+                    <td>External API</td>
+                    <td>Email Service</td>
+                    <td>api.sendgrid.com</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>✅ Deployment Checklist</h2>
+
+        <div class="step-card">
+            <h3>Before Deployment</h3>
+            <ul style="list-style: none;">
+                <li>☐ Get OpenAI API key and add credits</li>
+                <li>☐ Get SendGrid API key and verify sender email</li>
+                <li>☐ Create GitHub account and repository</li>
+                <li>☐ Create Render account</li>
+                <li>☐ Test locally with <code>docker-compose up</code></li>
+            </ul>
+        </div>
+
+        <div class="step-card">
+            <h3>During Deployment</h3>
+            <ul style="list-style: none;">
+                <li>☐ Push code to GitHub</li>
+                <li>☐ Create PostgreSQL database on Render</li>
+                <li>☐ Deploy backend service with env vars</li>
+                <li>☐ Deploy frontend service with backend URL</li>
+                <li>☐ Initialize database schema</li>
+            </ul>
+        </div>
+
+        <div class="step-card">
+            <h3>After Deployment</h3>
+            <ul style="list-style: none;">
+                <li>☐ Test user portal (PDF upload)</li>
+                <li>☐ Test admin dashboard (case approval)</li>
+                <li>☐ Verify email delivery</li>
+                <li>☐ Check all services are "Live" in Render</li>
+                <li>☐ Share URLs with supervisors</li>
+                <li>☐ Monitor API usage on OpenAI dashboard</li>
+            </ul>
+        </div>
+
+        <h2>🚨 Troubleshooting Common Issues</h2>
+
+        <h4>Issue: Frontend says "Network Error"</h4>
+        <p><strong>Solution:</strong> Check <code>VITE_API_URL</code> in frontend environment variables matches exact
+            backend URL</p>
+
+        <h4>Issue: Backend shows database errors</h4>
+        <p><strong>Solution:</strong> Verify <code>DATABASE_URL</code> and ensure database schema is initialized</p>
+
+        <h4>Issue: Service keeps crashing</h4>
+        <p><strong>Solution:</strong> Check logs in Render dashboard, usually missing dependencies or env vars</p>
+
+        <h4>Issue: Email not sending</h4>
+        <p><strong>Solution:</strong> Verify SendGrid API key and sender email is verified in SendGrid dashboard</p>
+
+        <footer
+            style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); color: #64b5f6;">
+            <p>Complete Deployment Plan - Address Automation System</p>
+            <p style="font-size: 0.9rem; margin-top: 0.5rem;">November 26, 2025</p>
+        </footer>
+    </div>
+</body>
+
+</html>
