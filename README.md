@@ -17,6 +17,33 @@
 
 ---
 
+## 🎨 Screenshots
+
+<div align="center">
+
+### User Portal
+*Citizens can upload documents and submit address change requests*
+
+<img src="docs/images/user_portal.png" alt="User Portal" width="800"/>
+
+---
+
+### Admin Dashboard
+*Case management, approval workflow, and HITL handling*
+
+<img src="docs/images/admin_dashboard.png" alt="Admin Dashboard" width="800"/>
+
+---
+
+### Login Page
+*Secure authentication for system access*
+
+<img src="docs/images/login_page.png" alt="Login Page" width="800"/>
+
+</div>
+
+---
+
 ## 📖 Overview
 
 This project automates the complex German address change (_Ummeldung_) process using a **multi-agent AI system**. When citizens move to a new address in Germany, they must notify the local registration office (_Bürgeramt_) within two weeks. This system digitizes and streamlines that process.
@@ -190,36 +217,6 @@ flowchart TD
 | `POST` | `/admin/approve/{case_id}` | Approve a pending case |
 | `GET` | `/case/{case_id}` | Get case details |
 | `GET` | `/audit-log/{case_id}` | Get case audit trail |
-
----
-
-## 🎨 User Interface
-
-### Login Page
-Secure authentication for accessing the system.
-
-<div align="center">
-<img src="docs/images/login_page.png" alt="Login Page" width="800"/>
-</div>
-
-### User Portal
-Citizens can upload their documents (address form + landlord certificate) and submit their address change request through an intuitive glassmorphic dark-themed interface.
-
-<div align="center">
-<img src="docs/images/user_portal.png" alt="User Portal" width="800"/>
-</div>
-
-### Admin Dashboard
-Administrators can:
-- View pending cases requiring review
-- Monitor auto-processing cases
-- Approve or reject submissions
-- Handle Human-in-the-Loop (HITL) cases
-- Track completed cases
-
-<div align="center">
-<img src="docs/images/admin_dashboard.png" alt="Admin Dashboard" width="800"/>
-</div>
 
 ---
 
