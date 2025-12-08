@@ -195,8 +195,19 @@ flowchart TD
 
 ## 🎨 User Interface
 
+### Login Page
+Secure authentication for accessing the system.
+
+<div align="center">
+<img src="docs/images/login_page.png" alt="Login Page" width="800"/>
+</div>
+
 ### User Portal
-Citizens can upload their documents (address form + landlord certificate) and submit their address change request.
+Citizens can upload their documents (address form + landlord certificate) and submit their address change request through an intuitive glassmorphic dark-themed interface.
+
+<div align="center">
+<img src="docs/images/user_portal.png" alt="User Portal" width="800"/>
+</div>
 
 ### Admin Dashboard
 Administrators can:
@@ -205,6 +216,10 @@ Administrators can:
 - Approve or reject submissions
 - Handle Human-in-the-Loop (HITL) cases
 - Track completed cases
+
+<div align="center">
+<img src="docs/images/admin_dashboard.png" alt="Admin Dashboard" width="800"/>
+</div>
 
 ---
 
