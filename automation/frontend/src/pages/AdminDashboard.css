@@ -1,0 +1,398 @@
+/* ================================================
+   ADMIN DASHBOARD CSS
+   Full-width layout matching admin-preview.html
+   Override App.css global styles with high specificity
+   ================================================ */
+
+/* ROOT: Override the main element's centering from App.css */
+.admin-dashboard-root {
+    background-color: #f2f5fa !important;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Override the main element from App.css */
+.admin-dashboard-root .page-content {
+    display: block !important;
+    align-items: unset !important;
+    justify-content: unset !important;
+    padding: 1.5rem 0 2rem 0 !important;
+    background-color: #f2f5fa !important;
+    flex: 1;
+    width: 100%;
+    min-height: auto !important;
+}
+
+/* Full-width container */
+.admin-dashboard-root .container-fluid {
+    max-width: 100% !important;
+    padding: 0 1.5rem !important;
+    margin: 0 !important;
+}
+
+/* Override App.css .card dark theme */
+.admin-dashboard-root .card {
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    border-radius: 0.5rem !important;
+    padding: 0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    border: 1px solid #e5e7eb !important;
+    position: relative;
+    overflow: visible !important;
+}
+
+.admin-dashboard-root .card::before {
+    display: none !important;
+}
+
+.admin-dashboard-root .card-header {
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    padding: 0.75rem 1rem !important;
+    color: #1e293b !important;
+}
+
+.admin-dashboard-root .card-body {
+    padding: 1rem !important;
+    color: #1e293b !important;
+}
+
+/* FILTER TOOLBAR - Uniform horizontal layout */
+.admin-filters {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+.admin-filters .form-select,
+.admin-filters .form-control,
+.admin-filters .input-group {
+    height: 32px !important;
+    width: 160px !important;
+}
+
+.admin-filters .input-group .form-control {
+    width: auto !important;
+    flex: 1 !important;
+}
+
+.admin-filters .input-group .btn {
+    height: 32px !important;
+}
+
+.admin-dashboard-root .card-footer {
+    background: #f8fafc !important;
+    border-top: 1px solid #e5e7eb !important;
+    padding: 0.75rem 1rem !important;
+}
+
+/* PAGE HEADER with blue left border */
+.admin-dashboard-root .card-page-header {
+    border-left: 4px solid #0052b5 !important;
+    border-radius: 0 0.5rem 0.5rem 0 !important;
+    overflow: visible !important;
+}
+
+.admin-dashboard-root .card-page-header .card-body {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 1rem !important;
+    overflow: visible !important;
+}
+
+/* STAT CARDS - Exact colors from admin-preview.html */
+.admin-dashboard-root .card-stat {
+    border: none !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08) !important;
+    overflow: hidden !important;
+}
+
+.admin-dashboard-root .card-stat::before {
+    display: none !important;
+}
+
+.admin-dashboard-root .card-stat .card-body {
+    padding: 1.25rem 1.5rem !important;
+}
+
+/* Blue card - Pending */
+.admin-dashboard-root .card-stat-primary {
+    background: linear-gradient(135deg, #1e88e5, #1565c0) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.admin-dashboard-root .card-stat-primary .card-body {
+    color: #fff !important;
+}
+
+/* Orange card - Needs Review */
+.admin-dashboard-root .card-stat-warning {
+    background: linear-gradient(135deg, #ffb74d, #f57c00) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.admin-dashboard-root .card-stat-warning .card-body {
+    color: #fff !important;
+}
+
+/* Green card - Completed */
+.admin-dashboard-root .card-stat-success {
+    background: linear-gradient(135deg, #66bb6a, #388e3c) !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.admin-dashboard-root .card-stat-success .card-body {
+    color: #fff !important;
+}
+
+/* White card - Neutral/Stats */
+.admin-dashboard-root .card-stat-neutral {
+    background: #ffffff !important;
+    border: 1px solid #e0e7ff !important;
+}
+
+.admin-dashboard-root .card-stat-neutral .card-body {
+    color: #1e293b !important;
+}
+
+.admin-dashboard-root .card-stat-label {
+    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+}
+
+.admin-dashboard-root .card-stat-value {
+    font-weight: 600;
+}
+
+.admin-dashboard-root .card-stat-icon {
+    font-size: 2rem;
+    opacity: 0.85;
+}
+
+/* TABLE styles */
+.admin-dashboard-root .table {
+    color: #1e293b !important;
+}
+
+.admin-dashboard-root .table thead th {
+    color: #64748b !important;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+.admin-dashboard-root .table tbody td {
+    color: #1e293b !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.admin-dashboard-root .table-hover tbody tr:hover {
+    background: #f8fafc !important;
+}
+
+.admin-dashboard-root .table-empty-state i {
+    opacity: 0.4;
+    color: #94a3b8 !important;
+}
+
+/* FORM CONTROLS */
+.admin-dashboard-root .form-control,
+.admin-dashboard-root .form-select {
+    background-color: #ffffff !important;
+    border-color: #d1d5db !important;
+    color: #1e293b !important;
+}
+
+.admin-dashboard-root .form-control::placeholder {
+    color: #9ca3af !important;
+}
+
+/* BUTTONS */
+.admin-dashboard-root .btn-primary {
+    background: #0052b5 !important;
+    border-color: #0052b5 !important;
+}
+
+.admin-dashboard-root .btn-primary:hover {
+    background: #003d87 !important;
+    border-color: #003d87 !important;
+}
+
+.admin-dashboard-root .btn-outline-secondary {
+    color: #64748b !important;
+    border-color: #d1d5db !important;
+}
+
+.admin-dashboard-root .btn-outline-success {
+    color: #16a34a !important;
+    border-color: #22c55e !important;
+}
+
+.admin-dashboard-root .btn-outline-warning {
+    color: #d97706 !important;
+    border-color: #f59e0b !important;
+}
+
+/* BADGES */
+.admin-dashboard-root .badge {
+    font-weight: 500;
+}
+
+/* CASE DETAIL DRAWER */
+.admin-dashboard-root .case-detail-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    display: none;
+    pointer-events: none;
+}
+
+.admin-dashboard-root .case-detail-drawer.active {
+    display: block;
+    pointer-events: auto;
+}
+
+.admin-dashboard-root .case-detail-drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+}
+
+.admin-dashboard-root .case-detail-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 420px;
+    height: 100%;
+    background: #ffffff !important;
+    box-shadow: -4px 0 16px rgba(15, 23, 42, 0.25);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.25s ease-out;
+}
+
+.admin-dashboard-root .case-detail-drawer.active .case-detail-panel {
+    transform: translateX(0);
+}
+
+.admin-dashboard-root .case-detail-header,
+.admin-dashboard-root .case-detail-footer {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff !important;
+}
+
+.admin-dashboard-root .case-detail-header {
+    color: #1e293b !important;
+}
+
+.admin-dashboard-root .case-detail-footer {
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 0;
+}
+
+.admin-dashboard-root .case-detail-body {
+    padding: 1rem 1.25rem;
+    overflow-y: auto;
+    flex: 1;
+    background: #ffffff !important;
+    color: #1e293b !important;
+}
+
+/* Gap helper */
+.admin-dashboard-root .gap-2 {
+    gap: 0.5rem !important;
+}
+
+/* FOOTER - Dark like admin-preview.html */
+.admin-footer {
+    background: #111827 !important;
+    color: #9ca3af !important;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.85rem;
+    width: 100%;
+}
+
+.admin-footer a {
+    color: #e5e7eb !important;
+    text-decoration: none;
+    margin-right: 1rem;
+}
+
+.admin-footer a:hover {
+    text-decoration: underline;
+}
+
+.admin-footer-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
+    padding: 0 1.5rem;
+}
+
+.admin-footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.admin-footer-copy {
+    margin-top: 0.25rem;
+    color: #9ca3af !important;
+}
+
+/* TEXT COLORS */
+.admin-dashboard-root .text-muted {
+    color: #64748b !important;
+}
+
+.admin-dashboard-root h1,
+.admin-dashboard-root h2,
+.admin-dashboard-root h3,
+.admin-dashboard-root h4,
+.admin-dashboard-root h5,
+.admin-dashboard-root h6 {
+    color: #1e293b !important;
+}
+
+.admin-dashboard-root p {
+    color: #475569 !important;
+}
+
+/* Small text */
+.admin-dashboard-root .small,
+.admin-dashboard-root small {
+    color: inherit;
+}
+
+/* RESPONSIVE */
+@media (max-width: 767.98px) {
+    .admin-dashboard-root .card-page-header .card-body {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+
+    .admin-footer-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}

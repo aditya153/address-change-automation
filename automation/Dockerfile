@@ -27,8 +27,8 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # Copy project
 COPY . .
 
-# Create uploads directory
-RUN mkdir -p /app/uploads
+# Create uploads and static directories
+RUN mkdir -p /app/uploads /app/static
 
 # Expose FastAPI port
 EXPOSE 8000

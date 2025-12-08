@@ -257,6 +257,40 @@ UPLOAD_DIR = Path("/app/uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
+def pre_validate_case(citizen_data: dict) -> tuple:
+    """
+    Check if case has all required data and is clean enough for auto-processing.
+    Returns (is_clean: bool, issues: list[str])
+    """
+    issues = []
+    
+    # Check required fields
+    required_fields = ['citizen_name', 'dob', 'old_address_raw', 'new_address_raw', 'move_in_date_raw']
+    for field in required_fields:
+        value = citizen_data.get(field, '')
+        if not value or value == 'Unknown' or value == '':
+            issues.append(f"Missing or invalid {field}")
+    
+    # Check address quality (basic checks)
+    new_addr = citizen_data.get('new_address_raw', '')
+    if len(new_addr) < 10:
+        issues.append("New address too short")
+    if not any(c.isdigit() for c in new_addr):
+        issues.append("New address missing house number or postal code")
+    
+    old_addr = citizen_data.get('old_address_raw', '')
+    if len(old_addr) < 10:
+        issues.append("Old address too short")
+    
+    # Check citizen name
+    name = citizen_data.get('citizen_name', '')
+    if len(name) < 3 or name in ['Unknown', 'OCR Fallback User']:
+        issues.append("Invalid citizen name")
+    
+    is_clean = len(issues) == 0
+    return (is_clean, issues)
+
+
 @app.post("/submit-case")
 async def submit_case(
     email: str =Form(...),
@@ -265,6 +299,7 @@ async def submit_case(
 ):
     """
     User submission endpoint - accepts email and 2 PDFs
+    Clean cases auto-process, problematic cases go to PENDING_REVIEW
     """
     try:
         # Generate unique filenames
@@ -295,18 +330,32 @@ async def submit_case(
                 "landlord_name": "Fallback Landlord GmbH"
             }
 
-        # Create case in database with PENDING_APPROVAL status
-        # Use plain cursor for simple query
+        # Pre-validate case to determine if it can auto-process
+        is_clean, validation_issues = pre_validate_case(citizen_data)
+        
+        if is_clean:
+            initial_status = "PROCESSING"
+            print(f"✅ Clean case detected - will auto-process")
+        else:
+            initial_status = "PENDING_REVIEW"
+            print(f"⚠️ Case needs review. Issues: {validation_issues}")
+
+        # Create case in database
         from psycopg2 import connect
         import os
         conn = connect(os.getenv("DATABASE_URL"))
+        case_id = None
         try:
-            cur = conn.cursor()  # Plain cursor, not RealDictCursor
+            cur = conn.cursor()
             try:
                 # Get next case ID
                 cur.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM cases")
                 next_id = cur.fetchone()[0]
                 case_id = f"Case ID: {next_id}"
+                
+                # Store validation issues as JSON string if any
+                import json
+                validation_notes = json.dumps(validation_issues) if validation_issues else None
                 
                 cur.execute(
                     """
@@ -329,7 +378,7 @@ async def submit_case(
                         citizen_data.get("new_address_raw", "Unknown"),
                         citizen_data.get("move_in_date_raw", "2025-01-01"),
                         citizen_data.get("landlord_name", "Unknown"),
-                        "PENDING_APPROVAL",
+                        initial_status,
                         str(landlord_path),
                         str(address_path),
                         dt.now()
@@ -341,11 +390,77 @@ async def submit_case(
         finally:
             conn.close()
         
+        # Auto-process clean cases in background thread
+        if is_clean and case_id:
+            import threading
+            
+            def run_auto_workflow():
+                try:
+                    print(f"🚀 Auto-processing clean case {case_id}...")
+                    
+                    from .crew import AddressChangeMain
+                    from .db import add_audit_entry
+                    
+                    # Add audit entry for auto-processing
+                    add_audit_entry(case_id, "Case auto-processing started (clean case - no admin approval required)")
+                    
+                    inputs = {
+                        "citizen_data": {
+                            "case_id": case_id,
+                            "email": email,
+                            "citizen_name": citizen_data.get("citizen_name"),
+                            "dob": citizen_data.get("dob"),
+                            "old_address_raw": citizen_data.get("old_address_raw"),
+                            "new_address_raw": citizen_data.get("new_address_raw"),
+                            "move_in_date_raw": citizen_data.get("move_in_date_raw"),
+                            "landlord_name": citizen_data.get("landlord_name"),
+                        }
+                    }
+                    
+                    AddressChangeMain().crew().kickoff(inputs=inputs)
+                    
+                    # Check final status
+                    with get_conn() as conn, conn.cursor() as cur:
+                        cur.execute("SELECT status FROM cases WHERE case_id = %s", (case_id,))
+                        status_row = cur.fetchone()
+                        
+                        if status_row and status_row["status"] == "WAITING_FOR_HUMAN":
+                            print(f"✋ HITL triggered for auto-processed case {case_id}")
+                            add_audit_entry(case_id, "Low confidence detected during auto-processing - requires human review")
+                        elif status_row and status_row["status"] == "CLOSED":
+                            print(f"✅ Auto-processing completed successfully for {case_id}")
+                            add_audit_entry(case_id, "Case auto-processed and completed successfully")
+                        else:
+                            print(f"✅ Workflow completed for {case_id}")
+                            
+                except Exception as e:
+                    print(f"Auto-processing Error for {case_id}: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # Update status to ERROR
+                    with get_conn() as conn, conn.cursor() as cur:
+                        cur.execute(
+                            "UPDATE cases SET status = 'ERROR' WHERE case_id = %s",
+                            (case_id,)
+                        )
+                        conn.commit()
+            
+            # Start workflow in background
+            thread = threading.Thread(target=run_auto_workflow)
+            thread.start()
+        
+        # Return response
+        if is_clean:
+            message = "Your request has been submitted and is being processed automatically! You will receive an email shortly."
+        else:
+            message = "Your request has been submitted and is pending review. An administrator will process it soon."
+        
         return JSONResponse({
             "status": "success",
-            "message": "Your request has been submitted! You will be notified via email soon.",
+            "message": message,
             "email": email,
-            "extracted_data": citizen_data  # Return extracted data for debugging
+            "auto_processing": is_clean,
+            "extracted_data": citizen_data
         })
         
     except Exception as e:
@@ -358,15 +473,16 @@ async def submit_case(
 @app.get("/admin/pending-cases")
 async def get_pending_cases():
     """
-    Admin endpoint - list all pending cases
+    Admin endpoint - list all cases needing review (PENDING_REVIEW status)
     """
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
             """
             SELECT case_id, email, submitted_at, status, 
-                   pdf_landlord_path, pdf_address_change_path 
+                   pdf_landlord_path, pdf_address_change_path,
+                   citizen_name, new_address_raw
             FROM cases 
-            WHERE status IN ('PENDING_APPROVAL', 'PROCESSING')
+            WHERE status = 'PENDING_REVIEW'
             ORDER BY submitted_at DESC
             """
         )
@@ -375,16 +491,37 @@ async def get_pending_cases():
     return {"cases": rows}
 
 
-@app.get("/admin/completed-cases")
-async def get_completed_cases():
+@app.get("/admin/processing-cases")
+async def get_processing_cases():
     """
-    Admin endpoint - list all completed (CLOSED) cases.
+    Admin endpoint - list all cases currently being auto-processed
     """
     with get_conn() as conn, conn.cursor() as cur:
         cur.execute(
             """
             SELECT case_id, email, submitted_at, status,
-                   pdf_landlord_path, pdf_address_change_path
+                   pdf_landlord_path, pdf_address_change_path,
+                   citizen_name, new_address_raw
+            FROM cases
+            WHERE status = 'PROCESSING'
+            ORDER BY submitted_at DESC
+            """
+        )
+        rows = cur.fetchall()
+    return {"cases": rows}
+
+
+@app.get("/admin/completed-cases")
+async def get_completed_cases():
+    """
+    Admin endpoint - list all completed (CLOSED) cases including auto-processed ones.
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT case_id, email, submitted_at, status,
+                   pdf_landlord_path, pdf_address_change_path,
+                   citizen_name, new_address_raw
             FROM cases
             WHERE status = 'CLOSED'
             ORDER BY submitted_at DESC
@@ -598,6 +735,72 @@ async def approve_case(case_id: str):
         except:
             pass
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =======================
+# CHATBOT ENDPOINT
+# =======================
+
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel as PydanticBaseModel
+
+# Mount static files for document previews
+STATIC_DIR = Path("/app/static")
+STATIC_DIR.mkdir(exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+class ChatRequest(PydanticBaseModel):
+    message: str
+
+
+class ChatResponse(PydanticBaseModel):
+    reply: str
+    has_document_preview: bool = False
+    document_type: Optional[str] = None
+    document_name: Optional[str] = None
+    document_url: Optional[str] = None
+    document_url2: Optional[str] = None
+
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    """
+    Chatbot endpoint - uses OpenAI to answer address change questions.
+    Can also return document previews when asked.
+    """
+    try:
+        from .chatbot_service import get_chatbot
+        
+        chatbot = get_chatbot()
+        response = chatbot.get_response(request.message)
+        
+        return ChatResponse(
+            reply=response["reply"],
+            has_document_preview=response.get("has_document_preview", False),
+            document_type=response.get("document_type"),
+            document_name=response.get("document_name"),
+            document_url=response.get("document_url"),
+            document_url2=response.get("document_url2")
+        )
+    except Exception as e:
+        print(f"Chat error: {e}")
+        return ChatResponse(
+            reply="I'm sorry, I'm having trouble right now. Please try again.",
+            has_document_preview=False
+        )
+
+
+@app.post("/chat/reset")
+async def reset_chat():
+    """Reset the chatbot conversation history."""
+    try:
+        from .chatbot_service import get_chatbot
+        chatbot = get_chatbot()
+        chatbot.reset_conversation()
+        return {"status": "ok", "message": "Conversation reset"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 # =======================

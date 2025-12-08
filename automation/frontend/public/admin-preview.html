@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Citizen Portal – Admin Dashboard</title>
+
+    <!-- Bootstrap 5 & Icons (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+
+    <style>
+        body {
+            background-color: #f2f5fa;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        /* Top nav similar to your user portal */
+        .portal-navbar {
+            background: #0052b5;
+            color: #fff;
+        }
+
+        .portal-navbar .navbar-brand,
+        .portal-navbar .nav-link,
+        .portal-navbar .navbar-text {
+            color: #fff;
+        }
+
+        .portal-navbar .nav-link.active,
+        .portal-navbar .nav-link:hover {
+            color: #ffdd57;
+        }
+
+        .page-content {
+            padding-top: 1.5rem;
+            padding-bottom: 2rem;
+        }
+
+        .card-page-header {
+            border-left: 4px solid #0052b5;
+        }
+
+        /* Stat cards */
+        .card-stat {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+        }
+
+        .card-stat-primary {
+            background: linear-gradient(135deg, #1e88e5, #1565c0);
+            color: #fff;
+        }
+
+        .card-stat-warning {
+            background: linear-gradient(135deg, #ffb74d, #f57c00);
+            color: #fff;
+        }
+
+        .card-stat-success {
+            background: linear-gradient(135deg, #66bb6a, #388e3c);
+            color: #fff;
+        }
+
+        .card-stat-neutral {
+            background: #ffffff;
+            border: 1px solid #e0e7ff;
+        }
+
+        .card-stat-label {
+            letter-spacing: 0.06em;
+        }
+
+        .card-stat-value {
+            font-weight: 600;
+        }
+
+        .card-stat-icon {
+            font-size: 2rem;
+            opacity: 0.85;
+        }
+
+        /* Case table */
+        .table-empty-state i {
+            opacity: 0.4;
+        }
+
+        /* Case detail drawer */
+        .case-detail-drawer {
+            position: fixed;
+            inset: 0;
+            z-index: 1050;
+            display: none;
+            pointer-events: none;
+        }
+
+        .case-detail-drawer.active {
+            display: block;
+            pointer-events: auto;
+        }
+
+        .case-detail-drawer-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .case-detail-panel {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            background: #ffffff;
+            box-shadow: -4px 0 16px rgba(15, 23, 42, 0.25);
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.25s ease-out;
+        }
+
+        .case-detail-drawer.active .case-detail-panel {
+            transform: translateX(0);
+        }
+
+        .case-detail-header,
+        .case-detail-footer {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .case-detail-footer {
+            border-top: 1px solid #e5e7eb;
+            border-bottom: 0;
+        }
+
+        .case-detail-body {
+            padding: 1rem 1.25rem;
+            overflow-y: auto;
+        }
+
+        footer.portal-footer {
+            background: #111827;
+            color: #9ca3af;
+            padding: 1rem 0;
+            font-size: 0.85rem;
+        }
+
+        footer.portal-footer a {
+            color: #e5e7eb;
+            text-decoration: none;
+        }
+
+        footer.portal-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .gap-2 {
+            gap: 0.5rem !important;
+        }
+
+        @media (max-width: 767.98px) {
+            .card-page-header .card-body {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- TOP NAVBAR (simplified) -->
+    <nav class="navbar navbar-expand-lg portal-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-semibold" href="#">
+                <i class="bi bi-building me-1"></i> Citizen portal
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <span class="navbar-text small">Residents' Registration Office – Registration</span>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">User Portal</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Admin Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light btn-sm ms-2" href="#">Log out</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="page-content">
+        <div class="container-fluid">
+
+            <!-- Breadcrumb -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="#">Homepage</a></li>
+                            <li class="breadcrumb-item"><a href="#">Admin Services</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Address Change</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- PAGE HEADER + FILTERS -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="card card-page-header">
+                        <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
+                            <div class="mb-2 mb-md-0">
+                                <h2 class="h4 mb-1">Address Change – Admin Dashboard</h2>
+                                <p class="text-muted mb-0">
+                                    Manage and review submitted address change cases.
+                                </p>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <!-- Status filter -->
+                                <div class="form-group mb-0">
+                                    <label for="filterStatus" class="visually-hidden">Status</label>
+                                    <select id="filterStatus" class="form-select form-select-sm">
+                                        <option value="">All statuses</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="review">Needs review</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                </div>
+
+                                <!-- Date range -->
+                                <div class="form-group mb-0">
+                                    <label for="filterDate" class="visually-hidden">Date range</label>
+                                    <input type="text" id="filterDate" class="form-control form-control-sm"
+                                        placeholder="Date range" />
+                                </div>
+
+                                <!-- Search -->
+                                <div class="form-group mb-0">
+                                    <label for="searchCases" class="visually-hidden">Search</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" id="searchCases" class="form-control"
+                                            placeholder="Search by Case ID or e-mail">
+                                        <button class="btn btn-outline-secondary" type="button">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Refresh -->
+                                <button type="button" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUMMARY CARDS -->
+            <div class="row g-3 mb-4">
+                <!-- Pending -->
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="card card-stat card-stat-primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="card-stat-label text-uppercase small">
+                                        Pending cases
+                                    </div>
+                                    <div class="card-stat-value display-6">0</div>
+                                    <div class="small">Awaiting approval</div>
+                                </div>
+                                <div class="card-stat-icon">
+                                    <i class="bi bi-inbox-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Needs review -->
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="card card-stat card-stat-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="card-stat-label text-uppercase small">
+                                        Needs review
+                                    </div>
+                                    <div class="card-stat-value display-6">0</div>
+                                    <div class="small">Requires manual correction</div>
+                                </div>
+                                <div class="card-stat-icon">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completed -->
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="card card-stat card-stat-success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="card-stat-label text-uppercase small">
+                                        Completed
+                                    </div>
+                                    <div class="card-stat-value display-6">0</div>
+                                    <div class="small">Successfully processed</div>
+                                </div>
+                                <div class="card-stat-icon">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avg processing time -->
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <div class="card card-stat card-stat-neutral">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="card-stat-label text-uppercase text-muted small">
+                                        Avg. processing time
+                                    </div>
+                                    <div class="card-stat-value h3 mb-0">–</div>
+                                    <div class="text-muted small">Last 30 days</div>
+                                </div>
+                                <div class="card-stat-icon text-muted">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAIN ROW: CASES TABLE + SIDE HELP -->
+            <div class="row">
+                <!-- CASES TABLE -->
+                <div class="col-12 col-xl-9">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="h5 mb-0">
+                                <i class="bi bi-list-ul me-1"></i> Cases
+                            </h3>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="small text-muted mb-0 me-1" for="rowsPerPage">Rows per page</label>
+                                <select id="rowsPerPage" class="form-select form-select-sm">
+                                    <option>10</option>
+                                    <option>25</option>
+                                    <option>50</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col" style="width: 40px;">
+                                                <input type="checkbox" />
+                                            </th>
+                                            <th scope="col">Case ID</th>
+                                            <th scope="col">Citizen e-mail</th>
+                                            <th scope="col">Submitted on</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Confidence</th>
+                                            <th scope="col">Auto-checks</th>
+                                            <th scope="col">Assigned to</th>
+                                            <th scope="col" class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Example row -->
+                                        <tr class="case-row" data-case-id="AC-2025-0001">
+                                            <td>
+                                                <input type="checkbox" />
+                                            </td>
+                                            <td>AC-2025-0001</td>
+                                            <td>citizen@example.de</td>
+                                            <td>08.12.2025 11:23</td>
+                                            <td>
+                                                <span class="badge bg-primary">Pending</span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-semibold">92%</span>
+                                            </td>
+                                            <td>
+                                                <span class="small text-muted">3 / 4 checks passed</span>
+                                            </td>
+                                            <td>
+                                                <span class="small text-muted">Unassigned</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button"
+                                                        class="btn btn-outline-secondary btn-view-case">
+                                                        View
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-success">
+                                                        Approve
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-warning">
+                                                        Needs review
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Empty state example (hide this if you have data) -->
+                                        <tr class="table-empty-state">
+                                            <td colspan="9" class="text-center py-5">
+                                                <div class="mb-2">
+                                                    <i class="bi bi-mailbox fs-1 text-muted"></i>
+                                                </div>
+                                                <p class="mb-0 fw-semibold">No pending cases at the moment</p>
+                                                <p class="text-muted small mb-0">
+                                                    New submissions will appear here automatically.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="card-footer d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">
+                                Showing <span id="casesShowingFrom">1</span>–<span id="casesShowingTo">1</span>
+                                of <span id="casesTotal">1</span> cases
+                            </div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item disabled">
+                                        <button class="page-link" type="button">&laquo;</button>
+                                    </li>
+                                    <li class="page-item active">
+                                        <button class="page-link" type="button">1</button>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <button class="page-link" type="button">&raquo;</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIDE HELP / CONTACT -->
+                <div class="col-12 col-xl-3 mt-3 mt-xl-0">
+                    <!-- Info card -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="bi bi-info-circle me-1"></i> Processing guidelines
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled small mb-0">
+                                <li class="mb-2">
+                                    ✔ Verify that uploaded documents are readable and complete.
+                                </li>
+                                <li class="mb-2">
+                                    ✔ Check that old and new addresses are plausible.
+                                </li>
+                                <li class="mb-2">
+                                    ✔ If confidence is low, mark the case as
+                                    <strong>Needs review</strong>.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Contact & Help -->
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-telephone me-1"></i> Contact &amp; Help
+                        </div>
+                        <div class="card-body small">
+                            <p class="mb-2">
+                                <strong>E-mail</strong><br>
+                                <a href="mailto:buergerservice@stadt.de">buergerservice@stadt.de</a>
+                            </p>
+                            <p class="mb-2">
+                                <strong>Phone</strong><br>
+                                +49 (0) 123 456 789
+                            </p>
+                            <p class="mb-0">
+                                <strong>Opening hours</strong><br>
+                                Mon–Fri: 8:00 – 16:00
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CASE DETAIL DRAWER -->
+        <aside class="case-detail-drawer" id="caseDetailDrawer">
+            <div class="case-detail-drawer-backdrop"></div>
+            <div class="case-detail-panel">
+                <div class="case-detail-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="h5 mb-1">Case <span id="detailCaseId">AC-2025-0001</span></h3>
+                        <p class="text-muted small mb-0">
+                            Submitted on <span id="detailSubmittedOn">08.12.2025 11:23</span>
+                        </p>
+                    </div>
+                    <div class="text-end">
+                        <span id="detailStatusBadge" class="badge bg-primary mb-2">Pending</span><br>
+                        <button type="button" class="btn btn-sm btn-outline-secondary btn-close-detail">
+                            Close
+                        </button>
+                    </div>
+                </div>
+
+                <div class="case-detail-body">
+                    <!-- Citizen info -->
+                    <section class="mb-3">
+                        <h4 class="h6 mb-2">Citizen information</h4>
+                        <dl class="row small mb-0">
+                            <dt class="col-4 text-muted">E-mail</dt>
+                            <dd class="col-8" id="detailEmail">citizen@example.de</dd>
+
+                            <dt class="col-4 text-muted">Case ID</dt>
+                            <dd class="col-8" id="detailCaseId2">AC-2025-0001</dd>
+                        </dl>
+                    </section>
+
+                    <!-- Uploaded documents -->
+                    <section class="mb-3">
+                        <h4 class="h6 mb-2">Uploaded documents</h4>
+                        <div class="card mb-2">
+                            <div class="card-body d-flex justify-content-between align-items-center small">
+                                <div>
+                                    <div class="fw-semibold">Address certificate (Meldebescheinigung)</div>
+                                    <div class="text-muted">meldebescheinigung.pdf · 0.8 MB</div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary">
+                                    View PDF
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body d-flex justify-content-between align-items-center small">
+                                <div>
+                                    <div class="fw-semibold">Landlord confirmation (Wohnungsgeberbestätigung)</div>
+                                    <div class="text-muted">landlord.pdf · 0.6 MB</div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary">
+                                    View PDF
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Extracted data -->
+                    <section class="mb-3">
+                        <h4 class="h6 mb-2">Extracted data</h4>
+                        <dl class="row small mb-0">
+                            <dt class="col-4 text-muted">Old address</dt>
+                            <dd class="col-8">
+                                Musterstr. 1, 12345 Musterstadt
+                                <span class="text-muted">(96%)</span>
+                            </dd>
+
+                            <dt class="col-4 text-muted">New address</dt>
+                            <dd class="col-8">
+                                Beispielweg 12, 54321 Beispielstadt
+                                <span class="text-muted">(88%)</span>
+                            </dd>
+
+                            <dt class="col-4 text-muted">Landlord</dt>
+                            <dd class="col-8 text-warning">
+                                Max Mustermann <span class="text-muted">(62% – please review)</span>
+                            </dd>
+
+                            <dt class="col-4 text-muted">Move-in date</dt>
+                            <dd class="col-8">
+                                01.12.2025 <span class="text-muted">(93%)</span>
+                            </dd>
+                        </dl>
+                    </section>
+
+                    <!-- Automated checks -->
+                    <section class="mb-3">
+                        <h4 class="h6 mb-2">Automated checks</h4>
+                        <ul class="list-unstyled small mb-0">
+                            <li class="mb-1">
+                                <span class="text-success fw-semibold">✔</span>
+                                Citizen found in registry
+                            </li>
+                            <li class="mb-1">
+                                <span class="text-success fw-semibold">✔</span>
+                                Address format valid
+                            </li>
+                            <li class="mb-1">
+                                <span class="text-warning fw-semibold">⚠</span>
+                                Landlord name mismatch – please verify
+                            </li>
+                            <li class="mb-1">
+                                <span class="text-success fw-semibold">✔</span>
+                                Move-in date plausible
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- Notes -->
+                    <section class="mb-3">
+                        <h4 class="h6 mb-2">Internal notes</h4>
+                        <textarea class="form-control form-control-sm" rows="3"
+                            placeholder="Notes for internal use only"></textarea>
+                    </section>
+                </div>
+
+                <div class="case-detail-footer d-flex justify-content-between align-items-center">
+                    <div class="small text-muted">
+                        All actions are logged for audit purposes.
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger">
+                            Reject
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-warning">
+                            Needs manual correction
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success">
+                            Approve
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="portal-footer mt-auto">
+        <div class="container-fluid d-flex flex-wrap justify-content-between">
+            <div class="mb-1">
+                <a href="#">Imprint</a> ·
+                <a href="#">Data protection</a> ·
+                <a href="#">Accessibility</a> ·
+                <a href="#">Terms of Use</a>
+            </div>
+            <div class="mb-1">
+                © 2025 Citizen Portal – All rights reserved
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS: Bootstrap + simple drawer logic -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const drawer = document.getElementById("caseDetailDrawer");
+        const openButtons = document.querySelectorAll(".btn-view-case");
+        const closeButtons = document.querySelectorAll(".btn-close-detail");
+        const backdrop = drawer.querySelector(".case-detail-drawer-backdrop");
+
+        openButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                drawer.classList.add("active");
+            });
+        });
+
+        closeButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                drawer.classList.remove("active");
+            });
+        });
+
+        backdrop.addEventListener("click", () => {
+            drawer.classList.remove("active");
+        });
+    </script>
+</body>
+
+</html>

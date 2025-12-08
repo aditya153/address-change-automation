@@ -1,0 +1,1194 @@
+/* ================================================
+   PROFESSIONAL GOVERNMENT UI - UserPortal.css
+   German Bürgerportal Style
+   ================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    background-color: #263238;
+    overflow-x: hidden;
+}
+
+.gov-portal {
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #ffffff;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+/* ==================== HEADER ==================== */
+.gov-header {
+    background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+    color: white;
+    padding: 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.header-top {
+    background: #0a3d91;
+    padding: 6px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+}
+
+.header-top-right a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    margin-left: 20px;
+    transition: color 0.2s ease;
+}
+
+.header-top-right a:hover {
+    color: white;
+}
+
+.header-main {
+    padding: 12px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.brand-logo {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.brand-text h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.brand-text span {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.header-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-btn {
+    padding: 10px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: white;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-btn.primary {
+    background: white;
+    color: #0d47a1;
+    border-color: white;
+}
+
+.nav-btn.primary:hover {
+    background: #e3f2fd;
+}
+
+/* ==================== BREADCRUMB ==================== */
+.breadcrumb {
+    background: #e8e8e8;
+    padding: 10px 30px;
+    border-bottom: 1px solid #d0d0d0;
+    font-size: 13px;
+    color: #555;
+    margin: 0;
+}
+
+.breadcrumb a {
+    color: #0d47a1;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb span {
+    margin: 0 8px;
+    color: #999;
+}
+
+/* ==================== MAIN CONTENT ==================== */
+.main-content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 50px 50px;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    flex: 1;
+    box-sizing: border-box;
+}
+
+/* ==================== FORM SECTION ==================== */
+.form-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    min-width: 700px;
+}
+
+.form-header {
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    color: white;
+    padding: 16px 24px;
+}
+
+.form-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-header p {
+    font-size: 13px;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.form-body {
+    padding: 20px 24px;
+}
+
+/* ==================== STATUS BAR ==================== */
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    position: relative;
+}
+
+.status-bar::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 60px;
+    right: 60px;
+    height: 3px;
+    background: #e0e0e0;
+    z-index: 0;
+}
+
+.status-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.status-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    border: 3px solid white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.status-step.active .status-icon {
+    background: #1565c0;
+    color: white;
+}
+
+.status-step.completed .status-icon {
+    background: #2e7d32;
+    color: white;
+}
+
+.status-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+.status-step.active .status-label {
+    color: #1565c0;
+}
+
+.status-step.completed .status-label {
+    color: #2e7d32;
+}
+
+/* ==================== ALERTS ==================== */
+.gov-alert {
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.gov-alert.success {
+    background: #e8f5e9;
+    border-left: 4px solid #2e7d32;
+    color: #1b5e20;
+}
+
+.gov-alert.error {
+    background: #ffebee;
+    border-left: 4px solid #c62828;
+    color: #b71c1c;
+}
+
+.gov-alert.info {
+    background: #e3f2fd;
+    border-left: 4px solid #1565c0;
+    color: #0d47a1;
+}
+
+.alert-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+/* ==================== FORM FIELDS ==================== */
+.form-row {
+    margin-bottom: 22px;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.form-label .required {
+    color: #c62828;
+    margin-left: 4px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 15px;
+    color: #333;
+    background: #fafafa;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #1565c0;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
+}
+
+.form-input::placeholder {
+    color: #999;
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+}
+
+.input-icon.success {
+    color: #2e7d32;
+}
+
+/* ==================== FILE UPLOAD ==================== */
+.file-upload-area {
+    border: 2px dashed #bdbdbd;
+    border-radius: 8px;
+    padding: 28px 20px;
+    text-align: center;
+    background: #fafafa;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.file-upload-area:hover {
+    border-color: #1565c0;
+    background: #e3f2fd;
+}
+
+.file-upload-area.has-file {
+    border-style: solid;
+    border-color: #2e7d32;
+    background: #e8f5e9;
+}
+
+.file-upload-area input[type="file"] {
+    display: none;
+}
+
+.upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-icon {
+    font-size: 36px;
+    color: #1565c0;
+}
+
+.upload-text {
+    font-size: 14px;
+    color: #666;
+}
+
+.upload-text strong {
+    color: #1565c0;
+    cursor: pointer;
+}
+
+.upload-hint {
+    font-size: 12px;
+    color: #999;
+}
+
+.file-selected-info {
+    display: none;
+    align-items: center;
+    gap: 14px;
+}
+
+.file-upload-area.has-file .upload-content {
+    display: none;
+}
+
+.file-upload-area.has-file .file-selected-info {
+    display: flex;
+}
+
+.file-icon-box {
+    width: 44px;
+    height: 44px;
+    background: #2e7d32;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.file-info {
+    flex: 1;
+    text-align: left;
+}
+
+.file-info-name {
+    font-weight: 600;
+    color: #1b5e20;
+    font-size: 14px;
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-info-status {
+    font-size: 12px;
+    color: #2e7d32;
+}
+
+.file-remove-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #ffcdd2;
+    color: #c62828;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-remove-btn:hover {
+    background: #c62828;
+    color: white;
+}
+
+/* ==================== SUBMIT BUTTON ==================== */
+.submit-section {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.gov-submit-btn {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: inherit;
+}
+
+.gov-submit-btn:hover {
+    background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+    box-shadow: 0 4px 15px rgba(21, 101, 192, 0.4);
+}
+
+.gov-submit-btn:disabled {
+    background: #bdbdbd;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.gov-submit-btn.loading {
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+}
+
+.btn-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: none;
+}
+
+.gov-submit-btn.loading .btn-spinner {
+    display: block;
+}
+
+.gov-submit-btn.loading .btn-text {
+    display: none;
+}
+
+.gov-submit-btn .loading-text {
+    display: none;
+}
+
+.gov-submit-btn.loading .loading-text {
+    display: inline;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.form-footer {
+    margin-top: 20px;
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #666;
+}
+
+.form-footer-icon {
+    font-size: 16px;
+    color: #1565c0;
+}
+
+/* ==================== SIDEBAR ==================== */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.info-card-header {
+    background: #f5f5f5;
+    padding: 14px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-card-body {
+    padding: 18px;
+}
+
+.info-list {
+    list-style: none;
+}
+
+.info-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 13px;
+    color: #555;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.info-list li:last-child {
+    border-bottom: none;
+}
+
+.info-list-icon {
+    color: #1565c0;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.contact-item:last-child {
+    border-bottom: none;
+}
+
+.contact-icon {
+    width: 36px;
+    height: 36px;
+    background: #e3f2fd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.contact-info {
+    font-size: 13px;
+}
+
+.contact-info strong {
+    display: block;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.contact-info span {
+    color: #666;
+}
+
+/* ==================== FOOTER ==================== */
+.gov-footer {
+    background: #263238;
+    color: white;
+    padding: 30px 240px;
+    width: 100vw;
+    margin-top: auto;
+}
+
+.footer-content {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-links {
+    display: flex;
+    gap: 30px;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: white;
+}
+
+.footer-copyright {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* ==================== CHATBOT ==================== */
+.chatbot-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(21, 101, 192, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.chatbot-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 30px rgba(21, 101, 192, 0.5);
+}
+
+.chatbot-fab.active {
+    background: linear-gradient(135deg, #c62828 0%, #d32f2f 100%);
+    box-shadow: 0 4px 20px rgba(198, 40, 40, 0.4);
+}
+
+.chatbot-window {
+    position: fixed;
+    bottom: 100px;
+    right: 24px;
+    width: 420px;
+    height: 580px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.chatbot-header {
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbot-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chatbot-avatar {
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.chatbot-header-text h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.chatbot-status {
+    font-size: 12px;
+    color: #4ade80;
+    font-weight: 600;
+}
+
+.chatbot-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.chatbot-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.chatbot-messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background: #f5f5f5;
+}
+
+.chat-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-message.user {
+    flex-direction: row-reverse;
+}
+
+.chat-avatar-small {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.chat-bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.chat-message.bot .chat-bubble {
+    background: white;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    border-top-left-radius: 4px;
+}
+
+.chat-message.user .chat-bubble {
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    color: white;
+    border-top-right-radius: 4px;
+}
+
+.chat-bubble.typing {
+    display: flex;
+    gap: 4px;
+    padding: 16px 20px;
+}
+
+.chat-bubble.typing span {
+    width: 8px;
+    height: 8px;
+    background: #bdbdbd;
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.chat-bubble.typing span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.chat-bubble.typing span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+.chat-bubble.typing span:nth-child(3) {
+    animation-delay: 0;
+}
+
+@keyframes typingBounce {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0.6);
+        opacity: 0.5;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.chatbot-input {
+    display: flex;
+    padding: 14px;
+    border-top: 1px solid #e0e0e0;
+    background: white;
+    gap: 10px;
+}
+
+.chatbot-input input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 24px;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    -webkit-text-fill-color: #000000 !important;
+}
+
+.chatbot-input input:focus {
+    border-color: #1565c0;
+}
+
+.chatbot-input input::placeholder {
+    color: #999;
+}
+
+.chatbot-input button {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.2s ease;
+}
+
+.chatbot-input button:hover:not(:disabled) {
+    box-shadow: 0 4px 15px rgba(21, 101, 192, 0.4);
+}
+
+.chatbot-input button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Document Preview in Chat */
+.chat-documents-container {
+    margin-top: 12px;
+}
+
+.chat-document-preview {
+    margin-top: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.chat-document-preview:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.chat-document-preview img {
+    width: 100%;
+    max-height: 120px;
+    object-fit: cover;
+}
+
+.chat-document-preview span {
+    display: block;
+    padding: 8px 12px;
+    background: #f5f5f5;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Image Preview Modal */
+.image-preview-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+    backdrop-filter: blur(8px);
+}
+
+.image-preview-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.image-preview-content img {
+    max-width: 100%;
+    max-height: 75vh;
+    display: block;
+}
+
+.image-preview-content p {
+    padding: 14px 18px;
+    margin: 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    background: #f5f5f5;
+}
+
+.image-preview-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.image-preview-close:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/* Goodbye Toast */
+.goodbye-toast {
+    position: fixed;
+    bottom: 100px;
+    right: 24px;
+    background: #263238;
+    color: white;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1001;
+    animation: toastIn 0.3s ease-out;
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.goodbye-toast span {
+    font-size: 18px;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-top {
+        display: none;
+    }
+
+    .breadcrumb {
+        display: none;
+    }
+
+    .header-main {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+        padding: 16px 20px;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .form-body {
+        padding: 20px;
+    }
+
+    .form-header {
+        padding: 20px;
+    }
+
+    .form-header h2 {
+        font-size: 18px;
+    }
+
+    .status-bar {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .status-bar::before {
+        display: none;
+    }
+
+    .status-step {
+        flex-direction: row;
+        gap: 12px;
+    }
+
+    .gov-footer {
+        padding: 20px;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .footer-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .chatbot-window {
+        width: calc(100vw - 48px);
+        height: 60vh;
+        bottom: 90px;
+    }
+}
