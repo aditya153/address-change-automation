@@ -157,6 +157,90 @@ const translations = {
         messageSent: "Ihre Nachricht wurde erfolgreich gesendet!",
         messageFailed: "Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
         backToPortal: "← Zurück zum Portal"
+    },
+    // Turkish
+    tr: {
+        federalRepublic: "🇩🇪 Almanya Federal Cumhuriyeti",
+        english: "English", german: "Deutsch", help: "Yardım", contact: "İletişim",
+        citizenPortal: "Vatandaş Portalı", registrationOffice: "Nüfus Kayıt Ofisi - Kayıt",
+        userPortal: "Kullanıcı Portalı", adminDashboard: "Yönetici Paneli", logout: "Çıkış",
+        homepage: "Ana Sayfa", citizenServices: "Vatandaş Hizmetleri", addressChange: "Adres Değişikliği",
+        registeringApartment: "📋 Daire Kaydı", registrationSubtitle: "İkamet Kaydı - Adres değişikliği için belgelerinizi gönderin",
+        personalData: "Kişisel Bilgiler", emailAddress: "E-posta adresi", submitApplication: "📤 BAŞVURUYU GÖNDER",
+        processing: "İşleniyor...", fillAllFields: "Lütfen tüm zorunlu alanları doldurun.",
+        submitSuccess: "Başvurunuz başarıyla gönderildi.", submitFailed: "Gönderim başarısız. Lütfen tekrar deneyin.",
+        chatbotTitle: "Vatandaş Asistanı", chatPlaceholder: "Mesajınız...",
+        chatGreeting: "Merhaba! 👋 Adres değişikliğinizde size nasıl yardımcı olabilirim?"
+    },
+    // Arabic
+    ar: {
+        federalRepublic: "🇩🇪 جمهورية ألمانيا الاتحادية",
+        english: "English", german: "Deutsch", help: "مساعدة", contact: "اتصل بنا",
+        citizenPortal: "بوابة المواطن", registrationOffice: "مكتب التسجيل",
+        userPortal: "بوابة المستخدم", adminDashboard: "لوحة الإدارة", logout: "تسجيل الخروج",
+        homepage: "الصفحة الرئيسية", citizenServices: "خدمات المواطن", addressChange: "تغيير العنوان",
+        registeringApartment: "📋 تسجيل شقة", registrationSubtitle: "تسجيل الإقامة - قدم مستنداتك لتغيير العنوان",
+        personalData: "البيانات الشخصية", emailAddress: "البريد الإلكتروني", submitApplication: "📤 إرسال الطلب",
+        processing: "جاري المعالجة...", fillAllFields: "يرجى ملء جميع الحقول المطلوبة.",
+        submitSuccess: "تم تقديم طلبك بنجاح.", submitFailed: "فشل الإرسال. حاول مرة أخرى.",
+        chatbotTitle: "مساعد المواطن", chatPlaceholder: "رسالتك...",
+        chatGreeting: "مرحباً! 👋 كيف يمكنني مساعدتك في تغيير عنوانك اليوم؟"
+    },
+    // Polish
+    pl: {
+        federalRepublic: "🇩🇪 Republika Federalna Niemiec",
+        english: "English", german: "Deutsch", help: "Pomoc", contact: "Kontakt",
+        citizenPortal: "Portal Obywatela", registrationOffice: "Urząd Meldunkowy",
+        userPortal: "Portal Użytkownika", adminDashboard: "Panel Administracyjny", logout: "Wyloguj",
+        homepage: "Strona główna", citizenServices: "Usługi dla obywateli", addressChange: "Zmiana adresu",
+        registeringApartment: "📋 Rejestracja mieszkania", registrationSubtitle: "Zameldowanie - Prześlij dokumenty do zmiany adresu",
+        personalData: "Dane osobowe", emailAddress: "Adres e-mail", submitApplication: "📤 WYŚLIJ WNIOSEK",
+        processing: "Przetwarzanie...", fillAllFields: "Proszę wypełnić wszystkie wymagane pola.",
+        submitSuccess: "Twój wniosek został pomyślnie przesłany.", submitFailed: "Wysyłanie nie powiodło się.",
+        chatbotTitle: "Asystent Obywatela", chatPlaceholder: "Twoja wiadomość...",
+        chatGreeting: "Cześć! 👋 Jak mogę Ci pomóc w zmianie adresu?"
+    },
+    // Russian
+    ru: {
+        federalRepublic: "🇩🇪 Федеративная Республика Германия",
+        english: "English", german: "Deutsch", help: "Помощь", contact: "Контакт",
+        citizenPortal: "Портал гражданина", registrationOffice: "Бюро регистрации",
+        userPortal: "Портал пользователя", adminDashboard: "Панель администратора", logout: "Выход",
+        homepage: "Главная", citizenServices: "Услуги для граждан", addressChange: "Изменение адреса",
+        registeringApartment: "📋 Регистрация квартиры", registrationSubtitle: "Регистрация по месту жительства",
+        personalData: "Личные данные", emailAddress: "Эл. почта", submitApplication: "📤 ОТПРАВИТЬ ЗАЯВКУ",
+        processing: "Обработка...", fillAllFields: "Пожалуйста, заполните все обязательные поля.",
+        submitSuccess: "Ваша заявка успешно отправлена.", submitFailed: "Ошибка отправки.",
+        chatbotTitle: "Помощник гражданина", chatPlaceholder: "Ваше сообщение...",
+        chatGreeting: "Здравствуйте! 👋 Как я могу помочь вам с изменением адреса?"
+    },
+    // Spanish
+    es: {
+        federalRepublic: "🇩🇪 República Federal de Alemania",
+        english: "English", german: "Deutsch", help: "Ayuda", contact: "Contacto",
+        citizenPortal: "Portal del Ciudadano", registrationOffice: "Oficina de Registro",
+        userPortal: "Portal de Usuario", adminDashboard: "Panel de Administración", logout: "Cerrar sesión",
+        homepage: "Inicio", citizenServices: "Servicios al Ciudadano", addressChange: "Cambio de Dirección",
+        registeringApartment: "📋 Registro de vivienda", registrationSubtitle: "Registro de residencia - Envíe sus documentos",
+        personalData: "Datos Personales", emailAddress: "Correo electrónico", submitApplication: "📤 ENVIAR SOLICITUD",
+        processing: "Procesando...", fillAllFields: "Por favor complete todos los campos requeridos.",
+        submitSuccess: "Su solicitud ha sido enviada con éxito.", submitFailed: "Error al enviar.",
+        chatbotTitle: "Asistente Ciudadano", chatPlaceholder: "Su mensaje...",
+        chatGreeting: "¡Hola! 👋 ¿Cómo puedo ayudarte con tu cambio de dirección?"
+    },
+    // French
+    fr: {
+        federalRepublic: "🇩🇪 République fédérale d'Allemagne",
+        english: "English", german: "Deutsch", help: "Aide", contact: "Contact",
+        citizenPortal: "Portail Citoyen", registrationOffice: "Bureau d'enregistrement",
+        userPortal: "Portail Utilisateur", adminDashboard: "Tableau de Bord Admin", logout: "Déconnexion",
+        homepage: "Accueil", citizenServices: "Services aux Citoyens", addressChange: "Changement d'Adresse",
+        registeringApartment: "📋 Enregistrement de logement", registrationSubtitle: "Déclaration de domicile",
+        personalData: "Données Personnelles", emailAddress: "Adresse e-mail", submitApplication: "📤 ENVOYER LA DEMANDE",
+        processing: "Traitement...", fillAllFields: "Veuillez remplir tous les champs requis.",
+        submitSuccess: "Votre demande a été envoyée avec succès.", submitFailed: "Échec de l'envoi.",
+        chatbotTitle: "Assistant Citoyen", chatPlaceholder: "Votre message...",
+        chatGreeting: "Bonjour! 👋 Comment puis-je vous aider avec votre changement d'adresse?"
     }
 };
 
@@ -174,7 +258,11 @@ export function LanguageProvider({ children }) {
     }, [language]);
 
     const t = (key) => {
-        return translations[language][key] || key;
+        // First try current language, then fallback to English, then show key
+        if (translations[language] && translations[language][key]) {
+            return translations[language][key];
+        }
+        return translations.en[key] || key;
     };
 
     const toggleLanguage = (lang) => {

@@ -1,0 +1,154 @@
+/* ================================================
+   LANGUAGE SELECTOR - Matches Government Template
+   Blue Government Style (UserPortal/AdminDashboard)
+   ================================================ */
+
+.language-selector {
+    position: relative;
+    z-index: 1000;
+}
+
+.lang-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.lang-trigger:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.lang-flag {
+    font-size: 16px;
+}
+
+.lang-name {
+    font-weight: 600;
+}
+
+.lang-arrow {
+    font-size: 8px;
+    opacity: 0.8;
+    margin-left: 4px;
+}
+
+/* Dropdown Panel - White Card Style */
+.lang-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px;
+    min-width: 340px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    animation: dropdownFade 0.2s ease;
+}
+
+@keyframes dropdownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Blue Header Border - Government Style */
+.lang-dropdown::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    border-radius: 8px 8px 0 0;
+}
+
+.lang-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding-top: 8px;
+}
+
+.lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #fafafa;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-size: 13px;
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.lang-option:hover {
+    background: #e3f2fd;
+    border-color: #1565c0;
+    color: #0d47a1;
+}
+
+/* Active State - Blue Government Style */
+.lang-option.active {
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
+}
+
+.lang-option .lang-flag {
+    font-size: 20px;
+}
+
+.lang-option .lang-name {
+    font-weight: 600;
+}
+
+/* RTL Support for Arabic */
+[dir="rtl"] .lang-dropdown {
+    right: auto;
+    left: 0;
+}
+
+[dir="rtl"] .lang-option {
+    text-align: right;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .lang-dropdown {
+        min-width: 280px;
+        right: -50px;
+    }
+
+    .lang-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .lang-trigger .lang-name {
+        display: none;
+    }
+}

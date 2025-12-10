@@ -146,6 +146,19 @@ body {
     color: #999;
 }
 
+/* ==================== FULL-WIDTH MAP SECTION ==================== */
+.full-width-map-section {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 50px 0 50px;
+    box-sizing: border-box;
+}
+
+.full-width-map-section .neighborhood-map-container {
+    width: 100%;
+}
+
 /* ==================== MAIN CONTENT ==================== */
 .main-content {
     width: 100%;

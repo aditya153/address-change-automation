@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
+import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import './AdminDashboard.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -48,6 +49,9 @@ function AdminDashboard() {
     const [loadingAi, setLoadingAi] = useState(false);
     const [correctedAddressInput, setCorrectedAddressInput] = useState('');
     const [submittingCorrection, setSubmittingCorrection] = useState(false);
+
+    // Analytics Dashboard state
+    const [analyticsOpen, setAnalyticsOpen] = useState(false);
 
     // Helper to get PDF URL from path
     const getPdfUrl = (path) => {
@@ -426,6 +430,19 @@ function AdminDashboard() {
                             </div>
                         </div>
                     )}
+
+                    {/* ANALYTICS BUTTON */}
+                    <div className="row mb-3">
+                        <div className="col-12 d-flex justify-content-end">
+                            <button
+                                className="btn btn-primary d-flex align-items-center gap-2"
+                                onClick={() => setAnalyticsOpen(true)}
+                            >
+                                <i className="bi bi-graph-up-arrow"></i>
+                                📊 View Analytics Dashboard
+                            </button>
+                        </div>
+                    </div>
 
                     {/* SUMMARY CARDS */}
                     <div className="row g-3 mb-4">
@@ -1294,6 +1311,15 @@ function AdminDashboard() {
                     </div>
                 </div>
             )}
+
+            {/* ANALYTICS DASHBOARD MODAL */}
+            <AnalyticsDashboard
+                isOpen={analyticsOpen}
+                onClose={() => setAnalyticsOpen(false)}
+                pendingCases={pendingCases}
+                hitlCases={hitlCases}
+                completedCases={completedCases}
+            />
         </div>
     );
 }

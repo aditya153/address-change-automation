@@ -6,6 +6,7 @@ import LoginPage from './pages/Login';
 import ContactPage from './pages/ContactPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import LanguageSelector from './components/LanguageSelector';
 import './App.css';
 
 function AppContent() {
@@ -28,18 +29,7 @@ function AppContent() {
           <div className="navbar-top-bar">
             <span>{t('federalRepublic')}</span>
             <div className="top-bar-links">
-              <button
-                className={`lang-btn ${language === 'en' ? 'active' : ''}`}
-                onClick={() => setLanguage('en')}
-              >
-                {t('english')}
-              </button>
-              <button
-                className={`lang-btn ${language === 'de' ? 'active' : ''}`}
-                onClick={() => setLanguage('de')}
-              >
-                {t('german')}
-              </button>
+              <LanguageSelector />
               <button className="top-link-btn" onClick={handleHelpClick}>
                 {t('help')}
               </button>

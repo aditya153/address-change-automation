@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
+import NeighborhoodMap from '../components/NeighborhoodMap';
 import './UserPortal.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -352,11 +353,18 @@ function UserPortal() {
                             <span className="form-footer-icon">🔒</span>
                             <span>{t('dataEncrypted')}</span>
                         </div>
+
+                        {/* Show Neighborhood Map after successful submission */}
+                        {success && (
+                            <NeighborhoodMap address="Kaiserslautern, Germany" />
+                        )}
+
                     </div>
                 </div>
 
                 {/* Sidebar */}
                 <div className="sidebar">
+
                     <div className="info-card">
                         <div className="info-card-header">
                             {t('requiredDocuments')}
