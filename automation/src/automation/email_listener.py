@@ -88,13 +88,103 @@ def get_email_body(msg):
 
 
 def is_address_change_email(subject, body):
-    """Check if email is about address change using multiple keywords."""
+    """
+    Check if email is about address change using:
+    1. Exact keyword matching (HIGH confidence - send rejection if invalid)
+    2. Fuzzy matching for typos (LOW confidence - skip silently if unrelated)
+    3. LLM classification as fallback (LOW confidence)
+    
+    Returns: (is_match: bool, is_high_confidence: bool)
+    - is_match: True if this looks like an address change email
+    - is_high_confidence: True if we should send rejection emails for invalid submissions
+                          False if we should skip silently (might be spam/unrelated)
+    """
     text = f"{subject} {body}".lower()
+    
+    # Step 1: Exact keyword matching - HIGH CONFIDENCE
+    # These are explicit address change terms that users would intentionally use
     for keyword in KEYWORDS:
         if keyword.lower() in text:
-            logger.info(f"Matched keyword: '{keyword}'")
-            return True
-    return False
+            logger.info(f"Matched keyword (exact): '{keyword}' - HIGH confidence")
+            return True, True  # Match with HIGH confidence
+    
+    # Step 2: Fuzzy matching for typos using difflib - LOW CONFIDENCE
+    # Only match multi-word phrases to avoid false positives from single words
+    import difflib
+    
+    # Only use multi-word patterns for fuzzy matching (more specific = less false positives)
+    expected_patterns = [
+        "address change", "address chnage", "adress change", "address chagne",
+        "change of address", "change address", "new address request",
+        "address registration", "address registartion",
+        "anmeldung formular", "umzug anmeldung", "ummeldung antrag",
+        "moving announcement", "relocation request"
+    ]
+    
+    # Only check word pairs and triplets (NOT single words - too prone to false positives)
+    words = text.split()
+    word_sequences = []
+    for i in range(len(words)):
+        if i < len(words) - 1:
+            word_sequences.append(f"{words[i]} {words[i+1]}")  # Word pairs only
+        if i < len(words) - 2:
+            word_sequences.append(f"{words[i]} {words[i+1]} {words[i+2]}")  # Word triplets
+    
+    for sequence in word_sequences:
+        # Higher cutoff (0.85) to reduce false positives
+        matches = difflib.get_close_matches(sequence.lower(), expected_patterns, n=1, cutoff=0.85)
+        if matches:
+            logger.info(f"Fuzzy matched: '{sequence}' → '{matches[0]}' - LOW confidence")
+            return True, False  # Match with LOW confidence (don't send rejection)
+    
+    # Step 3: LLM classification for edge cases - LOW CONFIDENCE
+    try:
+        import openai
+        import os
+        
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            logger.debug("No OpenAI API key for LLM classification, skipping")
+            return False, False
+        
+        client = openai.OpenAI(api_key=api_key)
+        
+        prompt = f"""Is this email about an ADDRESS CHANGE or ADDRESS REGISTRATION request?
+        
+Subject: {subject}
+Body: {body[:500]}  # Limit body length
+
+Respond with only: YES or NO
+
+Consider:
+- German terms like Anmeldung, Umzug, Ummeldung are address change related
+- Spelling mistakes should be tolerated (e.g., "Chnage" = "Change")
+- Moving/relocation related emails are address change requests
+- Marketing/promotional emails are NOT address change requests
+"""
+        
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",  # Use cheaper model for classification
+            messages=[
+                {"role": "system", "content": "You classify emails. Respond only YES or NO."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=5,
+            temperature=0
+        )
+        
+        answer = response.choices[0].message.content.strip().upper()
+        if answer == "YES":
+            logger.info("LLM classified email as address change request - LOW confidence")
+            return True, False  # Match with LOW confidence
+        else:
+            logger.info("LLM classified email as NOT address change related")
+            return False, False
+            
+    except Exception as e:
+        logger.warning(f"LLM classification failed: {e}")
+        return False, False
+
 
 
 def extract_attachments(msg, case_prefix):
@@ -306,8 +396,12 @@ def process_email(mail, email_id):
         logger.info(f"Processing email from: {sender_email}, Subject: {subject}")
         
         # Check if it's an address change email
-        if not is_address_change_email(subject, body):
-            logger.info(f"Email does not match address change keywords, skipping")
+        is_address_change, is_high_confidence = is_address_change_email(subject, body)
+        
+        if not is_address_change:
+            logger.info(f"Email does not match address change criteria, skipping silently")
+            # Mark as read so we don't keep checking it
+            mail.store(email_id, '+FLAGS', '\\Seen')
             return False
         
         # Extract PDF attachments
@@ -316,12 +410,18 @@ def process_email(mail, email_id):
         
         if len(attachments) < 2:
             logger.warning(f"Not enough PDF attachments ({len(attachments)}), need at least 2")
-            # Send rejection email for missing attachments
-            send_rejection_email(
-                sender_email,
-                ["You did not attach enough PDF documents. We need 2 documents."],
-                "Please attach both: 1) Wohnungsgeberbestätigung (Landlord Confirmation) and 2) Anmeldeformular (Address Registration Form)"
-            )
+            
+            # Only send rejection email if we're confident this was an actual address change request
+            if is_high_confidence:
+                logger.info(f"High confidence match - sending rejection email for missing attachments")
+                send_rejection_email(
+                    sender_email,
+                    ["You did not attach enough PDF documents. We need 2 documents."],
+                    "Please attach both: 1) Wohnungsgeberbestätigung (Landlord Confirmation) and 2) Anmeldeformular (Address Registration Form)"
+                )
+            else:
+                logger.info(f"Low confidence match - skipping silently (likely spam or unrelated email)")
+            
             # Mark email as read
             mail.store(email_id, '+FLAGS', '\\Seen')
             return False
@@ -335,16 +435,21 @@ def process_email(mail, email_id):
             logger.info(f"Successfully processed email, created {case_id}")
             return True
         elif error_info:
-            # Document validation failed - send rejection email
-            errors = error_info.get("errors", ["Documents could not be validated"])
-            help_text = error_info.get("help", "Please ensure you upload valid address change documents.")
-            email_sent = send_rejection_email(sender_email, errors, help_text)
+            # Document validation failed
+            # Only send rejection email if high confidence
+            if is_high_confidence:
+                errors = error_info.get("errors", ["Documents could not be validated"])
+                help_text = error_info.get("help", "Please ensure you upload valid address change documents.")
+                email_sent = send_rejection_email(sender_email, errors, help_text)
+                if email_sent:
+                    logger.info(f"Rejection email sent to {sender_email}")
+                else:
+                    logger.warning(f"Could not send rejection email to {sender_email}")
+            else:
+                logger.info(f"Low confidence match with validation errors - skipping silently")
+            
             # Mark email as read so we don't process again
             mail.store(email_id, '+FLAGS', '\\Seen')
-            if email_sent:
-                logger.info(f"Rejection email sent to {sender_email}")
-            else:
-                logger.warning(f"Could not send rejection email to {sender_email}")
             return False
         
         return False

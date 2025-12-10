@@ -145,3 +145,189 @@ def get_audit_entries(case_id: str):
         )
         rows = cur.fetchall()
     return rows
+
+
+# ========================
+# MEMORY SYSTEM FUNCTIONS
+# ========================
+
+def store_resolution(original_pattern: str, corrected_value: str, resolution_type: str) -> int:
+    """
+    Store a HITL correction for future reference.
+    If the pattern already exists, update the corrected value and increment frequency.
+    
+    Args:
+        original_pattern: The original text that needed correction (e.g., "KL")
+        corrected_value: The corrected text (e.g., "Kaiserslautern")
+        resolution_type: Type of correction ("city_abbreviation", "street_abbreviation", "full_address")
+    
+    Returns:
+        The resolution ID
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        # Check if pattern already exists
+        cur.execute(
+            """
+            SELECT id, frequency FROM case_resolutions 
+            WHERE original_pattern = %s AND resolution_type = %s;
+            """,
+            (original_pattern, resolution_type),
+        )
+        existing = cur.fetchone()
+        
+        if existing:
+            # Update existing resolution
+            cur.execute(
+                """
+                UPDATE case_resolutions 
+                SET corrected_value = %s, frequency = frequency + 1, last_used_at = NOW()
+                WHERE id = %s
+                RETURNING id;
+                """,
+                (corrected_value, existing["id"]),
+            )
+            result_id = cur.fetchone()["id"]
+        else:
+            # Insert new resolution
+            cur.execute(
+                """
+                INSERT INTO case_resolutions (original_pattern, corrected_value, resolution_type)
+                VALUES (%s, %s, %s)
+                RETURNING id;
+                """,
+                (original_pattern, corrected_value, resolution_type),
+            )
+            result_id = cur.fetchone()["id"]
+        
+        conn.commit()
+        return result_id
+
+
+def lookup_similar_resolution(pattern: str, resolution_type: str = None) -> dict:
+    """
+    Look up if we have a correction for a given pattern from past HITL resolutions.
+    
+    Args:
+        pattern: The pattern to look up (e.g., "KL", "Str.")
+        resolution_type: Optional filter by type
+    
+    Returns:
+        Dictionary with corrected_value and confidence, or None if not found
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        if resolution_type:
+            cur.execute(
+                """
+                SELECT corrected_value, frequency, resolution_type
+                FROM case_resolutions
+                WHERE original_pattern ILIKE %s AND resolution_type = %s
+                ORDER BY frequency DESC
+                LIMIT 1;
+                """,
+                (pattern, resolution_type),
+            )
+        else:
+            cur.execute(
+                """
+                SELECT corrected_value, frequency, resolution_type
+                FROM case_resolutions
+                WHERE original_pattern ILIKE %s
+                ORDER BY frequency DESC
+                LIMIT 1;
+                """,
+                (pattern,),
+            )
+        
+        row = cur.fetchone()
+        
+        if row:
+            # Calculate confidence based on frequency (more uses = higher confidence)
+            frequency = row["frequency"]
+            confidence = min(0.95, 0.6 + (frequency * 0.05))  # 0.6 base, +0.05 per use, max 0.95
+            return {
+                "corrected_value": row["corrected_value"],
+                "frequency": frequency,
+                "resolution_type": row["resolution_type"],
+                "confidence": confidence
+            }
+        
+        return None
+
+
+def apply_learned_corrections(address: str) -> tuple:
+    """
+    Apply all known corrections to an address based on learned patterns.
+    
+    Args:
+        address: The raw address to correct
+    
+    Returns:
+        Tuple of (corrected_address, list_of_corrections_applied)
+    """
+    corrected = address
+    corrections_applied = []
+    
+    with get_conn() as conn, conn.cursor() as cur:
+        # Get all known patterns, ordered by pattern length (longest first to avoid partial matches)
+        cur.execute(
+            """
+            SELECT original_pattern, corrected_value, resolution_type
+            FROM case_resolutions
+            ORDER BY LENGTH(original_pattern) DESC, frequency DESC;
+            """
+        )
+        patterns = cur.fetchall()
+    
+    import re
+    for pattern in patterns:
+        original = pattern["original_pattern"]
+        replacement = pattern["corrected_value"]
+        
+        # Use word boundary matching to avoid partial replacements
+        regex_pattern = r'\b' + re.escape(original) + r'\b'
+        
+        if re.search(regex_pattern, corrected, re.IGNORECASE):
+            corrected = re.sub(regex_pattern, replacement, corrected, flags=re.IGNORECASE)
+            corrections_applied.append({
+                "original": original,
+                "corrected": replacement,
+                "type": pattern["resolution_type"]
+            })
+            
+            # Update last_used_at for this pattern
+            with get_conn() as conn, conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE case_resolutions SET last_used_at = NOW() WHERE original_pattern = %s;",
+                    (original,),
+                )
+                conn.commit()
+    
+    return corrected, corrections_applied
+
+
+def get_resolution_stats() -> dict:
+    """
+    Get statistics about the memory system.
+    
+    Returns:
+        Dictionary with total patterns, most used patterns, etc.
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) as total FROM case_resolutions;")
+        total = cur.fetchone()["total"]
+        
+        cur.execute(
+            """
+            SELECT original_pattern, corrected_value, frequency 
+            FROM case_resolutions 
+            ORDER BY frequency DESC 
+            LIMIT 5;
+            """
+        )
+        top_patterns = cur.fetchall()
+        
+    return {
+        "total_patterns": total,
+        "top_patterns": [dict(p) for p in top_patterns]
+    }
+

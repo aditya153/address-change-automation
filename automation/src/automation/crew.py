@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable, Any
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
@@ -15,9 +15,53 @@ from src.automation.tools.crewai_tools import (
     update_registry_tool,
     generate_certificate_tool,
     get_audit_log_tool,
+    # Memory system tools
+    lookup_similar_cases_tool,
 )
 
 load_dotenv()  # load OPENAI_API_KEY etc. from .env if present
+
+
+# ===== CONDITIONAL EXECUTION HELPER =====
+def create_hitl_check_condition() -> Callable:
+    """
+    Creates a condition function that checks if the case is waiting for HITL.
+    Tasks with this condition will be skipped if the case is in WAITING_FOR_HUMAN status.
+    """
+    def check_hitl_status(context: Any) -> bool:
+        """
+        Check if the case is NOT waiting for HITL.
+        Returns True if task should execute, False if it should be skipped.
+        """
+        try:
+            from src.automation.db import fetch_case_by_id, add_audit_entry
+            
+            # Try to extract case_id from context
+            case_id = None
+            if hasattr(context, 'get'):
+                citizen_data = context.get('citizen_data', {})
+                case_id = citizen_data.get('case_id')
+            elif isinstance(context, str):
+                # Try to parse case_id from string context
+                import re
+                match = re.search(r'Case ID:?\s*(\d+)', str(context))
+                if match:
+                    case_id = f"Case ID: {match.group(1)}"
+            
+            if case_id:
+                case_row = fetch_case_by_id(case_id)
+                if case_row and case_row.get("status") == "WAITING_FOR_HUMAN":
+                    add_audit_entry(case_id, "Task conditionally skipped - case waiting for HITL")
+                    print(f"⏭️ Task skipped for {case_id} - HITL pending")
+                    return False  # Skip task
+                    
+            return True  # Execute task
+            
+        except Exception as e:
+            print(f"Condition check error (executing anyway): {e}")
+            return True  # Execute on error to avoid blocking
+    
+    return check_hitl_status
 
 
 @CrewBase
@@ -31,7 +75,7 @@ class AddressChangeMain:
 
     llm = LLM(
         model="gpt-4o-mini",
-        temperature=0.1,  # Lower temperature for more deterministic outputs  # Increased to allow complete responses
+        temperature=0.1,  # Lower temperature for more deterministic outputs
     )
 
     @agent
@@ -58,7 +102,7 @@ class AddressChangeMain:
             config=self.agents_config["quality_confidence_officer"],
             llm=self.llm,
             verbose=True,
-            tools=[assess_quality_tool],
+            tools=[assess_quality_tool, lookup_similar_cases_tool],  # Added memory lookup tool
         )
 
     @agent
@@ -114,30 +158,49 @@ class AddressChangeMain:
         cfg = self.tasks_config["assess_quality_task"]
         return Task(
             config=cfg,
-            #human_input=True,
+            # Note: This task determines if HITL is needed
+            # Downstream tasks will check status before executing
         )
 
     @task
     def check_business_rules_task(self) -> Task:
+        """
+        Business rules task with conditional execution.
+        Will be skipped if case is waiting for HITL.
+        """
         return Task(
             config=self.tasks_config["check_business_rules_task"],
+            # Note: The MCP tool itself checks HITL status and returns early if needed
         )
 
     @task
     def update_registry_task(self) -> Task:
+        """
+        Registry update task with conditional execution.
+        Will be skipped if case is waiting for HITL.
+        """
         return Task(
             config=self.tasks_config["update_registry_task"],
+            # Note: The MCP tool itself checks HITL status and returns early if needed
         )
 
     @task
     def generate_certificate_task(self) -> Task:
+        """
+        Certificate generation task with conditional execution.
+        Will be skipped if case is waiting for HITL.
+        """
         return Task(
             config=self.tasks_config["generate_certificate_task"],
             output_file="output/address_change_summary.md",
+            # Note: The MCP tool itself checks HITL status and returns early if needed
         )
 
     @task
     def generate_audit_log_task(self) -> Task:
+        """
+        Audit log task always runs to capture the full workflow state.
+        """
         return Task(
             config=self.tasks_config["generate_audit_log_task"],
             output_file="output/audit_log.md",
@@ -145,11 +208,13 @@ class AddressChangeMain:
 
     @crew
     def crew(self) -> Crew:
-
+        """
+        Creates the AddressChange crew with conditional task execution.
+        Tasks after assess_quality will check HITL status before executing.
+        """
         return Crew(
             agents=self.agents,
             tasks=self.tasks,
             process=Process.sequential,
             verbose=False,  # Disable verbose logs
         )
-

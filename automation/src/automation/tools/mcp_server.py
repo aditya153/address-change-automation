@@ -13,6 +13,11 @@ from src.automation.db import (
     add_audit_entry,
     get_audit_entries,
     get_canonical_address,
+    # Memory system imports
+    store_resolution,
+    lookup_similar_resolution,
+    apply_learned_corrections,
+    get_resolution_stats,
 )
 
 
@@ -113,6 +118,30 @@ class GetAuditLogOutput(BaseModel):
     entries: List[str]
 
 
+# ====== MEMORY SYSTEM MODELS ======
+
+class StoreResolutionInput(BaseModel):
+    original_pattern: str  # e.g., "KL", "Str."
+    corrected_value: str   # e.g., "Kaiserslautern", "Straße"
+    resolution_type: str   # "city_abbreviation", "street_abbreviation", "full_address"
+
+
+class StoreResolutionOutput(BaseModel):
+    resolution_id: int
+    message: str
+
+
+class LookupSimilarCasesInput(BaseModel):
+    address_raw: str  # The address to check for known corrections
+
+
+class LookupSimilarCasesOutput(BaseModel):
+    original_address: str
+    corrected_address: str
+    corrections_applied: List[Dict]
+    confidence_boost: float  # How much to boost confidence due to learned corrections
+
+
 # ====== TOOLS ======
 
 @server.tool()
@@ -177,39 +206,71 @@ def verify_identity(input: VerifyIdentityInput) -> VerifyIdentityOutput:
 
 @server.tool()
 def assess_quality(input: AssessQualityInput) -> AssessQualityOutput:
-    raw = input.new_address_raw.strip()
-    canonical = raw.title()
-
-    # Quality checks
-    has_comma = "," in canonical
-    has_digit = any(ch.isdigit() for ch in canonical)
+    """
+    Assess address quality with SIMPLE STATIC scoring.
     
-    # Check for abbreviated city names (2-3 uppercase letters like "KL", "DL")
-    # This is a strong indicator of low quality
+    Logic:
+    - If street name is incomplete (ends in str, Str, etc.) → 0.60 → HITL
+    - If street name is complete (straße, strasse, weg, platz, etc.) → 0.90 → OK
+    """
     import re
-    has_abbreviation = bool(re.search(r'\b[A-Z]{2,3}\b', raw))
     
-    # Check if it has a proper postal code (5 digits for Germany)
-    has_postal_code = bool(re.search(r'\b\d{5}\b', raw))
+    original_raw = input.new_address_raw.strip()
     
-    # Check for minimum length (proper addresses should be reasonably long)
-    min_length = len(raw) > 20
+    # ===== STEP 1: Apply memory corrections first =====
+    corrections_applied = []
+    corrected_address = original_raw
     
-    # Calculate confidence score
-    if has_abbreviation:
-        # If we detect abbreviations like "KL" or "DL", confidence is low
-        confidence = 0.4
-    elif has_comma and has_digit and has_postal_code and min_length:
-        # Well-formatted address with all components
-        confidence = 0.95
-    elif has_comma and has_digit:
-        # Has basic structure but might be incomplete
-        confidence = 0.7
+    try:
+        corrected_address, corrections_applied = apply_learned_corrections(original_raw)
+        if corrections_applied:
+            add_audit_entry(
+                input.case_id,
+                f"Memory applied {len(corrections_applied)} corrections: {corrections_applied}"
+            )
+    except Exception as e:
+        print(f"Memory lookup error: {e}")
+    
+    # ===== STEP 2: Check if street name is COMPLETE =====
+    # Complete street endings in German
+    complete_street_patterns = [
+        r'straße', r'strasse', r'weg', r'platz', r'allee', 
+        r'ring', r'damm', r'ufer', r'gasse', r'steig', r'pfad'
+    ]
+    
+    # Build regex pattern
+    pattern = r'\b\w+(' + '|'.join(complete_street_patterns) + r')\b'
+    has_complete_street = bool(re.search(pattern, corrected_address, re.IGNORECASE))
+    
+    # Check for INCOMPLETE street (ends in str, Str without proper suffix)
+    has_incomplete_street = bool(re.search(r'\b\w+str\b(?!aße|asse)', corrected_address, re.IGNORECASE))
+    
+    # ===== STEP 3: Simple Static Confidence =====
+    if has_incomplete_street:
+        # Incomplete street name → LOW confidence → HITL needed
+        confidence = 0.60
+        reason = "street name incomplete (e.g., 'Ziegelstr' should be 'Ziegelstraße')"
+        add_audit_entry(input.case_id, f"Incomplete street detected: confidence=0.60")
+    elif has_complete_street:
+        # Complete street name → HIGH confidence → OK
+        confidence = 0.90
+        reason = "street name complete"
+        add_audit_entry(input.case_id, f"Complete street name: confidence=0.90")
     else:
-        # Missing basic components
-        confidence = 0.5
-
-    needs_hitl = confidence < 0.8
+        # No clear street pattern → Medium confidence
+        confidence = 0.75
+        reason = "street format unclear"
+        add_audit_entry(input.case_id, f"Street format unclear: confidence=0.75")
+    
+    # Boost confidence slightly if memory corrections were applied
+    if corrections_applied and confidence < 0.90:
+        confidence = min(0.85, confidence + 0.10)
+        add_audit_entry(input.case_id, f"Memory boost applied: confidence={confidence}")
+    
+    canonical = corrected_address.title()
+    
+    # ===== STEP 4: Determine if HITL is needed =====
+    needs_hitl = confidence < 0.80
     hitl_task_id = None
 
     if needs_hitl:
@@ -217,16 +278,16 @@ def assess_quality(input: AssessQualityInput) -> AssessQualityOutput:
         update_case_status(input.case_id, "WAITING_FOR_HUMAN")
         add_audit_entry(
             input.case_id,
-            f"HITL required for address quality. confidence={confidence} (reason: {'abbreviation detected' if has_abbreviation else 'incomplete address format'})",
+            f"HITL required. confidence={confidence} | Reason: {reason}"
         )
     else:
         update_case_status(input.case_id, "QUALITY_OK")
         add_audit_entry(
             input.case_id,
-            f"Address quality OK. confidence={confidence}",
+            f"Address quality OK. confidence={confidence}"
         )
 
-    # store canonical address
+    # Store canonical address
     set_canonical_address(input.case_id, canonical)
 
     return AssessQualityOutput(
@@ -620,5 +681,61 @@ def get_audit_log(input: GetAuditLogInput) -> GetAuditLogOutput:
     )
 
 
+# ====== MEMORY SYSTEM TOOLS ======
+
+@server.tool()
+def store_resolution_mcp(input: StoreResolutionInput) -> StoreResolutionOutput:
+    """
+    Store a HITL correction for future reference.
+    This allows the system to learn from past corrections and auto-apply them.
+    
+    Example: If admin corrects "KL" to "Kaiserslautern", future cases with "KL"
+    will automatically have this correction applied.
+    """
+    try:
+        resolution_id = store_resolution(
+            original_pattern=input.original_pattern,
+            corrected_value=input.corrected_value,
+            resolution_type=input.resolution_type
+        )
+        return StoreResolutionOutput(
+            resolution_id=resolution_id,
+            message=f"Successfully stored resolution: '{input.original_pattern}' -> '{input.corrected_value}'"
+        )
+    except Exception as e:
+        return StoreResolutionOutput(
+            resolution_id=-1,
+            message=f"Error storing resolution: {str(e)}"
+        )
+
+
+@server.tool()
+def lookup_similar_cases_mcp(input: LookupSimilarCasesInput) -> LookupSimilarCasesOutput:
+    """
+    Look up learned corrections for an address and return the corrected version.
+    This tool checks if we have any learned patterns that apply to the given address.
+    """
+    try:
+        corrected_address, corrections_applied = apply_learned_corrections(input.address_raw)
+        
+        # Calculate confidence boost based on corrections
+        confidence_boost = min(0.3, len(corrections_applied) * 0.1) if corrections_applied else 0.0
+        
+        return LookupSimilarCasesOutput(
+            original_address=input.address_raw,
+            corrected_address=corrected_address,
+            corrections_applied=corrections_applied,
+            confidence_boost=confidence_boost
+        )
+    except Exception as e:
+        return LookupSimilarCasesOutput(
+            original_address=input.address_raw,
+            corrected_address=input.address_raw,
+            corrections_applied=[],
+            confidence_boost=0.0
+        )
+
+
 if __name__ == "__main__":
     server.run()
+

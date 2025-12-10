@@ -345,6 +345,63 @@ async def submit_case(
             # Documents are invalid - reject immediately
             error_messages = validation_result.get("errors", ["Documents could not be validated"])
             print(f"❌ Document validation failed: {error_messages}")
+            
+            # Send rejection email to the user
+            try:
+                import smtplib
+                from email.mime.text import MIMEText
+                from email.mime.multipart import MIMEMultipart
+                import os
+                
+                EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+                EMAIL_APP_PASSWORD = os.getenv("EMAIL_APP_PASSWORD")
+                
+                if EMAIL_ADDRESS and EMAIL_APP_PASSWORD:
+                    msg = MIMEMultipart('alternative')
+                    msg['Subject'] = 'Address Change Request - Documents Could Not Be Processed'
+                    msg['From'] = EMAIL_ADDRESS
+                    msg['To'] = email
+                    
+                    # Create error list
+                    error_list = "\n".join([f"• {err}" for err in error_messages])
+                    
+                    html_content = f"""
+                    <html>
+                    <body style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h2 style="color: #dc3545;">Documents Could Not Be Processed</h2>
+                        <p>Dear Citizen,</p>
+                        <p>Thank you for submitting your address change request.</p>
+                        <p>Unfortunately, we could not process your documents because:</p>
+                        <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                            <pre style="margin: 0; white-space: pre-wrap;">{error_list}</pre>
+                        </div>
+                        <h3>What documents do you need?</h3>
+                        <ol>
+                            <li><strong>Wohnungsgeberbestätigung</strong> (Landlord Confirmation)</li>
+                            <li><strong>Meldebescheinigung</strong> (Address Registration Certificate)</li>
+                        </ol>
+                        <p>Please ensure both documents are valid German address change documents and resubmit.</p>
+                        <p>If you need help, use our AI chatbot on the submission page.</p>
+                        <hr>
+                        <p style="color: #666; font-size: 12px;">Automated message from Address Change Automation System</p>
+                    </body>
+                    </html>
+                    """
+                    
+                    msg.attach(MIMEText(html_content, 'html'))
+                    
+                    with smtplib.SMTP('smtp.gmail.com', 587, timeout=30) as smtp:
+                        smtp.starttls()
+                        smtp.login(EMAIL_ADDRESS, EMAIL_APP_PASSWORD)
+                        smtp.sendmail(EMAIL_ADDRESS, email, msg.as_string())
+                    
+                    print(f"✅ Rejection email sent to {email}")
+                else:
+                    print("⚠️ Email credentials not configured, skipping rejection email")
+                    
+            except Exception as email_error:
+                print(f"⚠️ Could not send rejection email: {email_error}")
+            
             return JSONResponse(
                 status_code=400,
                 content={
@@ -736,14 +793,103 @@ async def resolve_hitl(case_id: str, corrected_address: str = Form(...)):
                 )
 
         # Update canonical address with corrected value
-        from .db import set_canonical_address, update_case_status, add_audit_entry
+        from .db import set_canonical_address, update_case_status, add_audit_entry, store_resolution
         
+        original_address = row["new_address_raw"]
         set_canonical_address(case_id, corrected_address)
         update_case_status(case_id, "QUALITY_OK")
         add_audit_entry(
             case_id,
             f"HITL resolved: Admin corrected address to '{corrected_address}'"
         )
+        
+        # ===== MEMORY SYSTEM: Automatic Diff-Based Learning =====
+        # Compare original and corrected addresses, find differences, store automatically
+        try:
+            import re
+            from difflib import SequenceMatcher
+            
+            def tokenize_address(address: str) -> list:
+                """Split address into tokens (words, numbers, punctuation)."""
+                # Remove common punctuation and split
+                tokens = re.findall(r'[\w]+', address)
+                return tokens
+            
+            def similarity(a: str, b: str) -> float:
+                """Calculate string similarity ratio (0.0 to 1.0)."""
+                return SequenceMatcher(None, a.lower(), b.lower()).ratio()
+            
+            def determine_pattern_type(original: str, corrected: str) -> str:
+                """Determine the type of pattern based on content."""
+                # City abbreviations: short uppercase → longer word
+                if original.isupper() and len(original) <= 3 and len(corrected) > 3:
+                    return "city_abbreviation"
+                # Street abbreviations: ends in 'str' → ends in 'straße/strasse'
+                if original.lower().endswith('str') and ('straße' in corrected.lower() or 'strasse' in corrected.lower()):
+                    return "street_abbreviation"
+                # Postal/number patterns
+                if original.isdigit() or corrected.isdigit():
+                    return "number_correction"
+                # Default
+                return "word_correction"
+            
+            # Tokenize both addresses
+            original_tokens = tokenize_address(original_address)
+            corrected_tokens = tokenize_address(corrected_address)
+            
+            add_audit_entry(case_id, f"Comparing addresses - Original: {original_tokens}, Corrected: {corrected_tokens}")
+            
+            # Find matching pairs and differences
+            used_corrected = set()
+            patterns_learned = []
+            
+            for orig_token in original_tokens:
+                best_match = None
+                best_similarity = 0.0
+                
+                for i, corr_token in enumerate(corrected_tokens):
+                    if i in used_corrected:
+                        continue
+                    
+                    sim = similarity(orig_token, corr_token)
+                    
+                    # If tokens are similar but not identical, it's likely a correction
+                    if sim > best_similarity:
+                        best_similarity = sim
+                        best_match = (i, corr_token)
+                
+                if best_match:
+                    idx, corr_token = best_match
+                    used_corrected.add(idx)
+                    
+                    # If tokens are different (not identical), store the pattern
+                    if orig_token.lower() != corr_token.lower():
+                        # Only store if there's meaningful similarity (not random word replacement)
+                        # OR if it's a clear abbreviation expansion
+                        is_abbreviation = len(orig_token) < len(corr_token) and best_similarity > 0.3
+                        is_similar = best_similarity > 0.5
+                        
+                        if is_abbreviation or is_similar:
+                            pattern_type = determine_pattern_type(orig_token, corr_token)
+                            
+                            # Skip numbers and very short tokens
+                            if pattern_type != "number_correction" and len(orig_token) >= 2:
+                                store_resolution(orig_token, corr_token, pattern_type)
+                                patterns_learned.append(f"'{orig_token}' → '{corr_token}' ({pattern_type})")
+            
+            # Log what was learned
+            if patterns_learned:
+                for pattern in patterns_learned:
+                    add_audit_entry(case_id, f"Memory learned: {pattern}")
+                add_audit_entry(case_id, f"Total patterns learned: {len(patterns_learned)}")
+            else:
+                add_audit_entry(case_id, "No new patterns to learn (addresses were similar)")
+                
+        except Exception as mem_error:
+            print(f"Memory storage error (non-critical): {mem_error}")
+            add_audit_entry(case_id, f"Memory learning error: {mem_error}")
+            # Non-critical error - continue with workflow
+
         
         # Resume workflow in background - RUN FULL WORKFLOW with corrected address
         def resume_workflow():

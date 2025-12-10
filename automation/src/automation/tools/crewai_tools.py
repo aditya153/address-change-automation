@@ -15,6 +15,9 @@ from src.automation.tools.mcp_server import (
     update_registry,
     generate_certificate,
     get_audit_log,
+    # Memory system tools
+    store_resolution_mcp,
+    lookup_similar_cases_mcp,
     IngestCaseInput,
     VerifyIdentityInput,
     AssessQualityInput,
@@ -22,6 +25,9 @@ from src.automation.tools.mcp_server import (
     UpdateRegistryInput,
     GenerateCertificateInput,
     GetAuditLogInput,
+    # Memory system models
+    StoreResolutionInput,
+    LookupSimilarCasesInput,
 )
 
 
@@ -218,3 +224,53 @@ def get_audit_log_tool(case_id: str) -> Dict:
     input_data = GetAuditLogInput(case_id=case_id)
     result = get_audit_log(input_data)
     return result.model_dump()
+
+
+# ====== MEMORY SYSTEM TOOLS ======
+
+@tool("store_resolution")
+def store_resolution_tool(
+    original_pattern: str,
+    corrected_value: str,
+    resolution_type: str
+) -> Dict:
+    """Store a HITL correction for future reference.
+    
+    This allows the system to learn from past corrections and auto-apply them.
+    For example, if admin corrects 'KL' to 'Kaiserslautern', future cases
+    with 'KL' will automatically have this correction applied.
+    
+    Args:
+        original_pattern: The original text that needed correction (e.g., 'KL', 'Str.')
+        corrected_value: The corrected text (e.g., 'Kaiserslautern', 'Straße')
+        resolution_type: Type of correction ('city_abbreviation', 'street_abbreviation', 'full_address')
+    
+    Returns:
+        Dictionary with resolution_id and success message
+    """
+    input_data = StoreResolutionInput(
+        original_pattern=original_pattern,
+        corrected_value=corrected_value,
+        resolution_type=resolution_type
+    )
+    result = store_resolution_mcp(input_data)
+    return result.model_dump()
+
+
+@tool("lookup_similar_cases")
+def lookup_similar_cases_tool(address_raw: str) -> Dict:
+    """Look up learned corrections for an address.
+    
+    Checks if we have any learned patterns from past HITL resolutions
+    that apply to the given address and returns the corrected version.
+    
+    Args:
+        address_raw: The raw address to check for known corrections
+    
+    Returns:
+        Dictionary with original_address, corrected_address, corrections_applied, confidence_boost
+    """
+    input_data = LookupSimilarCasesInput(address_raw=address_raw)
+    result = lookup_similar_cases_mcp(input_data)
+    return result.model_dump()
+
