@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Change Automation - Project Documentation</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-yellow: #eab308;
+            --accent-cyan: #06b6d4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark), #1a1a2e);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .toc {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toc h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            padding: 8px 0;
+        }
+
+        .toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: var(--primary);
+        }
+
+        section {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        section h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        section h3 {
+            color: var(--secondary);
+            font-size: 1.3rem;
+            margin: 25px 0 15px;
+        }
+
+        section h4 {
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+            margin: 20px 0 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+
+        .highlight {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .badge-yes {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .badge-no {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        .badge-tech {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
+        }
+
+        .alert {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary);
+        }
+
+        .alert-warning {
+            background: rgba(234, 179, 8, 0.1);
+            border-color: var(--accent-yellow);
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--accent-green);
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: var(--accent-cyan);
+        }
+
+        pre {
+            background: #0d1117;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .architecture-diagram {
+            background: #0d1117;
+            padding: 25px;
+            border-radius: 12px;
+            font-family: 'Consolas', monospace;
+            overflow-x: auto;
+            white-space: pre;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+        }
+
+        .card h4 {
+            margin: 0 0 15px;
+        }
+
+        .icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        ul,
+        ol {
+            margin: 15px 0 15px 25px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            margin-top: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🏛️ Address Change Automation</h1>
+            <p>Complete Technical Documentation - Docker, Architecture & Technology Stack</p>
+        </header>
+
+        <!-- Table of Contents -->
+        <nav class="toc">
+            <h2>📋 Table of Contents</h2>
+            <ul>
+                <li><a href="#summary">1. Quick Summary - Key Questions Answered</a></li>
+                <li><a href="#docker">2. Docker & Containerization Explained</a></li>
+                <li><a href="#architecture">3. System Architecture</a></li>
+                <li><a href="#tech-stack">4. Is it MERN Stack?</a></li>
+                <li><a href="#microservices">5. Microservices vs Monolithic</a></li>
+                <li><a href="#docker-compose">6. Docker Compose Deep Dive</a></li>
+                <li><a href="#workflow">7. How the System Works</a></li>
+                <li><a href="#commands">8. Essential Docker Commands</a></li>
+            </ul>
+        </nav>
+
+        <!-- Quick Summary -->
+        <section id="summary">
+            <h2>⚡ Quick Summary - Your Questions Answered</h2>
+
+            <div class="grid">
+                <div class="card">
+                    <div class="icon">🐳</div>
+                    <h4>Is Docker Used?</h4>
+                    <span class="badge badge-yes">✓ YES</span>
+                    <p>Docker is used to containerize all services (frontend, backend, database) for easy deployment and
+                        development.</p>
+                </div>
+
+                <div class="card">
+                    <div class="icon">📦</div>
+                    <h4>Is it MERN Stack?</h4>
+                    <span class="badge badge-no">✗ NO</span>
+                    <p>This is <strong>NOT</strong> a MERN stack project. It uses React + FastAPI (Python) + PostgreSQL
+                        instead of MongoDB, Express, React, Node.js.</p>
+                </div>
+
+                <div class="card">
+                    <div class="icon">🔀</div>
+                    <h4>Uses Microservices?</h4>
+                    <span class="badge badge-no">✗ NOT PURE MICROSERVICES</span>
+                    <p>Uses a <strong>Containerized Monolithic</strong> approach with Docker, not true microservices
+                        architecture.</p>
+                </div>
+
+                <div class="card">
+                    <div class="icon">🤖</div>
+                    <h4>Full Stack Project?</h4>
+                    <span class="badge badge-yes">✓ YES</span>
+                    <p>It's a complete full-stack application with frontend, backend, database, and AI components.</p>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>💡 Tech Stack Used:</strong><br>
+                <span class="badge badge-tech">React + Vite</span>
+                <span class="badge badge-tech">FastAPI (Python)</span>
+                <span class="badge badge-tech">PostgreSQL</span>
+                <span class="badge badge-tech">Docker Compose</span>
+                <span class="badge badge-tech">CrewAI (Multi-Agent AI)</span>
+            </div>
+        </section>
+
+        <!-- Docker Section -->
+        <section id="docker">
+            <h2>🐳 Docker & Containerization Explained</h2>
+
+            <h3>What is Docker?</h3>
+            <p>Docker is a platform that packages your application and all its dependencies into a <span
+                    class="highlight">container</span>. Think of it like a lightweight, portable box that contains
+                everything your app needs to run - the code, runtime, libraries, and settings.</p>
+
+            <h3>Why Use Docker?</h3>
+            <ul>
+                <li><strong>Consistency:</strong> "It works on my machine" becomes "It works everywhere"</li>
+                <li><strong>Isolation:</strong> Each service runs in its own container, preventing conflicts</li>
+                <li><strong>Easy Setup:</strong> One command (<code>docker compose up</code>) starts everything</li>
+                <li><strong>Easy Deployment:</strong> Same containers work on development, testing, and production</li>
+            </ul>
+
+            <h3>How Docker is Used in This Project</h3>
+            <p>Your project uses <strong>Docker Compose</strong> to orchestrate 3 containers:</p>
+
+            <div class="grid">
+                <div class="card">
+                    <h4>1️⃣ Database Container</h4>
+                    <code>postgres:16</code>
+                    <ul>
+                        <li>PostgreSQL 16 database</li>
+                        <li>Stores all case data and audit logs</li>
+                        <li>Port: 5432</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h4>2️⃣ Backend Container</h4>
+                    <code>python:3.11-slim</code>
+                    <ul>
+                        <li>FastAPI Python server</li>
+                        <li>CrewAI multi-agent system</li>
+                        <li>OCR processing (Tesseract)</li>
+                        <li>Port: 8000</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h4>3️⃣ Frontend Container</h4>
+                    <code>node:20-alpine</code>
+                    <ul>
+                        <li>React + Vite application</li>
+                        <li>User Portal & Admin Dashboard</li>
+                        <li>Port: 3000</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Docker Files in Your Project</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>File</th>
+                    <th>Purpose</th>
+                    <th>Location</th>
+                </tr>
+                <tr>
+                    <td><code>docker-compose.yml</code></td>
+                    <td>Defines all services, networks, and how they connect</td>
+                    <td>/automation/</td>
+                </tr>
+                <tr>
+                    <td><code>Dockerfile</code> (Backend)</td>
+                    <td>Instructions to build the Python/FastAPI container</td>
+                    <td>/automation/</td>
+                </tr>
+                <tr>
+                    <td><code>Dockerfile</code> (Frontend)</td>
+                    <td>Instructions to build the React container</td>
+                    <td>/automation/frontend/</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture">
+            <h2>🏗️ System Architecture</h2>
+
+            <div class="architecture-diagram">
+                ┌─────────────────────────────────────────────────────────────────────────────────┐
+                │ YOUR APPLICATION │
+                ├─────────────────────────────────────────────────────────────────────────────────┤
+                │ │
+                │ ┌──────────────────────────────────────────────────────────────────────────┐ │
+                │ │ FRONTEND (React + Vite) │ │
+                │ │ Port: 3000 │ │
+                │ │ ┌──────────────┐ ┌─────────────────┐ ┌───────────┐ ┌──────────────┐ │ │
+                │ │ │ User Portal │ │ Admin Dashboard │ │ Login │ │ Contact Page │ │ │
+                │ │ │ (Citizens) │ │ (Staff) │ │ Page │ │ │ │ │
+                │ │ └──────────────┘ └─────────────────┘ └───────────┘ └──────────────┘ │ │
+                │ └────────────────────────────────┬─────────────────────────────────────────┘ │
+                │ │ │
+                │ │ REST API Calls (HTTP) │
+                │ ▼ │
+                │ ┌──────────────────────────────────────────────────────────────────────────┐ │
+                │ │ BACKEND (FastAPI + Python) │ │
+                │ │ Port: 8000 │ │
+                │ │ ┌─────────────┐ ┌──────────────┐ ┌────────────┐ ┌──────────────────┐ │ │
+                │ │ │ API Layer │ │ OCR Service │ │ Email │ │ Chatbot Service │ │ │
+                │ │ │ (api.py) │ │ (Tesseract) │ │ SendGrid │ │ (OpenAI) │ │ │
+                │ │ └─────────────┘ └──────────────┘ └────────────┘ └──────────────────┘ │ │
+                │ │ │ │
+                │ │ ┌────────────────────────────────────────────────────────────────────┐ │ │
+                │ │ │ CrewAI Multi-Agent System (AI Brain) │ │ │
+                │ │ │ ┌────────────────┐ ┌─────────────────┐ ┌─────────────────────┐ │ │ │
+                │ │ │ │ Data Agent │ │Validation Agent │ │ Registry Agent │ │ │ │
+                │ │ │ │Extract from PDF│ │ Check accuracy │ │ Update registries │ │ │ │
+                │ │ │ └────────────────┘ └─────────────────┘ └─────────────────────┘ │ │ │
+                │ │ └────────────────────────────────────────────────────────────────────┘ │ │
+                │ └────────────────────────────────┬─────────────────────────────────────────┘ │
+                │ │ │
+                │ │ SQL Queries │
+                │ ▼ │
+                │ ┌──────────────────────────────────────────────────────────────────────────┐ │
+                │ │ DATABASE (PostgreSQL 16) │ │
+                │ │ Port: 5432 │ │
+                │ │ │ │
+                │ │ ┌────────────┐ ┌─────────────┐ ┌────────────────┐ ┌──────────────┐ │ │
+                │ │ │ Cases │ │ Audit Logs │ │ Extracted Data │ │Workflow State│ │ │
+                │ │ └────────────┘ └─────────────┘ └────────────────┘ └──────────────┘ │ │
+                │ └──────────────────────────────────────────────────────────────────────────┘ │
+                │ │
+                └─────────────────────────────────────────────────────────────────────────────────┘
+            </div>
+        </section>
+
+        <!-- MERN Stack Comparison -->
+        <section id="tech-stack">
+            <h2>🔄 Is This a MERN Stack Project?</h2>
+
+            <div class="alert alert-warning">
+                <strong>⚠️ No, this is NOT a MERN stack project!</strong>
+            </div>
+
+            <h3>What is MERN Stack?</h3>
+            <p>MERN is a popular JavaScript-based technology stack:</p>
+            <ul>
+                <li><strong>M</strong>ongoDB - NoSQL database</li>
+                <li><strong>E</strong>xpress.js - Node.js web framework</li>
+                <li><strong>R</strong>eact - Frontend library</li>
+                <li><strong>N</strong>ode.js - JavaScript runtime</li>
+            </ul>
+
+            <h3>Comparison: MERN vs Your Project</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Layer</th>
+                    <th>MERN Stack</th>
+                    <th>Your Project</th>
+                </tr>
+                <tr>
+                    <td>Frontend</td>
+                    <td>React</td>
+                    <td><span class="badge badge-tech">React + Vite</span> ✓ Same</td>
+                </tr>
+                <tr>
+                    <td>Backend</td>
+                    <td>Express.js (Node.js)</td>
+                    <td><span class="badge badge-tech">FastAPI (Python)</span> ✗ Different</td>
+                </tr>
+                <tr>
+                    <td>Database</td>
+                    <td>MongoDB (NoSQL)</td>
+                    <td><span class="badge badge-tech">PostgreSQL (SQL)</span> ✗ Different</td>
+                </tr>
+                <tr>
+                    <td>Runtime</td>
+                    <td>Node.js</td>
+                    <td><span class="badge badge-tech">Python 3.11</span> ✗ Different</td>
+                </tr>
+                <tr>
+                    <td>AI/ML</td>
+                    <td>Not included</td>
+                    <td><span class="badge badge-tech">CrewAI + OpenAI</span> ✓ Extra</td>
+                </tr>
+            </table>
+
+            <div class="alert alert-success">
+                <strong>✅ Your Stack Name:</strong> This could be called a <span class="highlight">"PFRP Stack"</span>
+                (PostgreSQL + FastAPI + React + Python) or simply a <strong>Python Full-Stack</strong> with React
+                frontend.
+            </div>
+        </section>
+
+        <!-- Microservices Section -->
+        <section id="microservices">
+            <h2>🔀 Microservices vs Your Architecture</h2>
+
+            <h3>What are Microservices?</h3>
+            <p>Microservices architecture breaks an application into many small, independent services that:</p>
+            <ul>
+                <li>Each service has its own database</li>
+                <li>Services communicate via APIs/message queues</li>
+                <li>Each service can be deployed independently</li>
+                <li>Different teams can work on different services</li>
+            </ul>
+
+            <h3>Your Architecture Type</h3>
+            <div class="alert alert-info">
+                <strong>📦 Containerized Modular Monolith</strong>
+            </div>
+
+            <p>Your project uses a <strong>Containerized Modular Architecture</strong>, which is:</p>
+
+            <table class="comparison-table">
+                <tr>
+                    <th>Aspect</th>
+                    <th>Pure Microservices</th>
+                    <th>Your Project</th>
+                </tr>
+                <tr>
+                    <td>Number of Services</td>
+                    <td>Many (10-100+)</td>
+                    <td>3 containers (Frontend, Backend, Database)</td>
+                </tr>
+                <tr>
+                    <td>Databases</td>
+                    <td>Each service has its own DB</td>
+                    <td>Single shared PostgreSQL database</td>
+                </tr>
+                <tr>
+                    <td>Communication</td>
+                    <td>API Gateway, Message Queues</td>
+                    <td>Direct REST API calls</td>
+                </tr>
+                <tr>
+                    <td>Deployment</td>
+                    <td>Independent deployment per service</td>
+                    <td>All containers deployed together</td>
+                </tr>
+                <tr>
+                    <td>Complexity</td>
+                    <td>High (for large teams)</td>
+                    <td>Moderate (good for small teams)</td>
+                </tr>
+            </table>
+
+            <h3>Is Your Approach Wrong?</h3>
+            <div class="alert alert-success">
+                <strong>✓ No! Your approach is perfect for this project.</strong>
+                <p>For a project of this size and team, a containerized monolith provides:</p>
+                <ul>
+                    <li>Easy development and debugging</li>
+                    <li>Simple deployment</li>
+                    <li>Consistent data management</li>
+                    <li>All the benefits of Docker without microservices complexity</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Docker Compose Deep Dive -->
+        <section id="docker-compose">
+            <h2>📄 Docker Compose Deep Dive</h2>
+
+            <h3>Your docker-compose.yml Explained</h3>
+            <pre><code>version: "3.9"
+
+services:
+  # 1️⃣ DATABASE SERVICE
+  db:
+    image: postgres:16                    # Uses official PostgreSQL 16 image
+    restart: unless-stopped               # Auto-restart if crashes
+    environment:
+      POSTGRES_DB: address_db             # Database name
+      POSTGRES_USER: app_user             # Database user
+      POSTGRES_PASSWORD: app_pass         # Database password
+    volumes:
+      - db-data:/var/lib/postgresql/data  # Persist data even when container stops
+    ports:
+      - "5432:5432"                        # Expose on port 5432
+
+  # 2️⃣ BACKEND SERVICE
+  backend:
+    build: .                              # Build from Dockerfile in current dir
+    depends_on:
+      - db                                # Wait for database to start first
+    environment:
+      DATABASE_URL: postgresql://...      # Connection to database
+      OPENAI_API_KEY: ${OPENAI_API_KEY}   # From .env file
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+    command: ["uvicorn", "src.automation.api:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"                        # API accessible on port 8000
+
+  # 3️⃣ FRONTEND SERVICE
+  frontend:
+    build: ./frontend                      # Build from frontend/Dockerfile
+    depends_on:
+      - backend                            # Wait for backend to be ready
+    ports:
+      - "3000:5173"                         # Map container's 5173 to host's 3000
+    environment:
+      - VITE_API_URL=http://localhost:8000  # Backend URL for API calls
+
+volumes:
+  db-data:    # Named volume for database persistence
+  uploads:    # Named volume for uploaded files</code></pre>
+
+            <h3>How Containers Connect</h3>
+            <div class="architecture-diagram">
+                ┌──────────────────┐
+                │ FRONTEND │
+                │ (Port 3000) │
+                │ │
+                │ Makes API calls │
+                │ to localhost:8000│
+                └────────┬─────────┘
+                │
+                ▼
+                ┌──────────────────┐
+                │ BACKEND │
+                │ (Port 8000) │
+                │ │
+                │ Connects to db │
+                │ using hostname │
+                │ "db:5432" │
+                └────────┬─────────┘
+                │
+                ▼
+                ┌──────────────────┐
+                │ DATABASE │
+                │ (Port 5432) │
+                │ │
+                │ PostgreSQL │
+                └──────────────────┘
+            </div>
+        </section>
+
+        <!-- Workflow Section -->
+        <section id="workflow">
+            <h2>⚙️ How the System Works</h2>
+
+            <h3>User Flow</h3>
+
+            <div class="flow-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <strong>Citizen Submits Documents</strong>
+                    <p>User uploads PDF documents via the User Portal (React frontend)</p>
+                </div>
+            </div>
+
+            <div class="flow-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <strong>Backend Receives Request</strong>
+                    <p>FastAPI receives the upload, stores files, creates a case in PostgreSQL</p>
+                </div>
+            </div>
+
+            <div class="flow-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <strong>OCR Processing</strong>
+                    <p>Tesseract OCR extracts text from uploaded PDFs</p>
+                </div>
+            </div>
+
+            <div class="flow-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <strong>Data Quality Check</strong>
+                    <p>System checks if extracted data is complete and confident</p>
+                </div>
+            </div>
+
+            <div class="flow-step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <strong>CrewAI Multi-Agent Processing</strong>
+                    <p>If data is clean, AI agents automatically process the case:<br>
+                        - Data Agent: Extracts structured data<br>
+                        - Validation Agent: Verifies accuracy<br>
+                        - Registry Agent: Updates public records</p>
+                </div>
+            </div>
+
+            <div class="flow-step">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <strong>Human-in-the-Loop (HITL)</strong>
+                    <p>If data has issues or low confidence, case goes to Admin Dashboard for review</p>
+                </div>
+            </div>
+
+            <div class="flow-step">
+                <div class="step-number">7</div>
+                <div class="step-content">
+                    <strong>Certificate Generation & Email</strong>
+                    <p>Upon completion, system generates certificate and emails it via SendGrid</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Essential Commands -->
+        <section id="commands">
+            <h2>🖥️ Essential Docker Commands</h2>
+
+            <h3>Starting the Application</h3>
+            <pre><code># Navigate to automation folder
+cd automation
+
+# Start all services (builds if needed)
+docker compose up --build
+
+# Start in background (detached mode)
+docker compose up -d
+
+# View running containers
+docker compose ps</code></pre>
+
+            <h3>Stopping the Application</h3>
+            <pre><code># Stop all containers
+docker compose down
+
+# Stop and remove all data (including database)
+docker compose down -v</code></pre>
+
+            <h3>Viewing Logs</h3>
+            <pre><code># View all logs
+docker compose logs
+
+# View specific service logs
+docker compose logs backend
+docker compose logs frontend
+docker compose logs db
+
+# Follow logs in real-time
+docker compose logs -f</code></pre>
+
+            <h3>Executing Commands in Containers</h3>
+            <pre><code># Open shell in backend container
+docker compose exec backend bash
+
+# Open PostgreSQL prompt
+docker compose exec db psql -U app_user -d address_db
+
+# Run Python script in backend
+docker compose exec backend python script.py</code></pre>
+
+            <h3>Rebuilding Containers</h3>
+            <pre><code># Rebuild a specific service
+docker compose build backend
+
+# Rebuild all services
+docker compose build
+
+# Rebuild and restart
+docker compose up --build</code></pre>
+        </section>
+
+        <footer>
+            <p>📚 Documentation for Address Change Automation Project</p>
+            <p>Created for understanding Docker, Architecture, and Technology Stack</p>
+            <p><strong>Built with ❤️ for German Public Administration Digitalization</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

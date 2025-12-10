@@ -9,6 +9,8 @@ from pydantic import BaseModel, EmailStr
 
 from .main import run_address_change_workflow
 from .db import get_audit_entries, get_conn
+from .document_validator import validate_case_data
+from .ocr_service import extract_text_from_pdf
 
 
 # =======================
@@ -313,7 +315,12 @@ async def submit_case(
         with address_path.open("wb") as buffer:
             shutil.copyfileobj(address_pdf.file, buffer)
         
-        # Run OCR immediately
+        # Extract OCR text for validation
+        print(f"Extracting OCR text for validation...")
+        landlord_text = extract_text_from_pdf(str(landlord_path))
+        address_text = extract_text_from_pdf(str(address_path))
+        
+        # Run OCR + GPT parsing
         try:
             print(f"Running OCR for new case...")
             citizen_data = process_uploaded_pdfs(str(landlord_path), str(address_path), email)
@@ -330,6 +337,26 @@ async def submit_case(
                 "landlord_name": "Fallback Landlord GmbH"
             }
 
+        # DOCUMENT VALIDATION - Check if documents are valid before creating case
+        print(f"🔍 Validating documents...")
+        validation_result = validate_case_data(landlord_text, address_text, citizen_data)
+        
+        if not validation_result.get("valid"):
+            # Documents are invalid - reject immediately
+            error_messages = validation_result.get("errors", ["Documents could not be validated"])
+            print(f"❌ Document validation failed: {error_messages}")
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": "Invalid documents uploaded",
+                    "errors": error_messages,
+                    "help": "Please ensure you upload: 1) Wohnungsgeberbestätigung (Landlord Confirmation) and 2) Anmeldeformular (Address Registration Form). Use the chatbot for assistance."
+                }
+            )
+        
+        print(f"✅ Documents validated successfully")
+        
         # Pre-validate case to determine if it can auto-process
         is_clean, validation_issues = pre_validate_case(citizen_data)
         
@@ -521,7 +548,8 @@ async def get_completed_cases():
             """
             SELECT case_id, email, submitted_at, status,
                    pdf_landlord_path, pdf_address_change_path,
-                   citizen_name, new_address_raw
+                   citizen_name, old_address_raw, new_address_raw, canonical_address,
+                   landlord_name, move_in_date_raw, registry_exists, dob, ai_analysis
             FROM cases
             WHERE status = 'CLOSED'
             ORDER BY submitted_at DESC
@@ -540,7 +568,7 @@ def get_hitl_cases():
         cur.execute(
             """
             SELECT case_id, email, citizen_name, new_address_raw, canonical_address,
-                   submitted_at, updated_at
+                   submitted_at, updated_at, status
             FROM cases
             WHERE status = 'WAITING_FOR_HUMAN'
             ORDER BY submitted_at DESC
@@ -548,6 +576,140 @@ def get_hitl_cases():
         )
         rows = cur.fetchall()
     return {"cases": rows}
+
+
+@app.get("/case/{case_id}/ai-analysis")
+async def get_ai_analysis(case_id: str):
+    """
+    Get AI-powered analysis and correction suggestions for a HITL case.
+    Uses OpenAI GPT to analyze extracted data, explain errors, and suggest corrections.
+    """
+    import openai
+    import os
+    
+    # Fetch case data
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT case_id, citizen_name, dob, email, 
+                   old_address_raw, new_address_raw, move_in_date_raw,
+                   landlord_name, status, submitted_at
+            FROM cases
+            WHERE case_id = %s
+            """,
+            (case_id,)
+        )
+        row = cur.fetchone()
+    
+    if not row:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+    
+    # Prepare data for analysis
+    case_data = {
+        "citizen_name": row["citizen_name"],
+        "dob": str(row["dob"]) if row["dob"] else None,
+        "email": row["email"],
+        "old_address": row["old_address_raw"],
+        "new_address": row["new_address_raw"],
+        "move_in_date": row["move_in_date_raw"],
+        "landlord_name": row["landlord_name"]
+    }
+    
+    # Use GPT to analyze and suggest corrections
+    try:
+        client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        
+        prompt = f"""You are an expert German address validation assistant for a government registration office.
+
+Analyze this address change case data and:
+1. Identify what is wrong, incomplete, or incorrectly formatted
+2. Explain why this case requires human review
+3. Suggest the corrected address in proper German format
+
+Case Data:
+- Citizen Name: {case_data.get('citizen_name', 'Unknown')}
+- Date of Birth: {case_data.get('dob', 'Unknown')}
+- Old Address: {case_data.get('old_address', 'Unknown')}
+- New Address: {case_data.get('new_address', 'Unknown')}
+- Move-in Date: {case_data.get('move_in_date', 'Unknown')}
+- Landlord Name: {case_data.get('landlord_name', 'Unknown')}
+
+German address format should be: "Straßenname Hausnummer, PLZ Stadt, Deutschland"
+Example: "Musterstraße 12A, 67655 Kaiserslautern, Deutschland"
+
+Respond in this exact JSON format:
+{{
+    "error_explanation": "A clear explanation of what's wrong with the data (1-2 sentences)",
+    "issues_found": ["list", "of", "specific", "issues"],
+    "original_address": "the original new address from the case",
+    "suggested_address": "the corrected address in proper German format",
+    "confidence": "high/medium/low",
+    "additional_notes": "any other observations or recommendations"
+}}
+
+IMPORTANT: 
+- If postal code looks wrong (e.g., 12345), try to identify the correct one based on the city name
+- Common German postal codes: Kaiserslautern (67655-67663), Berlin (10115-14199), Munich (80331-81929)
+- Abbreviations to fix: Str→Straße, KL→Kaiserslautern, Muc→München, Ffm→Frankfurt am Main
+- If data is marked as "Unknown", note it as an issue
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a German address validation assistant. Always respond with valid JSON."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=800
+        )
+        
+        ai_response = response.choices[0].message.content.strip()
+        
+        # Parse the JSON response
+        import json
+        # Remove markdown code blocks if present
+        if ai_response.startswith("```"):
+            ai_response = ai_response.split("```")[1]
+            if ai_response.startswith("json"):
+                ai_response = ai_response[4:]
+            ai_response = ai_response.strip()
+        
+        analysis = json.loads(ai_response)
+        
+        # Add case metadata
+        analysis["case_id"] = case_id
+        analysis["status"] = row["status"]
+        analysis["submitted_at"] = str(row["submitted_at"])
+        analysis["citizen_name"] = case_data.get("citizen_name")
+        analysis["dob"] = case_data.get("dob")
+        analysis["email"] = case_data.get("email")
+        analysis["landlord_name"] = case_data.get("landlord_name")
+        analysis["move_in_date"] = case_data.get("move_in_date")
+        analysis["old_address"] = case_data.get("old_address")
+        
+        return analysis
+        
+    except Exception as e:
+        # Fallback if AI fails
+        print(f"AI Analysis Error: {e}")
+        return {
+            "case_id": case_id,
+            "error_explanation": "Unable to perform AI analysis. Please review manually.",
+            "issues_found": ["AI analysis unavailable"],
+            "original_address": case_data.get("new_address", "Unknown"),
+            "suggested_address": case_data.get("new_address", ""),
+            "confidence": "low",
+            "additional_notes": f"Error: {str(e)}",
+            "status": row["status"],
+            "submitted_at": str(row["submitted_at"]),
+            "citizen_name": case_data.get("citizen_name"),
+            "dob": case_data.get("dob"),
+            "email": case_data.get("email"),
+            "landlord_name": case_data.get("landlord_name"),
+            "move_in_date": case_data.get("move_in_date"),
+            "old_address": case_data.get("old_address")
+        }
 
 
 @app.post("/admin/resolve-hitl/{case_id}")
@@ -735,6 +897,43 @@ async def approve_case(case_id: str):
         except:
             pass
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =======================
+# DOCUMENT PREVIEW ENDPOINT
+# =======================
+
+from fastapi.responses import FileResponse
+
+@app.get("/uploads/{filename:path}")
+async def get_uploaded_file(filename: str):
+    """
+    Serve uploaded PDF files for admin preview.
+    """
+    file_path = UPLOAD_DIR / filename
+    
+    # Security: ensure the file is within UPLOAD_DIR
+    try:
+        file_path = file_path.resolve()
+        upload_dir_resolved = UPLOAD_DIR.resolve()
+        if not str(file_path).startswith(str(upload_dir_resolved)):
+            raise HTTPException(status_code=403, detail="Access denied")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid file path")
+    
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Determine content type
+    content_type = "application/pdf"
+    if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+        content_type = f"image/{filename.split('.')[-1].lower()}"
+    
+    return FileResponse(
+        path=str(file_path),
+        media_type=content_type,
+        headers={"Content-Disposition": f"inline; filename={file_path.name}"}
+    )
 
 
 # =======================

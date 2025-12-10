@@ -410,117 +410,182 @@ def generate_certificate(input: GenerateCertificateInput) -> GenerateCertificate
         from reportlab.lib.pagesizes import A4
         from reportlab.pdfgen import canvas
         from reportlab.lib.units import cm
+        from reportlab.lib import colors
         
         c = canvas.Canvas(certificate_path, pagesize=A4)
         width, height = A4
         
-        # Header: Government Logo Area
-        c.setFillColorRGB(0.1, 0.2, 0.4)
-        c.rect(0, height - 3*cm, width, 3*cm, fill=1)
+        # --- BACKGROUND & BORDER ---
+        # Decorative border
+        c.setStrokeColorRGB(0.1, 0.1, 0.1)
+        c.setLineWidth(3)
+        c.rect(1.5*cm, 1.5*cm, width - 3*cm, height - 3*cm)
+        c.setLineWidth(1)
+        c.rect(1.6*cm, 1.6*cm, width - 3.2*cm, height - 3.2*cm)
         
-        c.setFillColorRGB(1, 1, 1)
-        c.setFont("Helvetica-Bold", 18)
-        c.drawCentredString(width / 2, height - 1.5*cm, "BUNDESREPUBLIK DEUTSCHLAND")
-        c.setFont("Helvetica", 12)
-        c.drawCentredString(width / 2, height - 2.2*cm, "Amt für Meldewesen und Bürgerservice")
+        # --- HEADER ---
+        # "Bundesadler" stylized placeholder (circle with eagle text representation)
+        c.setStrokeColorRGB(0, 0, 0)
+        c.setLineWidth(1)
+        c.circle(width/2, height - 3.5*cm, 1.2*cm)
+        c.setFont("Times-Bold", 14)
+        c.drawCentredString(width/2, height - 3.5*cm - 2, "§")  # Stylized symbol
         
-        # Title
+        # Official Title
         c.setFillColorRGB(0, 0, 0)
-        c.setFont("Helvetica-Bold", 22)
-        c.drawCentredString(width / 2, height - 5*cm, "MELDEBESCHEINIGUNG")
+        c.setFont("Times-Bold", 24)
+        c.drawCentredString(width/2, height - 5.5*cm, "BUNDESREPUBLIK DEUTSCHLAND")
         
         c.setFont("Helvetica", 14)
-        c.drawCentredString(width / 2, height - 6*cm, "Bestätigung der Adressänderung")
+        c.drawCentredString(width/2, height - 6.5*cm, "MELDEBESCHEINIGUNG")
+        c.setFont("Helvetica-Oblique", 10)
+        c.drawCentredString(width/2, height - 7*cm, "gemäß § 18 Bundesmeldegesetz (BMG)")
         
-        # Reference line
-        y = height - 7.5*cm
-        c.setFont("Helvetica", 10)
-        c.setFillColorRGB(0.4, 0.4, 0.4)
-        c.drawString(3*cm, y, f"Referenz-Nr.: {input.case_id}")
-        c.drawRightString(width - 3*cm, y, f"Ausstellungsdatum: {datetime.now().strftime('%d.%m.%Y')}")
+        # --- AUTHORITY INFO (Top Right) ---
+        c.setFont("Helvetica", 9)
+        c.drawRightString(width - 2.5*cm, height - 9*cm, "Datum: " + datetime.now().strftime('%d.%m.%Y'))
+        c.drawRightString(width - 2.5*cm, height - 9.5*cm, f"Vorgangs-Nr.: {input.case_id}")
+        c.drawRightString(width - 2.5*cm, height - 10*cm, "Sachbearbeiter: System")
         
-        # Separator
-        y -= 0.5*cm
+        # --- MAIN CONTENT ---
+        y = height - 11*cm
+        
+        # Intro text
+        c.setFont("Times-Roman", 12)
+        c.drawString(2.5*cm, y, "Hiermit wird amtlich bescheinigt, dass für die folgende Person:")
+        y -= 0.8*cm
+        
+        # Data Box
+        box_top = y
         c.setStrokeColorRGB(0.7, 0.7, 0.7)
         c.setLineWidth(0.5)
-        c.line(3*cm, y, width - 3*cm, y)
         
-        # Main content
-        y -= 1.5*cm
-        c.setFillColorRGB(0, 0, 0)
-        c.setFont("Helvetica", 11)
-        c.drawString(3*cm, y, "Hiermit wird bescheinigt, dass die Adressänderung für die folgende Person")
-        y -= 0.5*cm
-        c.drawString(3*cm, y, "erfolgreich im Melderegister eingetragen wurde.")
+        # Field 1: Name
+        y -= 0.8*cm
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(3*cm, y, "Familienname, Vorname(n):")
+        c.setFont("Helvetica", 12)
+        c.drawString(8.5*cm, y, input.citizen_name)
         
-        # Citizen details box
-        y -= 1.5*cm
-        box_height = 5*cm
-        c.setFillColorRGB(0.95, 0.97, 1)
-        c.roundRect(3*cm, y - box_height, width - 6*cm, box_height, 0.3*cm, fill=1, stroke=0)
-        
-        c.setFillColorRGB(0, 0, 0)
-        y_box = y - 0.8*cm
-        
-        c.setFont("Helvetica-Bold", 11)
-        c.drawString(4*cm, y_box, "Name:")
-        c.setFont("Helvetica", 11)
-        c.drawString(8*cm, y_box, input.citizen_name)
-        
-        y_box -= 0.8*cm
-        c.setFont("Helvetica-Bold", 11)
-        c.drawString(4*cm, y_box, "Geburtsdatum:")
-        c.setFont("Helvetica", 11)
+        # Field 2: DOB
+        y -= 1.2*cm
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(3*cm, y, "Geburtsdatum:")
+        c.setFont("Helvetica", 12)
         try:
-            dob_formatted = datetime.fromisoformat(input.dob).strftime('%d.%m.%Y')
+            dob_fmt = datetime.fromisoformat(input.dob).strftime('%d.%m.%Y')
         except:
-            dob_formatted = input.dob
-        c.drawString(8*cm, y_box, dob_formatted)
+            dob_fmt = input.dob
+        c.drawString(8.5*cm, y, dob_fmt)
         
-        y_box -= 0.8*cm
-        c.setFont("Helvetica-Bold", 11)
-        c.drawString(4*cm, y_box, "Neue Anschrift:")
-        c.setFont("Helvetica", 11)
-        address_text = input.new_address
-        if len(address_text) > 50:
-            c.drawString(8*cm, y_box, address_text[:50])
-            y_box -= 0.5*cm
-            c.drawString(8*cm, y_box, address_text[50:])
+        # Field 3: New Address
+        y -= 1.2*cm
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(3*cm, y, "Neue Anschrift:")
+        c.setFont("Helvetica", 12)
+        
+        addr_lines = input.new_address.split(',')
+        if len(addr_lines) > 1:
+            c.drawString(8.5*cm, y + 0.2*cm, addr_lines[0].strip())
+            c.drawString(8.5*cm, y - 0.4*cm, ",".join(addr_lines[1:]).strip())
         else:
-            c.drawString(8*cm, y_box, address_text)
-        
-        y_box -= 0.8*cm
-        c.setFont("Helvetica-Bold", 11)
-        c.drawString(4*cm, y_box, "Einzugsdatum:")
-        c.setFont("Helvetica", 11)
+             c.drawString(8.5*cm, y, input.new_address)
+             
+        # Field 4: Move-in Date
+        y -= 1.2*cm
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(3*cm, y, "Einzugsdatum:")
+        c.setFont("Helvetica", 12)
         try:
-            move_in_formatted = datetime.fromisoformat(input.move_in_date).strftime('%d.%m.%Y')
+            mid_fmt = datetime.fromisoformat(input.move_in_date).strftime('%d.%m.%Y')
         except:
-            move_in_formatted = input.move_in_date
-        c.drawString(8*cm, y_box, move_in_formatted)
+            mid_fmt = input.move_in_date
+        c.drawString(8.5*cm, y, mid_fmt)
         
-        # Official stamp
-        y = y - box_height - 2*cm
-        c.setFont("Helvetica-Oblique", 9)
-        c.setFillColorRGB(0.3, 0.3, 0.3)
-        c.drawCentredString(width / 2, y, "Diese Bescheinigung wurde maschinell erstellt und ist ohne Unterschrift gültig.")
+        # Field 5: Registration Type
+        y -= 1.2*cm
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(3*cm, y, "Melderechtsstatus:")
+        c.setFont("Helvetica", 12)
+        c.drawString(8.5*cm, y, "Hauptwohnsitz")
+
+        y -= 1.0*cm
         
-        # Footer
+        # Draw Box around data
+        box_bottom = y
+        c.rect(2.5*cm, box_bottom, width - 5*cm, box_top - box_bottom)
+        
+        
+        # --- CONFIRMATION STATEMENT ---
+        y -= 1.5*cm
+        c.setFont("Times-Roman", 11)
+        c.drawString(2.5*cm, y, "Die Daten wurden in das Melderegister übernommen.")
+        y -= 0.5*cm
+        c.drawString(2.5*cm, y, "Diese Bescheinigung dient zur Vorlage bei Behörden und Sozialversicherungsträgern.")
+        
+        # --- OFFICIAL STAMP & SIGNATURE ---
+        y -= 3*cm
+        
+        # Stylized Stamp (Amtliches Siegel)
+        errors = 0.5 # displacement
+        stamp_center_x = width - 6*cm
+        stamp_center_y = y
+        c.setStrokeColorRGB(0.1, 0.1, 0.4) # Blue stamp ink color
+        c.setLineWidth(1.5)
+        c.circle(stamp_center_x, stamp_center_y, 1.8*cm)
+        c.setLineWidth(0.5)
+        c.circle(stamp_center_x, stamp_center_y, 1.6*cm)
+        
+        c.setFont("Helvetica-Bold", 8)
+        c.setFillColorRGB(0.1, 0.1, 0.4)
+        
+        # Text around stamp (simplified visual approximation)
+        c.drawCentredString(stamp_center_x, stamp_center_y + 1.2*cm, "STADTVERWALTUNG")
+        c.drawCentredString(stamp_center_x, stamp_center_y - 1.3*cm, "BÜRGERAMT")
+        
+        c.setFont("Times-Bold", 20)
+        c.drawCentredString(stamp_center_x, stamp_center_y - 0.2*cm, "Amtlich")
+        
+        # Signature Line
+        c.setStrokeColorRGB(0, 0, 0)
+        c.setLineWidth(1)
+        c.line(2.5*cm, y, 9*cm, y)
         c.setFont("Helvetica", 8)
+        c.setFillColorRGB(0, 0, 0)
+        c.drawString(2.5*cm, y - 0.4*cm, "Im Auftrag")
+        # Use ZapfChancery-MediumItalic for script-like signature if available, else Helvetica-Oblique
+        try:
+            c.setFont("ZapfChancery-MediumItalic", 14)
+            c.drawString(5*cm, y - 0.5*cm, "M. Müller")
+        except:
+             c.setFont("Helvetica-Oblique", 14)
+             c.drawString(5*cm, y - 0.5*cm, "M. Müller")
+        
+        # --- FOOTER ---
+        footer_y = 2.5*cm
+        c.setFont("Helvetica", 7)
         c.setFillColorRGB(0.5, 0.5, 0.5)
-        footer_y = 2*cm
-        c.drawCentredString(width / 2, footer_y, "Bürgerservice der Bundesrepublik Deutschland")
-        c.drawCentredString(width / 2, footer_y - 0.4*cm, "www.bundesverwaltung.de | service@buergeramt.de")
+        c.drawCentredString(width/2, footer_y, "Dieses Dokument wurde maschinell erstellt und ist ohne Unterschrift gültig.")
+        c.drawCentredString(width/2, footer_y - 0.4*cm, "Bundesmeldegesetz (BMG) vom 3. Mai 2013 | BGBl. I S. 1084")
         
         c.save()
-        print(f"Generated professional PDF certificate at {certificate_path}")
+        print(f"Generated official German PDF certificate at {certificate_path}")
         
     except Exception as e:
         print(f"Error creating PDF certificate: {e}")
         import traceback
         traceback.print_exc()
-        with open(certificate_path, "w") as f:
-             f.write(f"Certificate (Fallback)\nCase: {input.case_id}\nName: {input.citizen_name}\nAddress: {input.new_address}")
+        try:
+            # Fallback: Generate a simple valid PDF with the error
+            from reportlab.pdfgen import canvas
+            c = canvas.Canvas(certificate_path)
+            c.drawString(100, 700, "Error generating certificate.")
+            c.drawString(100, 680, f"Case: {input.case_id}")
+            c.save()
+        except:
+            # Last resort if even ReportLab fails
+             with open(certificate_path, "w") as f:
+                 f.write(f"Certificate-Error.txt") # This will still look corrupt as .pdf but prevents 0-byte
 
     email_sent = send_certificate_email(input.email, certificate_path, input.case_id, input.citizen_name)
     email_status_msg = "sent" if email_sent else "failed"

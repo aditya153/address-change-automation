@@ -29,6 +29,95 @@ function AdminDashboard() {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
 
+    // Document preview modal state
+    const [docPreviewOpen, setDocPreviewOpen] = useState(false);
+    const [previewDocs, setPreviewDocs] = useState({ landlord: null, address: null });
+    const [previewCaseId, setPreviewCaseId] = useState(null);
+    const [activeDocTab, setActiveDocTab] = useState('both'); // 'both', 'landlord', 'address'
+
+    // Case detail modal state (for completed cases)
+    const [caseDetailOpen, setCaseDetailOpen] = useState(false);
+    const [selectedCaseDetail, setSelectedCaseDetail] = useState(null);
+    const [auditLogs, setAuditLogs] = useState([]);
+    const [loadingAudit, setLoadingAudit] = useState(false);
+
+    // HITL Review Modal state (for cases needing human review)
+    const [hitlModalOpen, setHitlModalOpen] = useState(false);
+    const [hitlCase, setHitlCase] = useState(null);
+    const [aiAnalysis, setAiAnalysis] = useState(null);
+    const [loadingAi, setLoadingAi] = useState(false);
+    const [correctedAddressInput, setCorrectedAddressInput] = useState('');
+    const [submittingCorrection, setSubmittingCorrection] = useState(false);
+
+    // Helper to get PDF URL from path
+    const getPdfUrl = (path) => {
+        if (!path) return null;
+        // Extract just the filename from the full path
+        const filename = path.split('/').pop();
+        return `${API_URL}/uploads/${filename}`;
+    };
+
+    // Open document preview modal
+    const handlePreviewDocs = (caseItem) => {
+        setPreviewDocs({
+            landlord: getPdfUrl(caseItem.pdf_landlord_path),
+            address: getPdfUrl(caseItem.pdf_address_change_path)
+        });
+        setPreviewCaseId(caseItem.case_id);
+        setActiveDocTab('both');
+        setDocPreviewOpen(true);
+    };
+
+    // Open case detail modal with audit logs
+    const handleViewCaseDetail = async (caseItem) => {
+        setSelectedCaseDetail(caseItem);
+        setCaseDetailOpen(true);
+        setLoadingAudit(true);
+        setAuditLogs([]);
+
+        try {
+            const res = await axios.get(`${API_URL}/cases/${encodeURIComponent(caseItem.case_id)}/audit`);
+            setAuditLogs(res.data.entries || []);
+        } catch (err) {
+            console.error('Error fetching audit logs:', err);
+            setAuditLogs([]);
+        } finally {
+            setLoadingAudit(false);
+        }
+    };
+
+    // Calculate processing time
+    const calculateProcessingTime = (submittedAt, lastAuditTime) => {
+        if (!submittedAt) return 'N/A';
+        const start = new Date(submittedAt);
+        const end = lastAuditTime ? new Date(lastAuditTime) : new Date();
+        const diffMs = end - start;
+
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+        if (hours > 0) {
+            return `${hours}h ${minutes}m ${seconds}s`;
+        } else if (minutes > 0) {
+            return `${minutes}m ${seconds}s`;
+        } else {
+            return `${seconds}s`;
+        }
+    };
+
+    // Lock body scroll when modals are open
+    useEffect(() => {
+        if (docPreviewOpen || caseDetailOpen || hitlModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [docPreviewOpen, caseDetailOpen, hitlModalOpen]);
+
     // --- API calls ------------------------------------------------------
 
     const fetchPendingCases = async () => {
@@ -191,6 +280,68 @@ function AdminDashboard() {
         setDrawerOpen(true);
     };
 
+    // Open HITL Review Modal with AI Analysis
+    const handleOpenHitlReview = async (caseItem) => {
+        setHitlCase(caseItem);
+        setHitlModalOpen(true);
+        setLoadingAi(true);
+        setAiAnalysis(null);
+        setCorrectedAddressInput('');
+
+        try {
+            const res = await axios.get(`${API_URL}/case/${encodeURIComponent(caseItem.case_id)}/ai-analysis`);
+            setAiAnalysis(res.data);
+            // Pre-fill the input with AI suggestion
+            if (res.data.suggested_address) {
+                setCorrectedAddressInput(res.data.suggested_address);
+            }
+        } catch (err) {
+            console.error('Failed to fetch AI analysis:', err);
+            setAiAnalysis({
+                error_explanation: 'Failed to load AI analysis. Please review manually.',
+                issues_found: ['Unable to connect to AI service'],
+                suggested_address: caseItem.new_address_raw || '',
+                confidence: 'low'
+            });
+            setCorrectedAddressInput(caseItem.new_address_raw || '');
+        } finally {
+            setLoadingAi(false);
+        }
+    };
+
+    // Close HITL Modal
+    const handleCloseHitlModal = () => {
+        setHitlModalOpen(false);
+        setHitlCase(null);
+        setAiAnalysis(null);
+        setCorrectedAddressInput('');
+    };
+
+    // Submit correction and resume workflow
+    const handleSubmitCorrection = async () => {
+        if (!correctedAddressInput.trim()) {
+            setMessage('❌ Please enter a corrected address');
+            return;
+        }
+        if (!window.confirm(`Approve address: "${correctedAddressInput}"?\n\nThis will resume the automation workflow.`)) {
+            return;
+        }
+
+        setSubmittingCorrection(true);
+        try {
+            const formData = new FormData();
+            formData.append('corrected_address', correctedAddressInput);
+            await axios.post(`${API_URL}/admin/resolve-hitl/${encodeURIComponent(hitlCase.case_id)}`, formData);
+            setMessage(`✅ Case ${hitlCase.case_id} approved with corrected address. Workflow resumed.`);
+            handleCloseHitlModal();
+            fetchAllCases();
+        } catch (err) {
+            setMessage(`❌ Error: ${err.response?.data?.detail || 'Failed to submit correction'}`);
+        } finally {
+            setSubmittingCorrection(false);
+        }
+    };
+
     // -------------------------------------------------------------------
 
     return (
@@ -280,7 +431,10 @@ function AdminDashboard() {
                     <div className="row g-3 mb-4">
                         {/* Pending */}
                         <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="card card-stat card-stat-primary">
+                            <div
+                                className={`card card-stat card-stat-primary card-stat-clickable ${filterStatus === 'pending' ? 'card-stat-active' : ''}`}
+                                onClick={() => setFilterStatus(filterStatus === 'pending' ? '' : 'pending')}
+                            >
                                 <div className="card-body">
                                     <div className="d-flex justify-content-between align-items-center">
                                         <div>
@@ -302,7 +456,10 @@ function AdminDashboard() {
 
                         {/* Needs review */}
                         <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="card card-stat card-stat-warning">
+                            <div
+                                className={`card card-stat card-stat-warning card-stat-clickable ${filterStatus === 'review' ? 'card-stat-active' : ''}`}
+                                onClick={() => setFilterStatus(filterStatus === 'review' ? '' : 'review')}
+                            >
                                 <div className="card-body">
                                     <div className="d-flex justify-content-between align-items-center">
                                         <div>
@@ -324,7 +481,10 @@ function AdminDashboard() {
 
                         {/* Completed */}
                         <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="card card-stat card-stat-success">
+                            <div
+                                className={`card card-stat card-stat-success card-stat-clickable ${filterStatus === 'completed' ? 'card-stat-active' : ''}`}
+                                onClick={() => setFilterStatus(filterStatus === 'completed' ? '' : 'completed')}
+                            >
                                 <div className="card-body">
                                     <div className="d-flex justify-content-between align-items-center">
                                         <div>
@@ -437,7 +597,15 @@ function AdminDashboard() {
                                                                     <button
                                                                         type="button"
                                                                         className="btn btn-outline-secondary btn-view-case"
-                                                                        onClick={() => handleViewCase(caseItem)}
+                                                                        onClick={() => {
+                                                                            if (caseItem.status === 'CLOSED') {
+                                                                                handleViewCaseDetail(caseItem);
+                                                                            } else if (caseItem.status === 'WAITING_FOR_HUMAN') {
+                                                                                handleOpenHitlReview(caseItem);
+                                                                            } else {
+                                                                                handleViewCase(caseItem);
+                                                                            }
+                                                                        }}
                                                                     >
                                                                         View
                                                                     </button>
@@ -457,13 +625,15 @@ function AdminDashboard() {
                                                                                 : 'Approve & Process'}
                                                                         </button>
                                                                     )}
-                                                                    {caseItem.status === 'WAITING_FOR_HUMAN' && (
+                                                                    {caseItem.status === 'CLOSED' && (caseItem.pdf_landlord_path || caseItem.pdf_address_change_path) && (
                                                                         <button
                                                                             type="button"
-                                                                            className="btn btn-outline-warning"
-                                                                            onClick={() => handleViewCase(caseItem)}
+                                                                            className="btn btn-outline-info"
+                                                                            onClick={() => handlePreviewDocs(caseItem)}
+                                                                            title="Preview uploaded documents"
                                                                         >
-                                                                            Needs review
+                                                                            <i className="bi bi-file-earmark-pdf me-1" />
+                                                                            Docs
                                                                         </button>
                                                                     )}
                                                                 </div>
@@ -699,6 +869,431 @@ function AdminDashboard() {
                     </div>
                 </div>
             </aside>
+
+            {/* DOCUMENT PREVIEW MODAL */}
+            {docPreviewOpen && (
+                <div className="doc-preview-overlay">
+                    <div className="doc-preview-modal">
+                        <div className="doc-preview-header">
+                            <h4 className="mb-0">
+                                <i className="bi bi-file-earmark-pdf me-2" />
+                                Documents for {previewCaseId}
+                            </h4>
+                            <div className="doc-preview-tabs">
+                                <button
+                                    className={`doc-tab-btn ${activeDocTab === 'both' ? 'active' : ''}`}
+                                    onClick={() => setActiveDocTab('both')}
+                                >
+                                    <i className="bi bi-layout-split me-1" />
+                                    Side by Side
+                                </button>
+                                <button
+                                    className={`doc-tab-btn ${activeDocTab === 'landlord' ? 'active' : ''}`}
+                                    onClick={() => setActiveDocTab('landlord')}
+                                >
+                                    <i className="bi bi-house-door me-1" />
+                                    Landlord
+                                </button>
+                                <button
+                                    className={`doc-tab-btn ${activeDocTab === 'address' ? 'active' : ''}`}
+                                    onClick={() => setActiveDocTab('address')}
+                                >
+                                    <i className="bi bi-geo-alt me-1" />
+                                    Address Form
+                                </button>
+                            </div>
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-light"
+                                onClick={() => setDocPreviewOpen(false)}
+                            >
+                                <i className="bi bi-x-lg" /> Close
+                            </button>
+                        </div>
+                        <div className={`doc-preview-body ${activeDocTab !== 'both' ? 'doc-preview-single' : ''}`}>
+                            {(activeDocTab === 'both' || activeDocTab === 'landlord') && (
+                                <div className="doc-preview-pane">
+                                    <div className="doc-preview-title">
+                                        <span>
+                                            <i className="bi bi-house-door me-1" />
+                                            Landlord Confirmation
+                                        </span>
+                                        {previewDocs.landlord && (
+                                            <a
+                                                href={previewDocs.landlord}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn btn-sm btn-outline-primary doc-open-btn"
+                                            >
+                                                <i className="bi bi-box-arrow-up-right me-1" />
+                                                Open Full
+                                            </a>
+                                        )}
+                                    </div>
+                                    {previewDocs.landlord ? (
+                                        <iframe
+                                            src={previewDocs.landlord}
+                                            title="Landlord PDF"
+                                            className="doc-preview-iframe"
+                                        />
+                                    ) : (
+                                        <div className="doc-preview-placeholder">
+                                            <i className="bi bi-file-earmark-x" />
+                                            <p>No document available</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                            {(activeDocTab === 'both' || activeDocTab === 'address') && (
+                                <div className="doc-preview-pane">
+                                    <div className="doc-preview-title">
+                                        <span>
+                                            <i className="bi bi-geo-alt me-1" />
+                                            Address Registration Form
+                                        </span>
+                                        {previewDocs.address && (
+                                            <a
+                                                href={previewDocs.address}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn btn-sm btn-outline-primary doc-open-btn"
+                                            >
+                                                <i className="bi bi-box-arrow-up-right me-1" />
+                                                Open Full
+                                            </a>
+                                        )}
+                                    </div>
+                                    {previewDocs.address ? (
+                                        <iframe
+                                            src={previewDocs.address}
+                                            title="Address PDF"
+                                            className="doc-preview-iframe"
+                                        />
+                                    ) : (
+                                        <div className="doc-preview-placeholder">
+                                            <i className="bi bi-file-earmark-x" />
+                                            <p>No document available</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* CASE DETAIL MODAL (for completed cases) */}
+            {caseDetailOpen && selectedCaseDetail && (
+                <div className="case-detail-overlay">
+                    <div className="case-detail-modal">
+                        <div className="case-detail-modal-header">
+                            <div className="case-detail-title">
+                                <h4 className="mb-0">
+                                    <i className="bi bi-folder2-open me-2" />
+                                    {selectedCaseDetail.case_id}
+                                </h4>
+                                <span className={`badge ${selectedCaseDetail.status === 'CLOSED' ? 'bg-success' : 'bg-secondary'} ms-2`}>
+                                    {selectedCaseDetail.status === 'CLOSED' ? 'Completed' : selectedCaseDetail.status}
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-light"
+                                onClick={() => setCaseDetailOpen(false)}
+                            >
+                                <i className="bi bi-x-lg" /> Close
+                            </button>
+                        </div>
+
+                        <div className="case-detail-modal-body">
+                            {/* Left Column: Case Info */}
+                            <div className="case-detail-info">
+                                {/* Submitted On */}
+                                <div className="case-info-section">
+                                    <h5><i className="bi bi-calendar-event me-2" />Submitted On</h5>
+                                    <p className="case-info-highlight">
+                                        {formatDate(selectedCaseDetail.submitted_at)}
+                                    </p>
+                                </div>
+
+                                {/* Citizen Info */}
+                                <div className="case-info-section">
+                                    <h5><i className="bi bi-person me-2" />Citizen Information</h5>
+                                    <dl className="case-info-list">
+                                        <dt>Name</dt>
+                                        <dd>{selectedCaseDetail.citizen_name || 'N/A'}</dd>
+                                        <dt>Email</dt>
+                                        <dd>{selectedCaseDetail.email || 'N/A'}</dd>
+                                        <dt>Date of Birth</dt>
+                                        <dd>{selectedCaseDetail.dob || 'N/A'}</dd>
+                                    </dl>
+                                </div>
+
+                                {/* Landlord Info */}
+                                <div className="case-info-section">
+                                    <h5><i className="bi bi-building me-2" />Landlord Information</h5>
+                                    <dl className="case-info-list">
+                                        <dt>Landlord Name</dt>
+                                        <dd>{selectedCaseDetail.landlord_name || 'N/A'}</dd>
+                                        <dt>Move-in Date</dt>
+                                        <dd>{selectedCaseDetail.move_in_date_raw || 'N/A'}</dd>
+                                    </dl>
+                                </div>
+
+                                {/* Old Address */}
+                                <div className="case-info-section">
+                                    <h5><i className="bi bi-geo me-2" />Old Address</h5>
+                                    <p className="case-address old-address">
+                                        {selectedCaseDetail.old_address_raw || 'Not available'}
+                                    </p>
+                                </div>
+
+                                {/* New Address */}
+                                <div className="case-info-section">
+                                    <h5><i className="bi bi-geo-alt-fill me-2" />New Address</h5>
+                                    <p className="case-address new-address">
+                                        {selectedCaseDetail.new_address_raw || selectedCaseDetail.canonical_address || 'Not available'}
+                                    </p>
+                                </div>
+
+
+                                {/* Processing Stats */}
+                                <div className="case-info-section case-stats">
+                                    <h5><i className="bi bi-speedometer2 me-2" />Processing Stats</h5>
+                                    <div className="stat-card">
+                                        <span className="stat-label">Total Processing Time</span>
+                                        <span className="stat-value">
+                                            {calculateProcessingTime(
+                                                selectedCaseDetail.submitted_at,
+                                                auditLogs.length > 0 ? auditLogs[auditLogs.length - 1].timestamp : null
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Column: Audit Log */}
+                            <div className="case-detail-audit">
+                                <h5><i className="bi bi-clock-history me-2" />Audit Log Timeline</h5>
+                                {loadingAudit ? (
+                                    <div className="audit-loading">
+                                        <div className="spinner-border spinner-border-sm me-2" role="status" />
+                                        Loading audit log...
+                                    </div>
+                                ) : auditLogs.length === 0 ? (
+                                    <div className="audit-empty">
+                                        <i className="bi bi-inbox" />
+                                        <p>No audit entries found</p>
+                                    </div>
+                                ) : (
+                                    <div className="audit-timeline">
+                                        {auditLogs.map((entry, index) => (
+                                            <div key={index} className="audit-entry">
+                                                <div className="audit-time">
+                                                    {new Date(entry.timestamp).toLocaleString('de-DE', {
+                                                        day: '2-digit',
+                                                        month: '2-digit',
+                                                        year: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        second: '2-digit'
+                                                    })}
+                                                </div>
+                                                <div className="audit-message">
+                                                    {entry.message}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* HITL REVIEW MODAL (AI-powered human review) */}
+            {hitlModalOpen && hitlCase && (
+                <div className="case-detail-overlay">
+                    <div className="case-detail-modal hitl-review-modal">
+                        <div className="case-detail-modal-header hitl-header">
+                            <div className="case-detail-title">
+                                <h4 className="mb-0">
+                                    <i className="bi bi-robot me-2" />
+                                    Human Review Required
+                                </h4>
+                                <span className="badge bg-warning text-dark ms-2">
+                                    {hitlCase.case_id}
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-light"
+                                onClick={handleCloseHitlModal}
+                            >
+                                <i className="bi bi-x-lg" /> Close
+                            </button>
+                        </div>
+
+                        <div className="case-detail-modal-body">
+                            {/* Left Column: Case Info */}
+                            <div className="case-detail-info">
+                                {/* Submitted On */}
+                                <div className="case-info-section">
+                                    <h5><i className="bi bi-calendar-event me-2" />Submitted On</h5>
+                                    <p className="case-info-highlight">
+                                        {aiAnalysis ? new Date(aiAnalysis.submitted_at).toLocaleString('de-DE') : 'Loading...'}
+                                    </p>
+                                </div>
+
+                                {/* Citizen Info */}
+                                <div className="case-info-section">
+                                    <h5><i className="bi bi-person me-2" />Citizen Information</h5>
+                                    <dl className="case-info-list">
+                                        <dt>Name</dt>
+                                        <dd>{aiAnalysis?.citizen_name || hitlCase.citizen_name || 'N/A'}</dd>
+                                        <dt>Email</dt>
+                                        <dd>{aiAnalysis?.email || hitlCase.email || 'N/A'}</dd>
+                                        <dt>Date of Birth</dt>
+                                        <dd>{aiAnalysis?.dob || 'N/A'}</dd>
+                                    </dl>
+                                </div>
+
+                                {/* Landlord Info */}
+                                <div className="case-info-section">
+                                    <h5><i className="bi bi-building me-2" />Landlord Information</h5>
+                                    <dl className="case-info-list">
+                                        <dt>Landlord Name</dt>
+                                        <dd>{aiAnalysis?.landlord_name || 'N/A'}</dd>
+                                        <dt>Move-in Date</dt>
+                                        <dd>{aiAnalysis?.move_in_date || 'N/A'}</dd>
+                                    </dl>
+                                </div>
+
+                                {/* Old Address */}
+                                <div className="case-info-section">
+                                    <h5><i className="bi bi-geo me-2" />Old Address</h5>
+                                    <p className="case-address old-address">
+                                        {aiAnalysis?.old_address || 'Not available'}
+                                    </p>
+                                </div>
+
+                                {/* Original Address (with issues) */}
+                                <div className="case-info-section">
+                                    <h5><i className="bi bi-exclamation-triangle me-2 text-warning" />Extracted Address (Has Issues)</h5>
+                                    <p className="case-address problem-address">
+                                        {aiAnalysis?.original_address || hitlCase.new_address_raw || 'Not available'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Right Column: AI Analysis & Correction */}
+                            <div className="case-detail-audit hitl-correction-panel">
+                                <h5><i className="bi bi-cpu me-2" />AI Analysis</h5>
+
+                                {loadingAi ? (
+                                    <div className="ai-loading">
+                                        <div className="spinner-border text-primary" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p>Analyzing case with AI...</p>
+                                    </div>
+                                ) : aiAnalysis ? (
+                                    <>
+                                        {/* Error Explanation */}
+                                        <div className="ai-error-box">
+                                            <h6><i className="bi bi-info-circle me-1" />Why Review is Needed</h6>
+                                            <p>{aiAnalysis.error_explanation}</p>
+                                        </div>
+
+                                        {/* Issues Found */}
+                                        <div className="ai-issues-box">
+                                            <h6><i className="bi bi-list-check me-1" />Issues Detected</h6>
+                                            <ul className="issues-list">
+                                                {aiAnalysis.issues_found?.map((issue, idx) => (
+                                                    <li key={idx}>
+                                                        <i className="bi bi-exclamation-circle text-warning me-1" />
+                                                        {issue}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+
+                                        {/* Confidence */}
+                                        <div className="ai-confidence">
+                                            <span className="confidence-label">AI Confidence:</span>
+                                            <span className={`confidence-badge confidence-${aiAnalysis.confidence}`}>
+                                                {aiAnalysis.confidence?.toUpperCase() || 'UNKNOWN'}
+                                            </span>
+                                        </div>
+
+                                        {/* Additional Notes */}
+                                        {aiAnalysis.additional_notes && (
+                                            <div className="ai-notes">
+                                                <small><i className="bi bi-lightbulb me-1" />{aiAnalysis.additional_notes}</small>
+                                            </div>
+                                        )}
+
+                                        {/* Corrected Address Input */}
+                                        <div className="correction-input-section">
+                                            <h6><i className="bi bi-magic me-1" />AI Suggested Correction</h6>
+                                            <div className="input-group">
+                                                <span className="input-group-text">
+                                                    <i className="bi bi-geo-alt-fill" />
+                                                </span>
+                                                <input
+                                                    type="text"
+                                                    className="form-control correction-input"
+                                                    value={correctedAddressInput}
+                                                    onChange={(e) => setCorrectedAddressInput(e.target.value)}
+                                                    placeholder="Enter corrected address"
+                                                />
+                                            </div>
+                                            <small className="form-text text-muted">
+                                                Review the AI suggestion above. Edit if needed, then approve.
+                                            </small>
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="hitl-actions">
+                                            <button
+                                                type="button"
+                                                className="btn btn-success btn-lg hitl-approve-btn"
+                                                onClick={handleSubmitCorrection}
+                                                disabled={submittingCorrection || !correctedAddressInput.trim()}
+                                            >
+                                                {submittingCorrection ? (
+                                                    <>
+                                                        <span className="spinner-border spinner-border-sm me-2" role="status" />
+                                                        Processing...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <i className="bi bi-check-circle me-2" />
+                                                        Approve & Resume Workflow
+                                                    </>
+                                                )}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="btn btn-outline-secondary"
+                                                onClick={handleCloseHitlModal}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="ai-error">
+                                        <i className="bi bi-exclamation-triangle text-danger" />
+                                        <p>Failed to load AI analysis</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

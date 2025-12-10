@@ -68,7 +68,9 @@ function UserPortal() {
         e.preventDefault();
 
         if (!email || !landlordPdf || !addressPdf) {
-            setMessage('Bitte füllen Sie alle Pflichtfelder aus.');
+            setMessage(language === 'de'
+                ? 'Bitte füllen Sie alle Pflichtfelder aus.'
+                : 'Please fill in all required fields.');
             setSuccess(false);
             setShowInfo(false);
             return;
@@ -91,13 +93,40 @@ function UserPortal() {
                 },
             });
 
-            setMessage(response.data.message || 'Ihr Antrag wurde erfolgreich eingereicht. Sie erhalten eine Bestätigung per E-Mail.');
+            setMessage(response.data.message || (language === 'de'
+                ? 'Ihr Antrag wurde erfolgreich eingereicht. Sie erhalten eine Bestätigung per E-Mail.'
+                : 'Your application has been successfully submitted. You will receive a confirmation by email.'));
             setSuccess(true);
             setEmail('');
             setLandlordPdf(null);
             setAddressPdf(null);
         } catch (error) {
-            setMessage(error.response?.data?.detail || 'Einreichung fehlgeschlagen. Bitte versuchen Sie es erneut.');
+            // Handle document validation errors
+            const errorData = error.response?.data;
+
+            if (error.response?.status === 400 && errorData?.errors) {
+                // Document validation failed - show detailed error
+                const errorMessages = errorData.errors;
+                const helpMessage = language === 'de'
+                    ? 'Benötigen Sie Hilfe? Klicken Sie auf den Chatbot unten rechts für Unterstützung.'
+                    : 'Need help? Click on the chatbot at the bottom right for assistance.';
+
+                let displayMessage = language === 'de'
+                    ? '❌ Dokumente ungültig:\n\n'
+                    : '❌ Invalid documents:\n\n';
+
+                errorMessages.forEach(err => {
+                    displayMessage += `• ${err}\n`;
+                });
+                displayMessage += `\n💡 ${helpMessage}`;
+
+                setMessage(displayMessage);
+            } else {
+                // Generic error
+                setMessage(error.response?.data?.detail || (language === 'de'
+                    ? 'Einreichung fehlgeschlagen. Bitte versuchen Sie es erneut.'
+                    : 'Submission failed. Please try again.'));
+            }
             setSuccess(false);
         } finally {
             setLoading(false);
@@ -194,8 +223,8 @@ function UserPortal() {
                         {/* Success/Error Alert */}
                         {message && (
                             <div className={`gov-alert ${success ? 'success' : 'error'}`}>
-                                <span className="alert-icon">{success ? '✅' : '❌'}</span>
-                                <div>{message}</div>
+                                <span className="alert-icon">{success ? '✅' : ''}</span>
+                                <div style={{ whiteSpace: 'pre-line' }}>{message}</div>
                             </div>
                         )}
 

@@ -45,6 +45,23 @@ services:
     environment:
       - VITE_API_URL=http://localhost:8000
 
+  email-listener:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - db
+      - backend
+    environment:
+      DATABASE_URL: postgresql://app_user:app_pass@db:5432/address_db
+      EMAIL_ADDRESS: adiyt19921@gmail.com
+      EMAIL_APP_PASSWORD: agns gzbm hjih lfpg
+      BACKEND_URL: http://backend:8000
+    working_dir: /app
+    command: [ "python", "-m", "src.automation.email_listener" ]
+    volumes:
+      - .:/app
+      - uploads:/app/uploads
+
 volumes:
   db-data:
   uploads:
