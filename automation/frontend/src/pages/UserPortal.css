@@ -796,8 +796,10 @@ body {
 
 .chatbot-avatar {
     width: 44px;
+
     height: 44px;
     background: rgba(255, 255, 255, 0.2);
+
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -1203,5 +1205,35 @@ body {
         width: calc(100vw - 48px);
         height: 60vh;
         bottom: 90px;
+    }
+}
+
+/* ==================== ENHANCED MOBILE OPTIMIZATIONS (< 768px) ==================== */
+@media (max-width: 768px) {
+    /* override any previous conflicting styles */
+
+    .main-content {
+        padding: 50px 20px !important;
+        grid-template-columns: 1fr !important;
+    }
+
+    .form-section {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .sidebar {
+        width: 100% !important;
+    }
+
+    /* Ensure status bar doesn't overflow */
+    .status-bar {
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+
+    .status-bar::before {
+        display: none;
+        /* Hide line on mobile if it breaks layout */
     }
 }

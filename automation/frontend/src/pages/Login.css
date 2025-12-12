@@ -107,3 +107,29 @@
     margin-bottom: 20px;
     text-align: center;
 }
+
+/* Responsive Design for Login */
+@media (max-width: 768px) {
+    .login-outer-box {
+        padding: 20px !important;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-card {
+        padding: 30px 20px;
+        min-width: 0 !important;
+        /* Allow shrinking below 400px */
+        width: 100% !important;
+        max-width: 100%;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-page {
+        height: 100%;
+        /* Prevent fixed height issues on mobile browsers */
+        position: relative;
+    }
+}

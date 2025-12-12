@@ -1251,4 +1251,17 @@
     .hitl-actions {
         flex-direction: column;
     }
+
+    /* Allow filters to wrap on mobile */
+    .admin-filters {
+        flex-wrap: wrap !important;
+        width: 100%;
+    }
+
+    .admin-filters .form-select,
+    .admin-filters .form-control,
+    .admin-filters .input-group {
+        width: 100% !important;
+        flex: 1 1 auto !important;
+    }
 }

@@ -922,30 +922,69 @@ input[type="file"]:hover {
 }
 
 @media (max-width: 768px) {
-  .navbar .container {
-    padding: 0 1rem;
-  }
 
-  .navbar h1 {
-    font-size: 1.25rem;
-  }
-
-  .nav-links {
-    gap: 0.5rem;
-  }
-
-  .nav-links a {
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-  }
-
+  /* Layout adjustments */
   main {
-    padding: 2rem 1rem;
-    min-height: calc(100vh - 70px);
+    padding: 1rem 0.5rem;
+    min-height: calc(100vh - 120px);
   }
 
+  .app {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Navbar Adjustments for Mobile */
+  .navbar-top-bar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 15px;
+    text-align: center;
+  }
+
+  .top-bar-links {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .navbar-main {
+    flex-direction: column;
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .navbar-brand {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .navbar-links {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .nav-link {
+    padding: 8px 12px;
+    font-size: 13px;
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .navbar-breadcrumb {
+    padding: 8px 15px;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  /* Card & Form Adjustments */
   .card {
-    padding: 2rem 1.5rem;
+    padding: 1.5rem 1rem;
+    border-radius: 16px;
   }
 
   h2 {
@@ -954,22 +993,98 @@ input[type="file"]:hover {
 
   .header-row {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
     gap: 1.5rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
   }
 
   .tabs {
     width: 100%;
+    flex-wrap: wrap;
   }
 
   .tab-btn {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    font-size: 0.875rem;
+    flex: 1 1 45%;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+    text-align: center;
   }
 
   .stats {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.5rem;
+  }
+
+  .stat-card h3 {
+    font-size: 2.5rem;
+  }
+
+  /* Table responsiveness */
+  .table-container {
+    margin: 0 -1rem;
+    /* Negative margin to let table scroll full width */
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  /* Modal responsiveness */
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+    margin: 0;
+    border-radius: 16px;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* Extra optimizations for small phones */
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .navbar-title {
+    font-size: 16px;
+  }
+
+  .navbar-subtitle {
+    font-size: 11px;
+  }
+
+  .nav-link {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .gov-footer {
+    padding: 30px 20px;
   }
 }
 
