@@ -134,11 +134,20 @@ app = FastAPI(
 )
 
 # CORS – configure for production and development
+# CORS – configure for production and development
 import os
-FRONTEND_URL = os.getenv("FRONTEND_URL", "*")  # Set in Railway: https://your-app.vercel.app
+
+# Default to known Vercel URL and Localhost to avoid "*" issues with credentials
+DEFAULT_ORIGINS = "https://address-change-automation.vercel.app,http://localhost:5173,http://localhost:3000"
+FRONTEND_URL = os.getenv("FRONTEND_URL", DEFAULT_ORIGINS)
 
 # Support multiple origins if comma-separated
-allowed_origins = [origin.strip() for origin in FRONTEND_URL.split(",")] if FRONTEND_URL != "*" else ["*"]
+if FRONTEND_URL == "*":
+    allowed_origins = ["*"]
+else:
+    allowed_origins = [origin.strip() for origin in FRONTEND_URL.split(",")]
+
+print(f"🚀 CORS Configured for origins: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
