@@ -471,8 +471,10 @@ async def submit_case(
         with get_conn() as conn:
             with conn.cursor() as cur:
                 # Get next case ID
-                cur.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM cases")
-                next_id = cur.fetchone()[0]
+                cur.execute("SELECT COALESCE(MAX(id), 0) + 1 as new_id FROM cases")
+                row = cur.fetchone()
+                # RealDictCursor returns a dict, so we access by key 'new_id'
+                next_id = row['new_id'] if row else 1
                 case_id = f"Case ID: {next_id}"
                 
                 # Store validation issues as JSON string if any
