@@ -145,7 +145,8 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", DEFAULT_ORIGINS)
 if FRONTEND_URL == "*":
     allowed_origins = ["*"]
 else:
-    allowed_origins = [origin.strip() for origin in FRONTEND_URL.split(",")]
+    # Split, strip whitespace, and strip trailing slashes (crucial for exact origin match)
+    allowed_origins = [origin.strip().rstrip("/") for origin in FRONTEND_URL.split(",")]
 
 print(f"🚀 CORS Configured for origins: {allowed_origins}")
 
