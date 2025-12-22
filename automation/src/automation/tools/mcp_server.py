@@ -10,6 +10,7 @@ from src.automation.db import (
     update_case_status,
     set_canonical_address,
     set_registry_exists,
+    set_had_hitl,
     add_audit_entry,
     get_audit_entries,
     get_canonical_address,
@@ -249,7 +250,10 @@ def assess_quality(input: AssessQualityInput) -> AssessQualityOutput:
     if has_incomplete_street:
         # Incomplete street name → LOW confidence → HITL needed
         confidence = 0.60
-        reason = "street name incomplete (e.g., 'Ziegelstr' should be 'Ziegelstraße')"
+        # Extract the actual incomplete street name for the log message
+        incomplete_match = re.search(r'\b(\w+str)\b', corrected_address, re.IGNORECASE)
+        incomplete_street = incomplete_match.group(1) if incomplete_match else "street"
+        reason = f"street name incomplete ('{incomplete_street}' should end with 'straße')"
         add_audit_entry(input.case_id, f"Incomplete street detected: confidence=0.60")
     elif has_complete_street:
         # Complete street name → HIGH confidence → OK
@@ -276,6 +280,7 @@ def assess_quality(input: AssessQualityInput) -> AssessQualityOutput:
     if needs_hitl:
         hitl_task_id = f"HITL-{input.case_id}"
         update_case_status(input.case_id, "WAITING_FOR_HUMAN")
+        set_had_hitl(input.case_id, True)  # Mark for analytics
         add_audit_entry(
             input.case_id,
             f"HITL required. confidence={confidence} | Reason: {reason}"
@@ -369,6 +374,7 @@ def check_business_rules(input: BusinessRulesInput) -> BusinessRulesOutput:
     if needs_hitl:
         hitl_task_id = f"HITL-RULES-{input.case_id}"
         update_case_status(input.case_id, "WAITING_FOR_HUMAN")
+        set_had_hitl(input.case_id, True)  # Mark for analytics
         add_audit_entry(
             input.case_id,
             f"HITL required for business rules. status={overall_status}, "

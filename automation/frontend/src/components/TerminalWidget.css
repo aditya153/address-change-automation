@@ -1,0 +1,137 @@
+.terminal-widget {
+    background: #0a0a0a;
+    border-radius: 8px;
+    border: 1px solid #333;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    overflow: hidden;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+.terminal-header {
+    background: #1a1a1a;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.terminal-title {
+    color: #888;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #444;
+}
+
+.status-dot.online {
+    background: #00ff00;
+    box-shadow: 0 0 8px #00ff00;
+}
+
+.terminal-controls {
+    display: flex;
+    gap: 6px;
+}
+
+.ctrl-btn {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.ctrl-btn.red {
+    background: #ff5f56;
+}
+
+.ctrl-btn.yellow {
+    background: #ffbd2e;
+}
+
+.ctrl-btn.green {
+    background: #27c93f;
+}
+
+.terminal-body {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background: #0d0d0d;
+}
+
+.terminal-line {
+    font-size: 12px;
+    margin-bottom: 4px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.log-time {
+    color: #555;
+    margin-right: 8px;
+}
+
+.log-agent {
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.log-message {
+    color: #ccc;
+}
+
+.log-message.thought {
+    color: #4facfe;
+    /* Light blue for internal thoughts */
+    font-style: italic;
+}
+
+.log-message.success {
+    color: #00ff00;
+}
+
+.log-message.error {
+    color: #ff3333;
+}
+
+.log-message.step {
+    color: #ccc;
+}
+
+.terminal-placeholder {
+    color: #444;
+    text-align: center;
+    margin-top: 100px;
+    font-style: italic;
+}
+
+/* Custom Scrollbar */
+.terminal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-body::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.terminal-body::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+.terminal-body::-webkit-scrollbar-thumb:hover {
+    background: #444;
+}

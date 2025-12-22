@@ -342,6 +342,7 @@ def create_case_from_email(sender_email, attachments):
             }
             data = {
                 'email': sender_email,
+                'source': 'email',  # Mark as email submission for analytics
             }
             
             response = requests.post(

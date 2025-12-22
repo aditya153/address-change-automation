@@ -212,9 +212,25 @@ class AddressChangeMain:
         Creates the AddressChange crew with conditional task execution.
         Tasks after assess_quality will check HITL status before executing.
         """
+        from .log_manager import log_manager
+
+        def step_callback(agent_output: Any, *args, **kwargs):
+            """Callback for every agent step"""
+            try:
+                log_manager.log_agent_step(agent_output)
+            except Exception as e:
+                print(f"Logging Error: {e}")
+
+        def task_callback(task_output: Any, *args, **kwargs):
+             """Callback for task completion"""
+             # We can keep this one simple or mute it entirely
+             pass
+
         return Crew(
             agents=self.agents,
             tasks=self.tasks,
             process=Process.sequential,
-            verbose=False,  # Disable verbose logs
+            verbose=False,  # Disable CrewAI's verbose output
+            step_callback=step_callback,
+            task_callback=task_callback
         )

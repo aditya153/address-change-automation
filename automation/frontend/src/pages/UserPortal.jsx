@@ -15,6 +15,12 @@ function UserPortal() {
     const [message, setMessage] = useState('');
     const [success, setSuccess] = useState(false);
 
+    // Document validation error state
+    const [documentValidationErrors, setDocumentValidationErrors] = useState({
+        landlord: false,
+        address: false
+    });
+
     // Chatbot state
     const [chatOpen, setChatOpen] = useState(false);
     const [chatMessages, setChatMessages] = useState([]);
@@ -80,6 +86,8 @@ function UserPortal() {
         setLoading(true);
         setMessage('');
         setSuccess(false);
+        // Reset validation errors when attempting new submission
+        setDocumentValidationErrors({ landlord: false, address: false });
         setShowInfo(false);
 
         try {
@@ -116,9 +124,27 @@ function UserPortal() {
                     ? '❌ Dokumente ungültig:\n\n'
                     : '❌ Invalid documents:\n\n';
 
+                // Determine which document(s) failed validation
+                const validationErrors = { landlord: false, address: false };
                 errorMessages.forEach(err => {
                     displayMessage += `• ${err}\n`;
+                    const errLower = err.toLowerCase();
+                    // Check for landlord document errors - match backend error patterns
+                    // Backend uses: "Landlord document invalid: ..." or "First document is not..."
+                    if (errLower.startsWith('landlord document') ||
+                        errLower.includes('first document') ||
+                        errLower.includes('wohnungsgeberbestätigung')) {
+                        validationErrors.landlord = true;
+                    }
+                    // Check for address form errors - match backend error patterns
+                    // Backend uses: "Address form invalid: ..." or "Second document is not..."
+                    if (errLower.startsWith('address form') ||
+                        errLower.includes('second document') ||
+                        errLower.includes('meldebescheinigung')) {
+                        validationErrors.address = true;
+                    }
                 });
+                setDocumentValidationErrors(validationErrors);
                 displayMessage += `\n💡 ${helpMessage}`;
 
                 setMessage(displayMessage);
@@ -174,10 +200,27 @@ function UserPortal() {
 
     const getStepStatus = () => {
         const hasEmail = email && email.includes('@');
+
+        // Determine step2 status (address certificate)
+        let step2Status = '';
+        if (addressPdf) {
+            step2Status = documentValidationErrors.address ? 'error' : 'completed';
+        } else if (hasEmail) {
+            step2Status = 'active';
+        }
+
+        // Determine step3 status (landlord certificate)
+        let step3Status = '';
+        if (landlordPdf) {
+            step3Status = documentValidationErrors.landlord ? 'error' : 'completed';
+        } else if (addressPdf) {
+            step3Status = 'active';
+        }
+
         return {
             step1: hasEmail ? 'completed' : 'active',
-            step2: addressPdf ? 'completed' : hasEmail ? 'active' : '',
-            step3: landlordPdf ? 'completed' : addressPdf ? 'active' : ''
+            step2: step2Status,
+            step3: step3Status
         };
     };
 
@@ -202,11 +245,15 @@ function UserPortal() {
                                 <span className="status-label">{t('personalData')}</span>
                             </div>
                             <div className={`status-step ${steps.step2}`}>
-                                <div className="status-icon">{steps.step2 === 'completed' ? '✓' : '2'}</div>
+                                <div className="status-icon">
+                                    {steps.step2 === 'completed' ? '✓' : steps.step2 === 'error' ? '✕' : '2'}
+                                </div>
                                 <span className="status-label">{t('registrationCertificate')}</span>
                             </div>
                             <div className={`status-step ${steps.step3}`}>
-                                <div className="status-icon">{steps.step3 === 'completed' ? '✓' : '3'}</div>
+                                <div className="status-icon">
+                                    {steps.step3 === 'completed' ? '✓' : steps.step3 === 'error' ? '✕' : '3'}
+                                </div>
                                 <span className="status-label">{t('landlordConfirmation')}</span>
                             </div>
                         </div>
@@ -257,14 +304,20 @@ function UserPortal() {
                                     Meldebescheinigung (Address Certificate) <span className="required">*</span>
                                 </label>
                                 <div
-                                    className={`file-upload-area ${addressPdf ? 'has-file' : ''}`}
+                                    className={`file-upload-area ${addressPdf ? 'has-file' : ''} ${documentValidationErrors.address ? 'has-error' : ''}`}
                                     onClick={() => handleFileClick('addressPdf')}
                                 >
                                     <input
                                         id="addressPdf"
                                         type="file"
                                         accept=".pdf"
-                                        onChange={(e) => setAddressPdf(e.target.files[0])}
+                                        onChange={(e) => {
+                                            setAddressPdf(e.target.files[0]);
+                                            // Clear validation error when new file is selected
+                                            if (documentValidationErrors.address) {
+                                                setDocumentValidationErrors(prev => ({ ...prev, address: false }));
+                                            }
+                                        }}
                                     />
                                     <div className="upload-content">
                                         <span className="upload-icon">📄</span>
@@ -274,10 +327,16 @@ function UserPortal() {
                                         <div className="upload-hint">Nur PDF-Dateien (max. 10 MB)</div>
                                     </div>
                                     <div className="file-selected-info">
-                                        <div className="file-icon-box">✓</div>
+                                        <div className={`file-icon-box ${documentValidationErrors.address ? 'error' : ''}`}>
+                                            {documentValidationErrors.address ? '✕' : '✓'}
+                                        </div>
                                         <div className="file-info">
-                                            <div className="file-info-name">{addressPdf?.name}</div>
-                                            <div className="file-info-status">Bereit zum Hochladen</div>
+                                            <div className={`file-info-name ${documentValidationErrors.address ? 'error' : ''}`}>{addressPdf?.name}</div>
+                                            <div className={`file-info-status ${documentValidationErrors.address ? 'error' : ''}`}>
+                                                {documentValidationErrors.address
+                                                    ? (language === 'de' ? 'Dokument ungültig' : 'Document invalid')
+                                                    : 'Bereit zum Hochladen'}
+                                            </div>
                                         </div>
                                         <button
                                             type="button"
@@ -299,14 +358,20 @@ function UserPortal() {
                                     Wohnungsgeberbestätigung (Landlord Certificate) <span className="required">*</span>
                                 </label>
                                 <div
-                                    className={`file-upload-area ${landlordPdf ? 'has-file' : ''}`}
+                                    className={`file-upload-area ${landlordPdf ? 'has-file' : ''} ${documentValidationErrors.landlord ? 'has-error' : ''}`}
                                     onClick={() => handleFileClick('landlordPdf')}
                                 >
                                     <input
                                         id="landlordPdf"
                                         type="file"
                                         accept=".pdf"
-                                        onChange={(e) => setLandlordPdf(e.target.files[0])}
+                                        onChange={(e) => {
+                                            setLandlordPdf(e.target.files[0]);
+                                            // Clear validation error when new file is selected
+                                            if (documentValidationErrors.landlord) {
+                                                setDocumentValidationErrors(prev => ({ ...prev, landlord: false }));
+                                            }
+                                        }}
                                     />
                                     <div className="upload-content">
                                         <span className="upload-icon">🏠</span>
@@ -316,10 +381,16 @@ function UserPortal() {
                                         <div className="upload-hint">Nur PDF-Dateien (max. 10 MB)</div>
                                     </div>
                                     <div className="file-selected-info">
-                                        <div className="file-icon-box">✓</div>
+                                        <div className={`file-icon-box ${documentValidationErrors.landlord ? 'error' : ''}`}>
+                                            {documentValidationErrors.landlord ? '✕' : '✓'}
+                                        </div>
                                         <div className="file-info">
-                                            <div className="file-info-name">{landlordPdf?.name}</div>
-                                            <div className="file-info-status">Bereit zum Hochladen</div>
+                                            <div className={`file-info-name ${documentValidationErrors.landlord ? 'error' : ''}`}>{landlordPdf?.name}</div>
+                                            <div className={`file-info-status ${documentValidationErrors.landlord ? 'error' : ''}`}>
+                                                {documentValidationErrors.landlord
+                                                    ? (language === 'de' ? 'Dokument ungültig' : 'Document invalid')
+                                                    : 'Bereit zum Hochladen'}
+                                            </div>
                                         </div>
                                         <button
                                             type="button"

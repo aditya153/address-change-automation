@@ -40,24 +40,31 @@ def normalize_case_id(case_id: str) -> str:
     # Otherwise, return as-is and let the database handle it
     return case_id
 
-def create_case(data: dict) -> str:
-    """Insert a new case and return case_id like 'Case ID: 1'."""
+def create_case(data: dict, source: str = 'portal') -> str:
+    """Insert a new case and return case_id like 'Case ID: 1'.
+    
+    Args:
+        data: Case data dictionary
+        source: 'portal' or 'email' indicating submission source
+    """
     with get_conn() as conn, conn.cursor() as cur:
+        # Add source to data dict for named parameter substitution
+        data_with_source = {**data, 'source': source}
         cur.execute(
             """
             INSERT INTO cases (
                 citizen_name, dob, email,
                 old_address_raw, new_address_raw,
                 move_in_date_raw, landlord_name,
-                status
+                status, source
             )
             VALUES (%(citizen_name)s, %(dob)s, %(email)s,
                     %(old_address_raw)s, %(new_address_raw)s,
                     %(move_in_date_raw)s, %(landlord_name)s,
-                    'INGESTED')
+                    'INGESTED', %(source)s)
             RETURNING id;
             """,
-            data,
+            data_with_source,
         )
         row = cur.fetchone()
         numeric_id = row["id"]
@@ -93,6 +100,15 @@ def set_registry_exists(case_id: str, exists: bool):
         cur.execute(
             "UPDATE cases SET registry_exists = %s, updated_at = %s WHERE case_id = %s;",
             (exists, datetime.utcnow(), case_id),
+        )
+
+def set_had_hitl(case_id: str, had_hitl: bool = True):
+    """Mark a case as having required human-in-the-loop intervention."""
+    case_id = normalize_case_id(case_id)
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE cases SET had_hitl = %s, updated_at = %s WHERE case_id = %s;",
+            (had_hitl, datetime.utcnow(), case_id),
         )
 
 def get_canonical_address(case_id: str) -> str:

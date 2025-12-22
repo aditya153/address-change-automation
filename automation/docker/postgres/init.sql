@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS cases (
     canonical_address      TEXT,                 -- from assess_quality
     registry_exists        BOOLEAN,              -- from verify_identity
     status                 TEXT NOT NULL,        -- "INGESTED", "WAITING_FOR_HUMAN", etc.
+    source                 TEXT DEFAULT 'portal', -- 'portal' or 'email'
+    had_hitl               BOOLEAN DEFAULT FALSE, -- whether case required human intervention
     pdf_landlord_path      TEXT,                 -- path to landlord confirmation PDF
     pdf_address_change_path TEXT,                -- path to address change PDF
     ai_analysis            TEXT,                 -- AI analysis result
@@ -42,21 +44,7 @@ CREATE TABLE IF NOT EXISTS case_resolutions (
 CREATE INDEX IF NOT EXISTS idx_case_resolutions_pattern ON case_resolutions(original_pattern);
 CREATE INDEX IF NOT EXISTS idx_case_resolutions_type ON case_resolutions(resolution_type);
 
--- Seed data: Common German address abbreviations
-INSERT INTO case_resolutions (original_pattern, corrected_value, resolution_type, frequency) VALUES
-    ('KL', 'Kaiserslautern', 'city_abbreviation', 10),
-    ('FFM', 'Frankfurt am Main', 'city_abbreviation', 10),
-    ('M', 'München', 'city_abbreviation', 10),
-    ('B', 'Berlin', 'city_abbreviation', 10),
-    ('HH', 'Hamburg', 'city_abbreviation', 10),
-    ('K', 'Köln', 'city_abbreviation', 10),
-    ('D', 'Düsseldorf', 'city_abbreviation', 10),
-    ('S', 'Stuttgart', 'city_abbreviation', 10),
-    ('Str.', 'Straße', 'street_abbreviation', 10),
-    ('str.', 'straße', 'street_abbreviation', 10),
-    ('Pl.', 'Platz', 'street_abbreviation', 10),
-    ('str', 'straße', 'street_abbreviation', 10),
-    ('Str', 'Straße', 'street_abbreviation', 10),
-    ('strasse', 'straße', 'street_abbreviation', 10),
-    ('Strasse', 'Straße', 'street_abbreviation', 10)
-ON CONFLICT (original_pattern, resolution_type) DO NOTHING;
+-- NO SEED DATA: System learns everything from HITL corrections
+-- When admin corrects an address, the diff is automatically stored here
+-- Next time a similar pattern appears, it will be auto-corrected without HITL
+

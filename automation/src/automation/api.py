@@ -2,6 +2,7 @@
 
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
+import asyncio
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -132,14 +133,52 @@ app = FastAPI(
     description="FastAPI backend for the address-change workflow (CrewAI + MCP + Postgres).",
 )
 
-# CORS – allow everything for now (you can tighten later)
+# CORS – configure for production and development
+import os
+FRONTEND_URL = os.getenv("FRONTEND_URL", "*")  # Set in Railway: https://your-app.vercel.app
+
+# Support multiple origins if comma-separated
+allowed_origins = [origin.strip() for origin in FRONTEND_URL.split(",")] if FRONTEND_URL != "*" else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],      # for demo; restrict to your frontend origin later
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# =======================
+# LOG STREAMING SETUP
+# =======================
+from .log_manager import log_manager
+from fastapi.responses import StreamingResponse
+
+@app.on_event("startup")
+async def startup_event():
+    import asyncio
+    # Start the log broadcaster in the background
+    asyncio.create_task(log_manager.stream_logs_to_clients())
+
+@app.get("/stream-logs")
+async def stream_logs():
+    """
+    Server-Sent Events (SSE) endpoint for real-time logs.
+    """
+    queue = await log_manager.connect()
+    
+    async def event_generator():
+        try:
+            while True:
+                # Wait for new log message
+                data = await queue.get()
+                yield data
+        except asyncio.CancelledError:
+            log_manager.disconnect(queue)
+            
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
 
 
 # =======================
@@ -297,7 +336,8 @@ def pre_validate_case(citizen_data: dict) -> tuple:
 async def submit_case(
     email: str =Form(...),
     landlord_pdf: UploadFile = File(...),
-    address_pdf: UploadFile = File(...)
+    address_pdf: UploadFile = File(...),
+    source: str = Form("portal")  # 'portal' (default) or 'email'
 ):
     """
     User submission endpoint - accepts email and 2 PDFs
@@ -446,11 +486,11 @@ async def submit_case(
                     INSERT INTO cases (
                         case_id, citizen_name, dob, email, 
                         old_address_raw, new_address_raw, move_in_date_raw,
-                        landlord_name, status, 
+                        landlord_name, status, source,
                         pdf_landlord_path, pdf_address_change_path,
                         submitted_at
                     ) VALUES (
-                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                     );
                     """,
                     (
@@ -463,6 +503,7 @@ async def submit_case(
                         citizen_data.get("move_in_date_raw", "2025-01-01"),
                         citizen_data.get("landlord_name", "Unknown"),
                         initial_status,
+                        source,  # Source from form parameter ('portal' or 'email')
                         str(landlord_path),
                         str(address_path),
                         dt.now()
@@ -614,6 +655,107 @@ async def get_completed_cases():
         )
         rows = cur.fetchall()
     return {"cases": rows}
+
+
+@app.get("/admin/analytics")
+async def get_analytics():
+    """
+    Admin endpoint - get aggregated analytics for the dashboard.
+    Returns real statistics based on case data.
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        # Total cases count
+        cur.execute("SELECT COUNT(*) as total FROM cases;")
+        total_cases = cur.fetchone()["total"]
+        
+        # Source breakdown (portal vs email)
+        cur.execute("""
+            SELECT 
+                COALESCE(source, 'portal') as source,
+                COUNT(*) as count 
+            FROM cases 
+            GROUP BY COALESCE(source, 'portal');
+        """)
+        source_breakdown = {row["source"]: row["count"] for row in cur.fetchall()}
+        
+        # HITL breakdown
+        cur.execute("""
+            SELECT 
+                COALESCE(had_hitl, FALSE) as had_hitl,
+                COUNT(*) as count 
+            FROM cases 
+            WHERE status = 'CLOSED'
+            GROUP BY COALESCE(had_hitl, FALSE);
+        """)
+        hitl_breakdown = {}
+        for row in cur.fetchall():
+            key = "manual" if row["had_hitl"] else "auto"
+            hitl_breakdown[key] = row["count"]
+        
+        # Status breakdown
+        cur.execute("""
+            SELECT status, COUNT(*) as count 
+            FROM cases 
+            GROUP BY status;
+        """)
+        status_breakdown = {row["status"]: row["count"] for row in cur.fetchall()}
+        
+        # Learned patterns count
+        cur.execute("SELECT COUNT(*) as total FROM case_resolutions;")
+        learned_patterns = cur.fetchone()["total"]
+        
+        # Average processing time for completed cases (in minutes)
+        cur.execute("""
+            SELECT AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) / 60) as avg_minutes
+            FROM cases
+            WHERE status = 'CLOSED';
+        """)
+        avg_time_row = cur.fetchone()
+        avg_processing_time = round(avg_time_row["avg_minutes"] or 0, 1)
+        
+    # Calculate automation rate
+    auto_count = hitl_breakdown.get("auto", 0)
+    manual_count = hitl_breakdown.get("manual", 0)
+    completed_total = auto_count + manual_count
+    automation_rate = round((auto_count / max(completed_total, 1)) * 100)
+    
+    return {
+        "total_cases": total_cases,
+        "source_breakdown": source_breakdown,
+        "hitl_breakdown": hitl_breakdown,
+        "status_breakdown": status_breakdown,
+        "automation_rate": automation_rate,
+        "avg_processing_time_minutes": avg_processing_time,
+        "learned_patterns": learned_patterns,
+    }
+
+
+@app.get("/admin/learned-patterns")
+async def get_learned_patterns():
+    """
+    Get all learned patterns from the memory system (case_resolutions table).
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("""
+            SELECT original_pattern, corrected_value, resolution_type, frequency, last_used_at
+            FROM case_resolutions
+            ORDER BY frequency DESC, last_used_at DESC
+            LIMIT 50;
+        """)
+        rows = cur.fetchall()
+    
+    patterns = [
+        {
+            "original": row["original_pattern"],
+            "corrected": row["corrected_value"],
+            "type": row["resolution_type"],
+            "frequency": row["frequency"],
+            "last_used": row["last_used_at"].isoformat() if row["last_used_at"] else None
+        }
+        for row in rows
+    ]
+    
+    return {"patterns": patterns}
 
 
 @app.get("/admin/hitl-cases")
@@ -869,11 +1011,21 @@ async def resolve_hitl(case_id: str, corrected_address: str = Form(...)):
                         is_abbreviation = len(orig_token) < len(corr_token) and best_similarity > 0.3
                         is_similar = best_similarity > 0.5
                         
-                        if is_abbreviation or is_similar:
+                        # SPECIAL CASE: Very short tokens (2-3 chars) expanding to much longer words
+                        # These are likely city abbreviations (KL→Kaiserslautern, FFM→Frankfurt)
+                        # They have low string similarity but are valid abbreviations
+                        is_short_abbreviation = (
+                            len(orig_token) <= 3 and 
+                            len(corr_token) >= 5 and 
+                            orig_token.isupper()  # City abbreviations are usually uppercase
+                        )
+                        
+                        if is_abbreviation or is_similar or is_short_abbreviation:
                             pattern_type = determine_pattern_type(orig_token, corr_token)
                             
-                            # Skip numbers and very short tokens
-                            if pattern_type != "number_correction" and len(orig_token) >= 2:
+                            # Skip numbers and very short tokens (but allow 2-char city abbreviations)
+                            min_length = 2 if is_short_abbreviation else 2
+                            if pattern_type != "number_correction" and len(orig_token) >= min_length:
                                 store_resolution(orig_token, corr_token, pattern_type)
                                 patterns_learned.append(f"'{orig_token}' → '{corr_token}' ({pattern_type})")
             
