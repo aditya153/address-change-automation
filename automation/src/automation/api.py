@@ -465,13 +465,11 @@ async def submit_case(
             print(f"⚠️ Case needs review. Issues: {validation_issues}")
 
         # Create case in database
-        from psycopg2 import connect
-        import os
-        conn = connect(os.getenv("DATABASE_URL"))
+        from .db import get_conn
         case_id = None
-        try:
-            cur = conn.cursor()
-            try:
+        
+        with get_conn() as conn:
+            with conn.cursor() as cur:
                 # Get next case ID
                 cur.execute("SELECT COALESCE(MAX(id), 0) + 1 FROM cases")
                 next_id = cur.fetchone()[0]
@@ -509,11 +507,6 @@ async def submit_case(
                         dt.now()
                     )
                 )
-                conn.commit()
-            finally:
-                cur.close()
-        finally:
-            conn.close()
         
         # Auto-process clean cases in background thread
         if is_clean and case_id:

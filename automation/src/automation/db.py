@@ -4,10 +4,21 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime
 
+from contextlib import contextmanager
+
 DB_DSN = os.getenv("DATABASE_URL", "postgresql://app_user:app_pass@db:5432/address_db")
 
+@contextmanager
 def get_conn():
-    return psycopg2.connect(DB_DSN, cursor_factory=RealDictCursor)
+    conn = psycopg2.connect(DB_DSN, cursor_factory=RealDictCursor)
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 def normalize_case_id(case_id: str) -> str:
     """
