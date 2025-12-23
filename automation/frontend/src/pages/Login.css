@@ -133,3 +133,30 @@
         position: relative;
     }
 }
+
+/* Demo Credentials Box */
+.demo-credentials {
+    margin-top: 24px;
+    padding: 16px;
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.demo-credentials .demo-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1565c0;
+    margin-bottom: 8px;
+}
+
+.demo-credentials p {
+    font-size: 13px;
+    color: #424242;
+    margin: 4px 0;
+}
+
+.demo-credentials strong {
+    color: #1a1a1a;
+}

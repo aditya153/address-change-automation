@@ -53,6 +53,12 @@ const LoginPage = () => {
                         </div>
                         <button type="submit" className="btn-login">Sign In</button>
                     </form>
+
+                    <div className="demo-credentials">
+                        <p className="demo-title">🔑 Demo Credentials</p>
+                        <p><strong>Username:</strong> admin</p>
+                        <p><strong>Password:</strong> admin</p>
+                    </div>
                 </div>
             </div>
         </div>
