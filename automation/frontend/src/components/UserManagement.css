@@ -139,15 +139,39 @@
     transition: all 0.2s;
 }
 
-.btn-promote {
-    background-color: #fff;
-    border-color: #d1d5db;
-    color: #374151;
+.current-user-row {
+    background-color: #f9fafb;
 }
 
-.btn-promote:hover {
-    background-color: #f9fafb;
-    border-color: #9ca3af;
+/* Invite Form Styles - AGGRESSIVE OVERRIDE */
+.user-management-container .user-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 30px !important;
+}
+
+.btn-add-user {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 12px 20px !important;
+    background-color: #0066cc !important;
+    /* Strong blue */
+    color: #ffffff !important;
+    /* FIXED: White text only */
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3) !important;
+}
+
+.btn-add-user svg {
+    color: #ffffff !important;
+    /* FIXED: White icon only */
 }
 
 .btn-demote {
@@ -298,6 +322,7 @@
     padding: 12px 28px !important;
     background-color: #0066cc !important;
     color: #ffffff !important;
+    /* Ensure white text */
     border: none !important;
     border-radius: 10px !important;
     font-size: 15px !important;
@@ -307,6 +332,11 @@
     align-items: center !important;
     gap: 10px !important;
     box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3) !important;
+}
+
+.btn-invite svg {
+    color: #ffffff !important;
+    /* Ensure white icon */
 }
 
 .btn-invite:hover {

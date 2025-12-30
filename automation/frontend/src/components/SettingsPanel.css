@@ -94,11 +94,18 @@
 
 .settings-tab.active {
     background-color: #0066cc;
-    color: white !important;
+    color: #ffffff !important;
+    /* Ensure white */
 }
 
 .settings-tab.active span {
-    color: white !important;
+    color: #ffffff !important;
+    /* Ensure white */
+}
+
+.settings-tab.active svg {
+    color: #ffffff !important;
+    /* Ensure white */
 }
 
 .settings-tab .chevron {
@@ -206,6 +213,14 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    background-color: #0066cc !important;
+    color: #ffffff !important;
+    /* Ensure white text */
+}
+
+.form-actions button svg {
+    color: #ffffff !important;
+    /* Ensure white icon */
 }
 
 /* Toggle Switches */
