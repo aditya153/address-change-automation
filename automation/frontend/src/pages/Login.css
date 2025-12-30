@@ -117,36 +117,9 @@
 }
 
 .portal-subtitle {
-    font-size: 14px;
+    font-size: 15px;
     color: rgba(255, 255, 255, 0.8);
-}
-
-.portal-icon {
-    width: 48px;
-    height: 48px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffffff;
-}
-
-.portal-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.portal-name {
-    font-size: 22px;
-    font-weight: 600;
-    margin: 0;
-    color: #ffffff !important;
-}
-
-.portal-subtitle {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Roboto', sans-serif;
 }
 
 /* Hero Section */
@@ -175,6 +148,7 @@
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.85) !important;
     max-width: 400px;
+    font-family: 'Roboto', sans-serif;
 }
 
 /* GDPR Section */
@@ -205,17 +179,20 @@
     font-size: 16px;
     font-weight: 600;
     color: #ffffff;
+    font-family: 'Roboto', sans-serif;
 }
 
 .gdpr-text span {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.7);
+    font-family: 'Roboto', sans-serif;
 }
 
 .copyright {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.6) !important;
     margin: 0;
+    font-family: 'Roboto', sans-serif;
 }
 
 /* Right Panel - White (50% width) */
@@ -246,6 +223,7 @@
     font-size: 16px;
     color: #6b7280 !important;
     margin: 0 0 36px 0;
+    font-family: 'Roboto', sans-serif;
 }
 
 /* Form Groups */
@@ -259,7 +237,7 @@
     font-weight: 500;
     color: #374151;
     margin-bottom: 8px;
-    font-family: 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Roboto', sans-serif;
 }
 
 /* Input Wrapper with Icon */
