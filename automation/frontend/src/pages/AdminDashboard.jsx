@@ -494,126 +494,157 @@ function AdminDashboard() {
                 </div>
             )}
 
-            {/* 2. CASE DETAIL MODAL (Redesigned) */}
+            {/* 2. CASE DETAIL MODAL (Redesigned - Card-Based Layout) */}
             {drawerOpen && selectedCase && (
                 <div className="modal-overlay" onClick={() => setDrawerOpen(false)}>
-                    <div className="modal-content case-detail-modal flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header bg-[#0066cc] py-5 px-8 flex items-center justify-between border-none">
+                    <div className="modal-content case-detail-modal-redesign" onClick={e => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="modal-header-redesign">
                             <div className="flex items-center gap-4">
-                                <div className="bg-white/20 p-2 rounded-lg">
-                                    <Inbox className="w-5 h-5 text-white" />
+                                <div className="bg-white/20 p-3 rounded-lg">
+                                    <Inbox className="w-6 h-6" />
                                 </div>
-                                <div className="flex flex-col">
-                                    <h3 className="case-id-header m-0 leading-tight">Case ID: {selectedCase.case_id.replace('Case ID: ', '')}</h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="status-badge bg-white/20 text-white text-[10px] uppercase font-bold tracking-widest py-0.5 px-2 rounded border border-white/30">
-                                            {selectedCase.status}
-                                        </span>
-                                    </div>
+                                <div>
+                                    <h3 className="text-2xl font-bold mb-1">Case #{selectedCase.case_id.replace('Case ID: ', '')}</h3>
+                                    <p className="text-white/80 text-sm">Submitted {formatDate(caseDetails?.created_at || selectedCase.submitted_at)}</p>
                                 </div>
                             </div>
-                            <button
-                                onClick={() => setDrawerOpen(false)}
-                                className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-all hover:rotate-90"
-                            >
-                                <X size={20} />
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <span className={`px-4 py-2 rounded-lg font-semibold text-sm ${selectedCase.status === 'CLOSED' ? 'bg-green-500/20 text-white' : 'bg-yellow-500/20 text-white'}`}>
+                                    {selectedCase.status === 'CLOSED' ? 'Completed' : selectedCase.status}
+                                </span>
+                                <button onClick={() => setDrawerOpen(false)} className="close-btn-redesign">
+                                    <X size={20} />
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="modal-body flex-1 overflow-y-auto p-0 bg-white">
+                        {/* Body - Two Column Layout */}
+                        <div className="modal-body-redesign">
                             {loadingDetails ? (
-                                <div className="h-full flex items-center justify-center text-slate-400">
+                                <div className="flex items-center justify-center h-64 w-full">
                                     <div className="flex flex-col items-center gap-4">
-                                        <div className="w-8 h-8 border-4 border-[#0066cc]/30 border-t-[#0066cc] rounded-full animate-spin"></div>
-                                        <p>Loading case data...</p>
+                                        <div className="w-10 h-10 border-4 border-[#0066cc]/30 border-t-[#0066cc] rounded-full animate-spin"></div>
+                                        <p className="text-slate-500">Loading case details...</p>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="flex h-full min-h-0">
-                                    {/* Left Column: Info Sections (45%) */}
-                                    <div className="case-detail-left p-6 overflow-y-auto border-r border-slate-100 space-y-5">
-                                        <div className="space-y-5">
-                                            <div>
-                                                <p className="section-label flex items-center gap-2"><Calendar className="w-4 h-4" /> SUBMITTED ON</p>
-                                                <p className="section-value text-base font-bold">{formatDate(caseDetails?.created_at || selectedCase.submitted_at)}</p>
-                                            </div>
-
-                                            <div className="space-y-3">
-                                                <p className="section-label flex items-center gap-2"><User className="w-4 h-4" /> CITIZEN INFORMATION</p>
-                                                <div className="info-box bg-slate-50/50 p-3 rounded-lg border border-slate-100">
-                                                    <div className="grid grid-cols-[80px_1fr] gap-y-2 gap-x-4 text-sm">
-                                                        <span className="text-slate-400">Name</span>
-                                                        <span className="font-bold text-slate-800">{caseDetails?.citizen_name || 'N/A'}</span>
-                                                        <span className="text-slate-400">Email</span>
-                                                        <span className="font-bold text-slate-[#0066cc] truncate">{caseDetails?.email || 'N/A'}</span>
-                                                        <span className="text-slate-400">DOB</span>
-                                                        <span className="font-bold text-slate-800">{caseDetails?.dob ? new Date(caseDetails.dob).toLocaleDateString() : 'N/A'}</span>
+                                <>
+                                    {/* Left Column - Info Cards */}
+                                    <div className="modal-left-column">
+                                        <div className="space-y-6">
+                                            {/* Citizen Information Card */}
+                                            <div className="info-card-redesign">
+                                                <div className="card-header-redesign">
+                                                    <User className="w-5 h-5 text-[#0066cc]" />
+                                                    <h4 className="text-lg font-bold text-slate-800">Citizen Information</h4>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-6">
+                                                    <div>
+                                                        <p className="info-label">Full Name</p>
+                                                        <p className="info-value">{caseDetails?.citizen_name || 'N/A'}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="info-label">Email Address</p>
+                                                        <p className="info-value text-[#0066cc]">{caseDetails?.email || 'N/A'}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="info-label">Date of Birth</p>
+                                                        <p className="info-value">{caseDetails?.dob ? new Date(caseDetails.dob).toLocaleDateString('de-DE') : 'N/A'}</p>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-3">
-                                                <p className="section-label flex items-center gap-2"><File className="w-4 h-4" /> LANDLORD INFORMATION</p>
-                                                <div className="info-box bg-slate-50/50 p-3 rounded-lg border border-slate-100">
-                                                    <div className="grid grid-cols-[100px_1fr] gap-y-2 gap-x-4 text-sm">
-                                                        <span className="text-slate-400">Landlord</span>
-                                                        <span className="font-bold text-slate-800">{caseDetails?.landlord_name || 'N/A'}</span>
-                                                        <span className="text-slate-400">Move-in</span>
-                                                        <span className="font-bold text-slate-800">{caseDetails?.move_in_date_raw || 'N/A'}</span>
+                                            {/* Landlord Information Card */}
+                                            <div className="info-card-redesign">
+                                                <div className="card-header-redesign">
+                                                    <File className="w-5 h-5 text-[#0066cc]" />
+                                                    <h4 className="text-lg font-bold text-slate-800">Landlord Information</h4>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-6">
+                                                    <div>
+                                                        <p className="info-label">Landlord Name</p>
+                                                        <p className="info-value">{caseDetails?.landlord_name || 'N/A'}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="info-label">Move-in Date</p>
+                                                        <p className="info-value">{caseDetails?.move_in_date_raw || 'N/A'}</p>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <p className="section-label flex items-center gap-2"><MapPin className="w-4 h-4" /> OLD ADDRESS</p>
-                                                <div className="p-3 rounded-lg bg-red-50/30 border border-red-100 text-slate-700 text-sm">
-                                                    {caseDetails?.old_address_raw || 'N/A'}
+                                            {/* Address Information Card */}
+                                            <div className="info-card-redesign">
+                                                <div className="card-header-redesign">
+                                                    <MapPin className="w-5 h-5 text-[#0066cc]" />
+                                                    <h4 className="text-lg font-bold text-slate-800">Address Change Details</h4>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-6">
+                                                    <div>
+                                                        <p className="info-label mb-2">Previous Address</p>
+                                                        <div className="address-box address-old">
+                                                            {caseDetails?.old_address_raw || 'N/A'}
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <p className="info-label mb-2">New Address</p>
+                                                        <div className="address-box address-new">
+                                                            {caseDetails?.new_address_raw || 'N/A'}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <p className="section-label flex items-center gap-2 text-[#0066cc]"><MapPin className="w-4 h-4" /> NEW ADDRESS</p>
-                                                <div className="p-3 rounded-lg bg-green-50/30 border border-green-100 text-slate-700 text-sm font-semibold">
-                                                    {caseDetails?.new_address_raw || 'N/A'}
+                                            {/* Processing Stats - Single Card */}
+                                            <div className="stat-card-redesign" style={{ maxWidth: '320px' }}>
+                                                <div className="flex items-center gap-3 mb-3">
+                                                    <div className="stat-icon-redesign bg-blue-50">
+                                                        <Clock className="w-5 h-5 text-[#0066cc]" />
+                                                    </div>
+                                                    <p className="stat-label-redesign">Processing Time</p>
                                                 </div>
-                                            </div>
-
-                                            <div className="space-y-3">
-                                                <p className="section-label flex items-center gap-2"><Brain className="w-4 h-4" /> PROCESSING STATS</p>
-                                                <div className="stats-gradient-box p-4 rounded-2xl text-white flex flex-col items-center justify-center text-center">
-                                                    <p className="text-[9px] uppercase tracking-widest opacity-80 mb-0.5">PROCESSING TIME</p>
-                                                    <p className="text-xl font-bold">1m 21s</p>
-                                                </div>
+                                                <p className="stat-value-redesign">1m 21s</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Right Column: Timeline (55%) */}
-                                    <div className="case-detail-right bg-[#fcfdfe] p-8 overflow-y-auto">
-                                        <p className="section-label flex items-center gap-2 mb-6"><Clock className="w-4 h-4" /> AUDIT LOG TIMELINE</p>
-                                        <div className="timeline-container relative pl-8 pb-10 border-l-2 border-slate-100 ml-2">
+                                    {/* Right Column - Timeline */}
+                                    <div className="modal-right-column">
+                                        <div className="mb-6">
+                                            <div className="flex items-center gap-3 mb-1">
+                                                <Clock className="w-6 h-6 text-[#0066cc]" />
+                                                <h4 className="text-xl font-bold text-slate-800 m-0" style={{ fontFamily: 'Merriweather, Georgia, serif' }}>Processing Timeline</h4>
+                                            </div>
+                                            <p className="text-sm text-slate-500 ml-9">Complete audit trail of case processing</p>
+                                        </div>
+
+                                        <div className="timeline-redesign">
                                             {auditLog.length > 0 ? (
                                                 auditLog.map((entry, idx) => (
-                                                    <div key={idx} className="timeline-entry mb-8 relative">
-                                                        <div className="absolute -left-[41px] top-1.5 w-4 h-4 rounded-full border-2 border-white bg-[#0066cc] z-10"></div>
-                                                        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                                                            <div className="flex items-center gap-2 mb-2">
-                                                                <span className="bg-[#0066cc] text-white text-[10px] font-mono px-2 py-0.5 rounded">
-                                                                    {new Date(entry.timestamp).toLocaleDateString('de-DE')} {new Date(entry.timestamp).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                    <div key={idx} className="timeline-item-redesign">
+                                                        <div className="timeline-dot-redesign"></div>
+                                                        <div className="timeline-content-redesign">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <span className="timeline-timestamp">
+                                                                    {new Date(entry.timestamp).toLocaleString('de-DE', {
+                                                                        day: '2-digit',
+                                                                        month: 'short',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit',
+                                                                        second: '2-digit'
+                                                                    })}
                                                                 </span>
                                                             </div>
-                                                            <p className="text-sm text-slate-700 leading-relaxed font-medium">
-                                                                {entry.message}
-                                                            </p>
+                                                            <p className="timeline-message">{entry.message}</p>
                                                         </div>
                                                     </div>
                                                 ))
                                             ) : (
-                                                <div className="text-slate-400 text-sm italic">No audit entries yet.</div>
+                                                <p className="text-slate-400 text-sm italic">No timeline entries available</p>
                                             )}
                                         </div>
                                     </div>
-                                </div>
+                                </>
                             )}
                         </div>
                     </div>
