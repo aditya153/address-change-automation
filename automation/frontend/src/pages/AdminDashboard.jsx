@@ -497,17 +497,26 @@ function AdminDashboard() {
             {/* 2. CASE DETAIL MODAL (Redesigned) */}
             {drawerOpen && selectedCase && (
                 <div className="modal-overlay" onClick={() => setDrawerOpen(false)}>
-                    <div className="modal-content w-11/12 max-w-6xl h-[85vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header bg-[#0066cc] text-white py-4">
-                            <div className="flex items-center gap-3">
-                                <Inbox className="w-5 h-5 text-white/80" />
-                                <h3 className="text-xl font-bold">Case ID: {selectedCase.case_id.replace('Case ID: ', '')}</h3>
-                                <span className="status-badge bg-green-500/20 text-green-100 text-[10px] uppercase tracking-wider py-0.5 px-2 rounded">
-                                    {selectedCase.status}
-                                </span>
+                    <div className="modal-content w-[95%] max-w-7xl h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header bg-[#0066cc] py-5 px-8 flex items-center justify-between border-none">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-white/20 p-2 rounded-lg">
+                                    <Inbox className="w-5 h-5 text-white" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <h3 className="text-xl font-bold m-0 leading-tight">Case ID: {selectedCase.case_id.replace('Case ID: ', '')}</h3>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="status-badge bg-white/20 text-white text-[10px] uppercase font-bold tracking-widest py-0.5 px-2 rounded border border-white/30">
+                                            {selectedCase.status}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <button onClick={() => setDrawerOpen(false)} className="bg-white/10 hover:bg-white/20 text-white rounded-md px-3 py-1 text-sm flex items-center gap-2">
-                                <X size={16} /> Close
+                            <button
+                                onClick={() => setDrawerOpen(false)}
+                                className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-all hover:rotate-90"
+                            >
+                                <X size={20} />
                             </button>
                         </div>
 

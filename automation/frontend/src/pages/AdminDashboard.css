@@ -59,6 +59,7 @@
     --sidebar-background: 220 20% 98%;
     --sidebar-foreground: 220 20% 20%;
     --sidebar-primary: 210 100% 40% !important;
+    --sidebar-primary-foreground: 0 0% 100% !important;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 14% 94%;
     --sidebar-accent-foreground: 220 20% 20%;
@@ -852,11 +853,12 @@ h6 {
 
 /* MODAL STYLES RE-IMPLEMENTED */
 .modal-overlay {
-    @apply fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm;
+    @apply fixed inset-0 bg-black/60 z-[2000] flex items-center justify-center backdrop-blur-md;
 }
 
 .modal-content {
-    @apply bg-background border border-border rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative animate-in;
+    @apply bg-background border border-border rounded-xl shadow-2xl relative animate-in overflow-hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
 }
 
 .modal-header {
@@ -925,4 +927,36 @@ h6 {
     width: 2px;
     height: 100%;
     background: linear-gradient(to bottom, #e2e8f0, transparent);
+}
+
+/* SCROLLBAR REFINEMENT */
+.modal-body::-webkit-scrollbar,
+.flex-1.p-8.overflow-y-auto::-webkit-scrollbar,
+.w-\[45\%\].bg-\[\#fcfdfe\].p-8.overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track,
+.flex-1.p-8.overflow-y-auto::-webkit-scrollbar-track,
+.w-\[45\%\].bg-\[\#fcfdfe\].p-8.overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb,
+.flex-1.p-8.overflow-y-auto::-webkit-scrollbar-thumb,
+.w-\[45\%\].bg-\[\#fcfdfe\].p-8.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover,
+.flex-1.p-8.overflow-y-auto::-webkit-scrollbar-thumb:hover,
+.w-\[45\%\].bg-\[\#fcfdfe\].p-8.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.modal-header h3,
+.modal-header span,
+.modal-header button {
+    color: white !important;
 }
