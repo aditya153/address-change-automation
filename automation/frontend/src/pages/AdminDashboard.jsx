@@ -374,25 +374,24 @@ function AdminDashboard() {
                     </div>
                 </div>
             ) : (
-                <div className="space-y-8 animate-in">
+                <div className="space-y-4 animate-in">
                     {/* Page Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-2">
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight mb-1">Dashboard</h1>
+                            <h1 className="text-3xl font-bold tracking-tight mb-2">Dashboard</h1>
                             <p className="text-muted-foreground">Address Change Automation Overview</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <Button
                                 variant="outline"
-                                className="gap-2 bg-white border-slate-200 text-[#0066cc] hover:bg-[#f8fafc] hover:text-[#0052a3] transition-colors"
+                                className="gap-2 bg-white border-slate-200 text-[#0066cc] hover:bg-[#f8fafc] hover:text-[#0052a3] shadow-sm transition-all"
                                 onClick={() => setActiveNav('analytics')}
                             >
                                 <BarChart3 className="w-4 h-4" />
-                                Analytics
+                                Analytics Dashboard
                             </Button>
                             <Button
-                                className="gap-2 bg-[#0066cc] hover:bg-[#0052a3] text-white border-none"
-                                style={{ backgroundColor: '#0066cc' }}
+                                className="gap-2 bg-[#0066cc] hover:bg-[#0052a3] text-white border-none shadow-md transition-all px-6"
                             >
                                 <Brain className="w-4 h-4" />
                                 AI Brain
@@ -592,17 +591,29 @@ function AdminDashboard() {
                                 </div>
                             </div>
 
-                            {/* Success Rate Card */}
-                            <div className="success-rate-card">
-                                <div>
-                                    <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest mb-1">This Month</p>
-                                    <p className="text-4xl font-bold mb-1">94.2%</p>
-                                    <p className="text-xs opacity-90">Automation Success Rate</p>
+                            {/* Next Processing Batch Card */}
+                            <div className="next-batch-card p-6 bg-slate-900 text-white rounded-2xl shadow-xl overflow-hidden relative">
+                                <div className="relative z-10">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Next Update</p>
+                                    <div className="flex items-end gap-2 mb-2">
+                                        <span className="text-4xl font-bold">14:00</span>
+                                        <span className="text-slate-400 text-sm mb-1">Today</span>
+                                    </div>
+                                    <p className="text-xs text-slate-300 mb-6">Scheduled background automation sync</p>
 
-                                    <div className="success-rate-progress-bg">
-                                        <div className="success-rate-progress-bar" style={{ width: '94.2%' }}></div>
+                                    <div className="flex items-center gap-4 text-xs">
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                                            <span className="text-slate-200">System Active</span>
+                                        </div>
+                                        <div className="bg-slate-800 px-3 py-1.5 rounded-full text-slate-300">
+                                            128 items queued
+                                        </div>
                                     </div>
                                 </div>
+                                {/* Decorative elements */}
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full -translate-y-16 translate-x-16 blur-3xl"></div>
+                                <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-500/10 rounded-full translate-y-12 -translate-x-12 blur-2xl"></div>
                             </div>
                         </div>
                     </div>

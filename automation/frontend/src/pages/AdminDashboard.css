@@ -174,8 +174,8 @@
 }
 
 .sidebar-header {
-    padding: 32px 24px;
-    border-bottom: none !important;
+    padding: 32px 24px 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .sidebar-brand {
@@ -215,7 +215,7 @@
 
 .sidebar-nav {
     flex: 1;
-    padding: 0 16px;
+    padding: 16px 16px;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -817,7 +817,7 @@ h6 {
 
 .clean-table td {
     padding: 20px 24px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #cbd5e0;
     font-size: 14px;
     color: #4a5568;
 }

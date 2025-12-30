@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { LayoutDashboard, FileText, Users, BarChart3, Settings, Building2, LogOut, Search, Bell, ChevronDown, UserCog, ExternalLink } from 'lucide-react';
+import { Home, FileText, Users, BarChart3, Settings, Building2, LogOut, Search, Bell, ChevronDown, UserCog, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import '../../pages/AdminDashboard.css'; // Ensure CSS is available
 
@@ -39,7 +39,7 @@ export const DashboardLayout = ({ children, activeNav, onNavChange }) => {
                             className={`sidebar-nav-item ${activeNav === 'dashboard' ? 'active' : ''}`}
                             onClick={() => onNavChange('dashboard')}
                         >
-                            <LayoutDashboard size={18} />
+                            <Home size={18} />
                             <span>Dashboard</span>
                         </button>
                         <button
