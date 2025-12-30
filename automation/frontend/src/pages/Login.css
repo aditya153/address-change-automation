@@ -329,13 +329,13 @@
 
 .login-form-container .form-group input {
     width: 100%;
-    padding: 14px 14px 14px 44px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 15px;
+    padding: 16px 16px 16px 48px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 16px;
     background-color: #ffffff;
     color: #1a1a1a;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: all 0.2s ease;
     box-sizing: border-box;
 }
 
