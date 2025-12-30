@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
             (username === 'user' && password === 'user')) {
             const role = username === 'admin' ? 'admin' : 'user';
             const demoUser = {
-                id: 1,
+                id: role === 'admin' ? 999999 : 888888,
                 username,
                 name: username.charAt(0).toUpperCase() + username.slice(1),
                 email: `${username}@demo.com`,

@@ -13,7 +13,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function AdminDashboard() {
     const { t } = useLanguage();
-    const { logout } = useAuth();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
 
     // Navigation state
@@ -443,18 +443,21 @@ function AdminDashboard() {
                         </svg>
                         <span>Settings</span>
                     </button>
-                    <button
-                        className={`sidebar-nav-item ${activeNav === 'users' ? 'active' : ''}`}
-                        onClick={() => setActiveNav('users')}
-                    >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                            <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                        </svg>
-                        <span>Users</span>
-                    </button>
+                    {/* Hide Users tab for Demo Admin (ID 999999) */}
+                    {(!user || user.id !== 999999) && (
+                        <button
+                            className={`sidebar-nav-item ${activeNav === 'users' ? 'active' : ''}`}
+                            onClick={() => setActiveNav('users')}
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                            <span>Users</span>
+                        </button>
+                    )}
                 </nav>
                 <div className="sidebar-footer">
                     <button className="sidebar-signout" onClick={() => { logout(); navigate('/login'); }}>
