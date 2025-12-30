@@ -159,7 +159,6 @@
     background-color: #0066cc !important;
     /* Strong blue */
     color: #ffffff !important;
-    /* FIXED: White text only */
     border: none !important;
     border-radius: 8px !important;
     font-size: 14px !important;
@@ -169,42 +168,13 @@
     box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3) !important;
 }
 
+/* forcing white color on all children including spans and icons */
+.btn-add-user,
+.btn-add-user *,
+.btn-add-user span,
 .btn-add-user svg {
     color: #ffffff !important;
-    /* FIXED: White icon only */
-}
-
-.btn-demote {
-    background-color: #fff;
-    border-color: #fca5a5;
-    color: #b91c1c;
-}
-
-.btn-demote:hover {
-    background-color: #fef2f2;
-}
-
-.current-user-row {
-    background-color: #f9fafb;
-}
-
-/* Invite Form Styles - AGGRESSIVE OVERRIDE */
-
-.btn-add-user {
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    padding: 12px 20px !important;
-    background-color: #0066cc !important;
-    /* Strong blue */
-    color: #ffffff !important;
-    border: none !important;
-    border-radius: 8px !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3) !important;
+    fill: #ffffff !important;
 }
 
 .btn-add-user:hover {
@@ -220,7 +190,6 @@
     right: 0 !important;
     bottom: 0 !important;
     background-color: rgba(15, 23, 42, 0.8) !important;
-    /* Darker backdrop */
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -249,7 +218,6 @@
     font-weight: 800 !important;
     margin: 0 0 8px 0 !important;
     color: #0f172a !important;
-    /* Very dark blue */
 }
 
 .modal-header p {
@@ -322,7 +290,6 @@
     padding: 12px 28px !important;
     background-color: #0066cc !important;
     color: #ffffff !important;
-    /* Ensure white text */
     border: none !important;
     border-radius: 10px !important;
     font-size: 15px !important;
@@ -334,9 +301,13 @@
     box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3) !important;
 }
 
+/* forcing white color on all children */
+.btn-invite,
+.btn-invite *,
+.btn-invite span,
 .btn-invite svg {
     color: #ffffff !important;
-    /* Ensure white icon */
+    fill: #ffffff !important;
 }
 
 .btn-invite:hover {

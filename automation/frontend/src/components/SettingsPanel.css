@@ -93,19 +93,16 @@
 }
 
 .settings-tab.active {
-    background-color: #0066cc;
-    color: #ffffff !important;
-    /* Ensure white */
+    background-color: #0066cc !important;
 }
 
-.settings-tab.active span {
-    color: #ffffff !important;
-    /* Ensure white */
-}
-
+/* Aggressive white text for active tab and all its children */
+.settings-tab.active,
+.settings-tab.active *,
+.settings-tab.active span,
 .settings-tab.active svg {
     color: #ffffff !important;
-    /* Ensure white */
+    fill: #ffffff !important;
 }
 
 .settings-tab .chevron {
@@ -210,17 +207,22 @@
 }
 
 .form-actions button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
     background-color: #0066cc !important;
-    color: #ffffff !important;
-    /* Ensure white text */
+    border-radius: 8px !important;
+    padding: 10px 20px !important;
+    font-weight: 700 !important;
 }
 
+/* Aggressive white text for button children */
+.form-actions button,
+.form-actions button *,
+.form-actions button span,
 .form-actions button svg {
     color: #ffffff !important;
-    /* Ensure white icon */
+    fill: #ffffff !important;
 }
 
 /* Toggle Switches */
