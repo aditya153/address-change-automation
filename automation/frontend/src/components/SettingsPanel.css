@@ -94,7 +94,11 @@
 
 .settings-tab.active {
     background-color: #0066cc;
-    color: white;
+    color: white !important;
+}
+
+.settings-tab.active span {
+    color: white !important;
 }
 
 .settings-tab .chevron {
@@ -157,6 +161,8 @@
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 14px;
+    color: #1a202c !important;
+    background-color: #ffffff !important;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
