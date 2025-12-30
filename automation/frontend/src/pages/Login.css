@@ -321,6 +321,62 @@
     border: 1px solid #fecaca;
 }
 
+/* Google Sign-In Button */
+.btn-google {
+    width: 100%;
+    padding: 14px 24px;
+    background-color: #ffffff;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    font-family: 'Roboto', sans-serif;
+    margin-bottom: 8px;
+}
+
+.btn-google:hover {
+    background-color: #f9fafb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-google:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.google-icon {
+    flex-shrink: 0;
+}
+
+/* Divider */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background-color: #e5e7eb;
+}
+
+.divider span {
+    padding: 0 16px;
+    color: #9ca3af;
+    font-size: 13px;
+    font-family: 'Roboto', sans-serif;
+}
+
 /* Demo Credentials */
 .demo-credentials {
     margin-top: 28px;

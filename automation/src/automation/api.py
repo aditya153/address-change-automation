@@ -191,7 +191,6 @@ async def stream_logs():
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
-
 # =======================
 # Routes
 # =======================
@@ -202,6 +201,139 @@ def health_check() -> Dict[str, str]:
     Simple health endpoint to check that the backend is running.
     """
     return {"status": "ok", "service": "address-change-backend"}
+
+
+# =======================
+# AUTHENTICATION ENDPOINTS
+# =======================
+
+from fastapi import Header, Depends
+from .auth import (
+    verify_google_token, 
+    get_or_create_user, 
+    create_jwt_token, 
+    verify_jwt_token,
+    get_user_from_token
+)
+
+class GoogleLoginRequest(BaseModel):
+    """Request body for Google login."""
+    credential: str  # Google ID token
+
+
+class LoginResponse(BaseModel):
+    """Response for successful login."""
+    success: bool
+    token: str
+    user: Dict[str, Any]
+
+
+def get_current_user(authorization: str = Header(None)) -> Optional[Dict]:
+    """Dependency to get current user from JWT token."""
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    token = authorization.replace("Bearer ", "")
+    return get_user_from_token(token)
+
+
+def require_auth(authorization: str = Header(...)) -> Dict:
+    """Dependency that requires authentication."""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
+    token = authorization.replace("Bearer ", "")
+    user = get_user_from_token(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return user
+
+
+def require_admin(user: Dict = Depends(require_auth)) -> Dict:
+    """Dependency that requires admin role."""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+
+@app.post("/auth/google")
+async def google_login(request: GoogleLoginRequest):
+    """
+    Authenticate user with Google OAuth token.
+    
+    1. Receives Google ID token from frontend
+    2. Verifies token with Google
+    3. Creates or updates user in database
+    4. Returns JWT session token
+    """
+    # Verify Google token
+    google_user = verify_google_token(request.credential)
+    
+    if not google_user:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+    
+    # Get or create user in database
+    user = get_or_create_user(
+        email=google_user["email"],
+        name=google_user["name"],
+        picture=google_user["picture"],
+        google_id=google_user["google_id"]
+    )
+    
+    # Create JWT token
+    token = create_jwt_token(user)
+    
+    return {
+        "success": True,
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "email": user["email"],
+            "name": user["name"],
+            "picture": user.get("picture"),
+            "role": user["role"]
+        }
+    }
+
+
+@app.get("/auth/me")
+async def get_current_user_info(user: Dict = Depends(require_auth)):
+    """Get current authenticated user info."""
+    return {
+        "id": user["id"],
+        "email": user["email"],
+        "name": user["name"],
+        "picture": user.get("picture"),
+        "role": user["role"]
+    }
+
+
+@app.post("/auth/logout")
+async def logout():
+    """
+    Logout endpoint.
+    Since we use stateless JWTs, logout is handled client-side by deleting the token.
+    This endpoint is provided for completeness.
+    """
+    return {"success": True, "message": "Logged out successfully"}
+
+
+@app.post("/auth/set-admin")
+async def set_user_as_admin(email: str, user: Dict = Depends(require_admin)):
+    """
+    Admin-only endpoint to promote a user to admin role.
+    """
+    from .db import get_conn
+    
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE users SET role = 'admin' WHERE email = %s RETURNING id, email, role;",
+            (email,)
+        )
+        updated = cur.fetchone()
+        
+    if not updated:
+        raise HTTPException(status_code=404, detail=f"User not found: {email}")
+    
+    return {"success": True, "user": dict(updated)}
 
 
 

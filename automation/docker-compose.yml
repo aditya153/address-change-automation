@@ -24,6 +24,9 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
       SENDER_EMAIL: ${SENDER_EMAIL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
     working_dir: /app
     command: [ "uvicorn", "src.automation.api:app", "--host", "0.0.0.0", "--port", "8000" ]
     ports:
