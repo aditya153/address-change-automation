@@ -801,7 +801,7 @@ function AdminDashboard() {
             </div>
 
             {/* FOOTER */}
-            < footer className="admin-footer" >
+            <footer className="admin-footer">
                 <div className="admin-footer-content">
                     <div className="admin-footer-links">
                         <a href="#">{t('imprint')}</a>
@@ -811,11 +811,10 @@ function AdminDashboard() {
                     </div>
                     <div className="admin-footer-copy">{t('copyright')}</div>
                 </div>
-            </footer >
+            </footer>
 
             {/* CASE DETAIL DRAWER */}
-            < aside className={`case-detail-drawer ${drawerOpen ? 'active' : ''}`
-            }>
+            <aside className={`case-detail-drawer ${drawerOpen ? 'active' : ''}`}>
                 <div
                     className="case-detail-drawer-backdrop"
                     onClick={() => setDrawerOpen(false)}
