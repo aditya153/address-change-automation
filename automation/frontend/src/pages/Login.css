@@ -1,6 +1,6 @@
 /* ================================================
    LOGIN PAGE - German Government Portal Style
-   Split-view layout: Dark blue left, White right
+   Split-view layout: Bright Blue left, White right
    ================================================ */
 
 /* Full page container */
@@ -15,17 +15,19 @@
     right: 0;
     bottom: 0;
     z-index: 9999;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Government Banner */
+/* Government Banner - Very Dark, Centered */
 .gov-banner {
-    background-color: #1e3a5f;
+    background-color: #0d1b2a;
     color: #ffffff;
-    padding: 8px 24px;
+    padding: 10px 24px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    font-size: 13px;
+    font-size: 14px;
+    position: relative;
 }
 
 .gov-banner-content {
@@ -35,24 +37,27 @@
 }
 
 .gov-banner-flag {
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .gov-banner-text {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 14px;
 }
 
 .gov-banner-link {
+    position: absolute;
+    right: 24px;
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.8);
+    color: #60a5fa;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     transition: color 0.2s;
 }
 
 .gov-banner-link:hover {
-    color: #ffffff;
+    color: #93c5fd;
 }
 
 /* Main Container - Split View */
@@ -61,10 +66,10 @@
     display: flex;
 }
 
-/* Left Panel - Dark Blue */
+/* Left Panel - Bright Blue */
 .login-left-panel {
     width: 45%;
-    background: linear-gradient(135deg, #1e3a5f 0%, #0d2840 100%);
+    background: linear-gradient(180deg, #0066cc 0%, #0052a3 100%);
     color: #ffffff;
     display: flex;
     flex-direction: column;
@@ -102,15 +107,15 @@
 }
 
 .portal-name {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 600;
     margin: 0;
     color: #ffffff !important;
 }
 
 .portal-subtitle {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* Hero Section */
@@ -119,9 +124,9 @@
 }
 
 .login-title {
-    font-size: 42px;
+    font-size: 48px;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1.15;
     margin: 0 0 16px 0;
     color: #ffffff !important;
 }
@@ -134,10 +139,10 @@
 }
 
 .login-description {
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.6;
-    color: rgba(255, 255, 255, 0.8) !important;
-    max-width: 380px;
+    color: rgba(255, 255, 255, 0.85) !important;
+    max-width: 400px;
 }
 
 /* GDPR Section */
@@ -198,16 +203,18 @@
 
 /* Form Title */
 .form-title {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 600;
     color: #1a1a1a !important;
     margin: 0 0 8px 0;
+    font-family: 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .form-subtitle {
-    font-size: 15px;
+    font-size: 16px;
     color: #6b7280 !important;
-    margin: 0 0 32px 0;
+    margin: 0 0 36px 0;
+    font-family: 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* Form Groups */
@@ -217,10 +224,11 @@
 
 .login-form-container .form-group label {
     display: block;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     color: #374151;
     margin-bottom: 8px;
+    font-family: 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* Input Wrapper with Icon */
@@ -259,11 +267,11 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-/* Login Button */
+/* Login Button - Bright Blue */
 .login-form-container .btn-login {
     width: 100%;
     padding: 14px 24px;
-    background-color: #1e3a5f;
+    background-color: #0066cc;
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -279,7 +287,7 @@
 }
 
 .login-form-container .btn-login:hover {
-    background-color: #15304d;
+    background-color: #0052a3;
 }
 
 .btn-arrow {
