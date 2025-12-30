@@ -9,7 +9,7 @@ import LanguageSelector from './components/LanguageSelector';
 import './App.css';
 
 function AppContent() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,7 +50,9 @@ function AppContent() {
             </div>
             <div className="navbar-links">
               <Link to="/" className="nav-link">{t('userPortal')}</Link>
-              <Link to="/admin" className="nav-link">{t('adminDashboard')}</Link>
+              {user?.role === 'admin' && (
+                <Link to="/admin" className="nav-link">{t('adminDashboard')}</Link>
+              )}
               <button onClick={logout} className="nav-logout">{t('logout')}</button>
             </div>
           </div>
@@ -75,7 +77,9 @@ function AppContent() {
             isAuthenticated ? <UserPortal /> : <Navigate to="/login" />
           } />
           <Route path="/admin" element={
-            isAuthenticated ? <AdminDashboard /> : <Navigate to="/login" />
+            isAuthenticated
+              ? (user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />)
+              : <Navigate to="/login" />
           } />
           <Route path="/contact" element={
             isAuthenticated ? <ContactPage /> : <Navigate to="/login" />

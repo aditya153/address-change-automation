@@ -29,7 +29,9 @@ const UserManagement = () => {
             };
 
             const response = await axios.get(`${API_URL}/admin/users`, config);
-            setUsers(response.data.users);
+            // Filter only regular users (not admins - those are shown in Employees section)
+            const regularUsers = (response.data.users || []).filter(u => u.role !== 'admin');
+            setUsers(regularUsers);
             setError('');
         } catch (err) {
             console.error('Error fetching users:', err);
@@ -187,7 +189,6 @@ const UserManagement = () => {
                         <tr>
                             <th>User</th>
                             <th>Email</th>
-                            <th>Role</th>
                             <th>Last Login</th>
                             <th>Actions</th>
                         </tr>
@@ -208,31 +209,18 @@ const UserManagement = () => {
                                 </td>
                                 <td>{user.email}</td>
                                 <td>
-                                    <span className={`role-badge ${user.role}`}>
-                                        {user.role}
-                                    </span>
-                                </td>
-                                <td>
                                     {user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}
                                 </td>
                                 <td>
                                     <div className="user-actions-cell">
                                         {user.id !== currentUser?.id && (
-                                            <>
-                                                <button
-                                                    className={`btn-role ${user.role === 'admin' ? 'btn-demote' : 'btn-promote'}`}
-                                                    onClick={() => handleRoleChange(user.id, user.role === 'admin' ? 'user' : 'admin')}
-                                                >
-                                                    {user.role === 'admin' ? 'Demote to User' : 'Promote to Admin'}
-                                                </button>
-                                                <button
-                                                    className="btn-delete-user"
-                                                    onClick={() => handleDeleteUser(user.id)}
-                                                    title="Delete User"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </>
+                                            <button
+                                                className="btn-delete-user"
+                                                onClick={() => handleDeleteUser(user.id)}
+                                                title="Delete User"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         )}
                                     </div>
                                 </td>
