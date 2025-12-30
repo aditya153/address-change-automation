@@ -251,11 +251,18 @@ function AdminDashboard() {
                             <p className="text-muted-foreground">Address Change Automation Overview</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Button variant="outline" className="gap-2 bg-white border-slate-200" onClick={() => setAnalyticsOpen(true)}>
+                            <Button
+                                variant="outline"
+                                className="gap-2 bg-white border-slate-200 text-[#0066cc] hover:bg-[#f8fafc] hover:text-[#0052a3] transition-colors"
+                                onClick={() => setAnalyticsOpen(true)}
+                            >
                                 <BarChart3 className="w-4 h-4" />
                                 Analytics
                             </Button>
-                            <Button className="gap-2 bg-[#005596] hover:bg-[#00447a] text-white border-none">
+                            <Button
+                                className="gap-2 bg-[#0066cc] hover:bg-[#0052a3] text-white border-none"
+                                style={{ backgroundColor: '#0066cc' }}
+                            >
                                 <Brain className="w-4 h-4" />
                                 AI Brain
                             </Button>
@@ -297,7 +304,7 @@ function AdminDashboard() {
                         <div className="lg:col-span-2 admin-card">
                             <div className="p-6 border-b border-border flex flex-row items-center justify-between">
                                 <h3 className="text-lg font-bold m-0">Recent Cases</h3>
-                                <Button variant="ghost" size="sm" className="gap-1 text-[#005596] p-0 h-auto hover:bg-transparent font-semibold" onClick={() => setActiveNav('cases')}>
+                                <Button variant="ghost" size="sm" className="gap-1 text-[#0066cc] p-0 h-auto hover:bg-transparent font-semibold" onClick={() => setActiveNav('cases')}>
                                     View All <ArrowRight className="w-4 h-4" />
                                 </Button>
                             </div>

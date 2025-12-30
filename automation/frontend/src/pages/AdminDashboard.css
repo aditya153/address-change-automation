@@ -17,10 +17,9 @@
     --background: 210 20% 98%;
     --foreground: 220 20% 15%;
 
-    /* Primary: Official Government Blue */
-    --primary: 210 100% 29%;
-    /* Matches #005596 */
-    --primary-foreground: 0 0% 100%;
+    /* Primary: Official Government Blue - Matches Login Page #0066cc */
+    --primary: 210 100% 40% !important;
+    --primary-foreground: 0 0% 100% !important;
 
     /* Secondary: Light Gray */
     --secondary: 220 14% 96%;
@@ -59,7 +58,7 @@
     /* Sidebar */
     --sidebar-background: 220 20% 98%;
     --sidebar-foreground: 220 20% 20%;
-    --sidebar-primary: 210 100% 35%;
+    --sidebar-primary: 210 100% 40% !important;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 14% 94%;
     --sidebar-accent-foreground: 220 20% 20%;
@@ -258,7 +257,7 @@
 }
 
 .sidebar-nav-item.active {
-    background-color: #005596 !important;
+    background-color: #0066cc !important;
     color: #ffffff !important;
     box-shadow: 0 4px 12px rgba(0, 85, 150, 0.25) !important;
 }
@@ -331,8 +330,8 @@
 }
 
 .header-search:focus-within {
-    border-color: #005596 !important;
-    box-shadow: 0 0 0 3px rgba(0, 85, 150, 0.15) !important;
+    border-color: #0066cc !important;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15) !important;
     outline: none !important;
 }
 
