@@ -15,17 +15,18 @@ function AppContent() {
   const location = useLocation();
 
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isPortalRoute = location.pathname === '/portal' || location.pathname === '/contact';
 
   const handleHelpClick = () => {
     // Navigate to user portal and trigger chatbot open
-    navigate('/');
+    navigate('/portal');
     // Dispatch custom event to open chatbot
     window.dispatchEvent(new CustomEvent('openChatbot'));
   };
 
   return (
     <div className="app">
-      {isAuthenticated && !isAdminRoute && (
+      {isAuthenticated && isPortalRoute && (
         <nav className="gov-navbar">
           {/* Top Bar */}
           <div className="navbar-top-bar">
@@ -49,7 +50,6 @@ function AppContent() {
               </div>
             </div>
             <div className="navbar-links">
-              <Link to="/" className="nav-link">{t('userPortal')}</Link>
               {user?.role === 'admin' && (
                 <Link to="/admin" className="nav-link">{t('adminDashboard')}</Link>
               )}
@@ -71,14 +71,19 @@ function AppContent() {
       <main>
         <Routes>
           <Route path="/login" element={
-            isAuthenticated ? <Navigate to="/" /> : <LoginPage />
+            isAuthenticated ? (user?.role === 'admin' ? <Navigate to="/admin" /> : <Navigate to="/portal" />) : <LoginPage />
           } />
           <Route path="/" element={
+            isAuthenticated
+              ? (user?.role === 'admin' ? <Navigate to="/admin" /> : <Navigate to="/portal" />)
+              : <Navigate to="/login" />
+          } />
+          <Route path="/portal" element={
             isAuthenticated ? <UserPortal /> : <Navigate to="/login" />
           } />
           <Route path="/admin" element={
             isAuthenticated
-              ? (user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/" />)
+              ? (user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/portal" />)
               : <Navigate to="/login" />
           } />
           <Route path="/contact" element={

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, Users, BarChart3, Settings, Building2, LogOut, Search, Bell, ChevronDown, UserCog } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { LayoutDashboard, FileText, Users, BarChart3, Settings, Building2, LogOut, Search, Bell, ChevronDown, UserCog, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import '../../pages/AdminDashboard.css'; // Ensure CSS is available
 
@@ -92,6 +92,10 @@ export const DashboardLayout = ({ children, activeNav, onNavChange }) => {
                         )}
                     </nav>
                     <div className="sidebar-footer">
+                        <Link to="/portal" className="sidebar-nav-item portal-link">
+                            <ExternalLink size={18} />
+                            <span>User Portal</span>
+                        </Link>
                         <button className="sidebar-signout" onClick={() => { logout(); navigate('/login'); }}>
                             <LogOut size={18} />
                             <span>Sign Out</span>
