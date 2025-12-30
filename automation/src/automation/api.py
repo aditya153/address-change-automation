@@ -336,6 +336,36 @@ async def set_user_as_admin(email: str, user: Dict = Depends(require_admin)):
     return {"success": True, "user": dict(updated)}
 
 
+@app.get("/admin/users")
+async def get_all_users_admin(user: Dict = Depends(require_admin)):
+    """
+    Admin-only endpoint to list all users.
+    """
+    from .auth import get_all_users
+    users = get_all_users()
+    return {"users": users}
+
+
+class UpdateRoleRequest(BaseModel):
+    role: str
+
+@app.put("/admin/users/{user_id}/role")
+async def update_user_role_admin(user_id: int, payload: UpdateRoleRequest, user: Dict = Depends(require_admin)):
+    """
+    Admin-only endpoint to update a user's role.
+    """
+    if payload.role not in ["admin", "user"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+        
+    from .auth import update_user_role
+    updated_user = update_user_role(user_id, payload.role)
+    
+    if not updated_user:
+        raise HTTPException(status_code=404, detail=f"User {user_id} not found")
+        
+    return {"success": True, "user": updated_user}
+
+
 
 
 @app.post("/address-change/run", response_model=AddressChangeResponse)

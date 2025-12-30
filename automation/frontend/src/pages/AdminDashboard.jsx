@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import TerminalWidget from '../components/TerminalWidget';
+import UserManagement from '../components/UserManagement';
 import './AdminDashboard.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -442,6 +443,18 @@ function AdminDashboard() {
                         </svg>
                         <span>Settings</span>
                     </button>
+                    <button
+                        className={`sidebar-nav-item ${activeNav === 'users' ? 'active' : ''}`}
+                        onClick={() => setActiveNav('users')}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        <span>Users</span>
+                    </button>
                 </nav>
                 <div className="sidebar-footer">
                     <button className="sidebar-signout" onClick={() => { logout(); navigate('/login'); }}>
@@ -504,286 +517,291 @@ function AdminDashboard() {
                 {/* MAIN CONTENT */}
                 <main className="page-content">
                     <div className="container-fluid">
+                        {activeNav === 'users' ? (
+                            <UserManagement />
+                        ) : (
+                            <>
 
-                        {/* PAGE HEADER */}
-                        <div className="dashboard-header">
-                            <div className="dashboard-title-section">
-                                <h1>Dashboard</h1>
-                                <p>Address Change Automation Overview</p>
-                            </div>
-                            <div className="dashboard-actions">
-                                <button
-                                    className="btn-analytics"
-                                    onClick={() => setAnalyticsOpen(true)}
-                                >
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <line x1="18" y1="20" x2="18" y2="10" />
-                                        <line x1="12" y1="20" x2="12" y2="4" />
-                                        <line x1="6" y1="20" x2="6" y2="14" />
-                                    </svg>
-                                    Analytics
-                                </button>
-                                <button
-                                    className="btn-ai-brain"
-                                    onClick={() => setAiBrainOpen(true)}
-                                >
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <path d="M12 16v-4" />
-                                        <path d="M12 8h.01" />
-                                    </svg>
-                                    AI Brain
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* ALERT MESSAGE */}
-                        {message && (
-                            <div className="alert-container">
-                                <div
-                                    className={`alert ${message.includes('✅')
-                                        ? 'alert-success'
-                                        : message.includes('⏳')
-                                            ? 'alert-info'
-                                            : 'alert-warning'
-                                        } alert-dismissible fade show mb-0`}
-                                >
-                                    {message}
-                                    <button
-                                        type="button"
-                                        className="btn-close"
-                                        onClick={() => setMessage('')}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* SUMMARY CARDS */}
-                        <div className="stats-grid">
-                            {/* Pending */}
-                            <div
-                                className={`stat-card stat-pending ${filterStatus === 'pending' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus(filterStatus === 'pending' ? '' : 'pending')}
-                            >
-                                <div className="stat-content">
-                                    <span className="stat-label">Pending Cases</span>
-                                    <span className="stat-value">{pendingCases.length}</span>
-                                    <span className="stat-trend">↗ +3 today</span>
-                                </div>
-                                <div className="stat-icon pending">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-                                    </svg>
-                                </div>
-                            </div>
-
-                            {/* Needs Review */}
-                            <div
-                                className={`stat-card stat-review ${filterStatus === 'review' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus(filterStatus === 'review' ? '' : 'review')}
-                            >
-                                <div className="stat-content">
-                                    <span className="stat-label">Needs Review</span>
-                                    <span className="stat-value">{hitlCases.length}</span>
-                                    <span className="stat-trend warning">↗ 2 urgent</span>
-                                </div>
-                                <div className="stat-icon review">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                                        <line x1="12" y1="9" x2="12" y2="13" />
-                                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                                    </svg>
-                                </div>
-                            </div>
-
-                            {/* Completed */}
-                            <div
-                                className={`stat-card stat-completed ${filterStatus === 'completed' ? 'active' : ''}`}
-                                onClick={() => setFilterStatus(filterStatus === 'completed' ? '' : 'completed')}
-                            >
-                                <div className="stat-content">
-                                    <span className="stat-label">Completed</span>
-                                    <span className="stat-value">{completedCases.length}</span>
-                                    <span className="stat-trend success">↗ +18 this week</span>
-                                </div>
-                                <div className="stat-icon completed">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                        <polyline points="22 4 12 14.01 9 11.01" />
-                                    </svg>
-                                </div>
-                            </div>
-
-                            {/* Avg Processing */}
-                            <div className="stat-card stat-time">
-                                <div className="stat-content">
-                                    <span className="stat-label">Avg. Processing</span>
-                                    <span className="stat-value">2.4h</span>
-                                    <span className="stat-trend success">↘ -12% faster</span>
-                                </div>
-                                <div className="stat-icon time">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <polyline points="12 6 12 12 16 14" />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* MAIN CONTENT ROW */}
-                        <div className="content-row">
-                            {/* CASES TABLE */}
-                            <div className="cases-section">
-                                <div className="section-header">
-                                    <h2>Recent Cases</h2>
-                                    <button className="view-all-btn" onClick={() => setFilterStatus('')}>
-                                        View All →
-                                    </button>
-                                </div>
-                                <div className="cases-table">
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>CASE ID</th>
-                                                <th>CITIZEN</th>
-                                                <th>SUBMITTED</th>
-                                                <th>STATUS</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {filteredCases.length === 0 ? (
-                                                <tr className="empty-row">
-                                                    <td colSpan={5}>
-                                                        <div className="empty-state">
-                                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                                                                <polyline points="22,6 12,13 2,6" />
-                                                            </svg>
-                                                            <p>No cases at the moment</p>
-                                                            <span>New submissions will appear here</span>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ) : (
-                                                filteredCases.slice(0, 5).map((caseItem) => (
-                                                    <tr key={caseItem.case_id}>
-                                                        <td className="case-id">AC-{caseItem.case_id}</td>
-                                                        <td className="citizen-info">
-                                                            <span className="citizen-name">{caseItem.citizen_name || 'Unknown'}</span>
-                                                            <span className="citizen-email">{caseItem.email}</span>
-                                                        </td>
-                                                        <td className="submitted-date">
-                                                            {formatDate(caseItem.submitted_at)}
-                                                        </td>
-                                                        <td>
-                                                            <span className={`status-badge status-${caseItem.status?.toLowerCase().replace('_', '-')}`}>
-                                                                <span className="status-dot"></span>
-                                                                {getStatusDisplay(caseItem.status)}
-                                                            </span>
-                                                        </td>
-                                                        <td className="actions-cell">
-                                                            <button
-                                                                className="action-btn"
-                                                                onClick={() => {
-                                                                    if (caseItem.status === 'CLOSED') {
-                                                                        handleViewCaseDetail(caseItem);
-                                                                    } else if (caseItem.status === 'WAITING_FOR_HUMAN') {
-                                                                        handleOpenHitlReview(caseItem);
-                                                                    } else {
-                                                                        handleViewCase(caseItem);
-                                                                    }
-                                                                }}
-                                                                title="View"
-                                                            >
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                                    <circle cx="12" cy="12" r="3" />
-                                                                </svg>
-                                                            </button>
-                                                            {(caseItem.pdf_landlord_path || caseItem.pdf_address_change_path) && (
-                                                                <button
-                                                                    className="action-btn"
-                                                                    onClick={() => handlePreviewDocs(caseItem)}
-                                                                    title="Documents"
-                                                                >
-                                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                                                        <polyline points="14 2 14 8 20 8" />
-                                                                    </svg>
-                                                                </button>
-                                                            )}
-                                                            <button className="action-btn" title="More">
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                    <circle cx="12" cy="12" r="1" />
-                                                                    <circle cx="19" cy="12" r="1" />
-                                                                    <circle cx="5" cy="12" r="1" />
-                                                                </svg>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            {/* SIDEBAR CARDS */}
-                            <div className="sidebar-cards">
-                                {/* Processing Guidelines */}
-                                <div className="guidelines-card">
-                                    <h3>Processing Guidelines</h3>
-                                    <ul className="guidelines-list">
-                                        <li>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                                <polyline points="22 4 12 14.01 9 11.01" />
+                                {/* PAGE HEADER */}
+                                <div className="dashboard-header">
+                                    <div className="dashboard-title-section">
+                                        <h1>Dashboard</h1>
+                                        <p>Address Change Automation Overview</p>
+                                    </div>
+                                    <div className="dashboard-actions">
+                                        <button
+                                            className="btn-analytics"
+                                            onClick={() => setAnalyticsOpen(true)}
+                                        >
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <line x1="18" y1="20" x2="18" y2="10" />
+                                                <line x1="12" y1="20" x2="12" y2="4" />
+                                                <line x1="6" y1="20" x2="6" y2="14" />
                                             </svg>
-                                            Verify uploaded documents are readable and complete
-                                        </li>
-                                        <li>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                                <polyline points="22 4 12 14.01 9 11.01" />
+                                            Analytics
+                                        </button>
+                                        <button
+                                            className="btn-ai-brain"
+                                            onClick={() => setAiBrainOpen(true)}
+                                        >
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <path d="M12 16v-4" />
+                                                <path d="M12 8h.01" />
                                             </svg>
-                                            Confirm old and new addresses are plausible
-                                        </li>
-                                        <li>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                                <polyline points="22 4 12 14.01 9 11.01" />
-                                            </svg>
-                                            Mark low-confidence cases for manual review
-                                        </li>
-                                        <li>
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                                                <polyline points="22 4 12 14.01 9 11.01" />
-                                            </svg>
-                                            Complete processing within 48 hours
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                {/* Success Rate Card */}
-                                <div className="success-card">
-                                    <span className="success-label">This Month</span>
-                                    <span className="success-value">94.2%</span>
-                                    <span className="success-subtitle">Automation Success Rate</span>
-                                    <div className="success-bar">
-                                        <div className="success-fill" style={{ width: '94.2%' }}></div>
+                                            AI Brain
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
+                                {/* ALERT MESSAGE */}
+                                {message && (
+                                    <div className="alert-container">
+                                        <div
+                                            className={`alert ${message.includes('✅')
+                                                ? 'alert-success'
+                                                : message.includes('⏳')
+                                                    ? 'alert-info'
+                                                    : 'alert-warning'
+                                                } alert-dismissible fade show mb-0`}
+                                        >
+                                            {message}
+                                            <button
+                                                type="button"
+                                                className="btn-close"
+                                                onClick={() => setMessage('')}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* SUMMARY CARDS */}
+                                <div className="stats-grid">
+                                    {/* Pending */}
+                                    <div
+                                        className={`stat-card stat-pending ${filterStatus === 'pending' ? 'active' : ''}`}
+                                        onClick={() => setFilterStatus(filterStatus === 'pending' ? '' : 'pending')}
+                                    >
+                                        <div className="stat-content">
+                                            <span className="stat-label">Pending Cases</span>
+                                            <span className="stat-value">{pendingCases.length}</span>
+                                            <span className="stat-trend">↗ +3 today</span>
+                                        </div>
+                                        <div className="stat-icon pending">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    {/* Needs Review */}
+                                    <div
+                                        className={`stat-card stat-review ${filterStatus === 'review' ? 'active' : ''}`}
+                                        onClick={() => setFilterStatus(filterStatus === 'review' ? '' : 'review')}
+                                    >
+                                        <div className="stat-content">
+                                            <span className="stat-label">Needs Review</span>
+                                            <span className="stat-value">{hitlCases.length}</span>
+                                            <span className="stat-trend warning">↗ 2 urgent</span>
+                                        </div>
+                                        <div className="stat-icon review">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                                <line x1="12" y1="9" x2="12" y2="13" />
+                                                <line x1="12" y1="17" x2="12.01" y2="17" />
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    {/* Completed */}
+                                    <div
+                                        className={`stat-card stat-completed ${filterStatus === 'completed' ? 'active' : ''}`}
+                                        onClick={() => setFilterStatus(filterStatus === 'completed' ? '' : 'completed')}
+                                    >
+                                        <div className="stat-content">
+                                            <span className="stat-label">Completed</span>
+                                            <span className="stat-value">{completedCases.length}</span>
+                                            <span className="stat-trend success">↗ +18 this week</span>
+                                        </div>
+                                        <div className="stat-icon completed">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                <polyline points="22 4 12 14.01 9 11.01" />
+                                            </svg>
+                                        </div>
+                                    </div>
+
+                                    {/* Avg Processing */}
+                                    <div className="stat-card stat-time">
+                                        <div className="stat-content">
+                                            <span className="stat-label">Avg. Processing</span>
+                                            <span className="stat-value">2.4h</span>
+                                            <span className="stat-trend success">↘ -12% faster</span>
+                                        </div>
+                                        <div className="stat-icon time">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <polyline points="12 6 12 12 16 14" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* MAIN CONTENT ROW */}
+                                <div className="content-row">
+                                    {/* CASES TABLE */}
+                                    <div className="cases-section">
+                                        <div className="section-header">
+                                            <h2>Recent Cases</h2>
+                                            <button className="view-all-btn" onClick={() => setFilterStatus('')}>
+                                                View All →
+                                            </button>
+                                        </div>
+                                        <div className="cases-table">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>CASE ID</th>
+                                                        <th>CITIZEN</th>
+                                                        <th>SUBMITTED</th>
+                                                        <th>STATUS</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {filteredCases.length === 0 ? (
+                                                        <tr className="empty-row">
+                                                            <td colSpan={5}>
+                                                                <div className="empty-state">
+                                                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                                                        <polyline points="22,6 12,13 2,6" />
+                                                                    </svg>
+                                                                    <p>No cases at the moment</p>
+                                                                    <span>New submissions will appear here</span>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ) : (
+                                                        filteredCases.slice(0, 5).map((caseItem) => (
+                                                            <tr key={caseItem.case_id}>
+                                                                <td className="case-id">AC-{caseItem.case_id}</td>
+                                                                <td className="citizen-info">
+                                                                    <span className="citizen-name">{caseItem.citizen_name || 'Unknown'}</span>
+                                                                    <span className="citizen-email">{caseItem.email}</span>
+                                                                </td>
+                                                                <td className="submitted-date">
+                                                                    {formatDate(caseItem.submitted_at)}
+                                                                </td>
+                                                                <td>
+                                                                    <span className={`status-badge status-${caseItem.status?.toLowerCase().replace('_', '-')}`}>
+                                                                        <span className="status-dot"></span>
+                                                                        {getStatusDisplay(caseItem.status)}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="actions-cell">
+                                                                    <button
+                                                                        className="action-btn"
+                                                                        onClick={() => {
+                                                                            if (caseItem.status === 'CLOSED') {
+                                                                                handleViewCaseDetail(caseItem);
+                                                                            } else if (caseItem.status === 'WAITING_FOR_HUMAN') {
+                                                                                handleOpenHitlReview(caseItem);
+                                                                            } else {
+                                                                                handleViewCase(caseItem);
+                                                                            }
+                                                                        }}
+                                                                        title="View"
+                                                                    >
+                                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                                            <circle cx="12" cy="12" r="3" />
+                                                                        </svg>
+                                                                    </button>
+                                                                    {(caseItem.pdf_landlord_path || caseItem.pdf_address_change_path) && (
+                                                                        <button
+                                                                            className="action-btn"
+                                                                            onClick={() => handlePreviewDocs(caseItem)}
+                                                                            title="Documents"
+                                                                        >
+                                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                                                <polyline points="14 2 14 8 20 8" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    )}
+                                                                    <button className="action-btn" title="More">
+                                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                            <circle cx="12" cy="12" r="1" />
+                                                                            <circle cx="19" cy="12" r="1" />
+                                                                            <circle cx="5" cy="12" r="1" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    {/* SIDEBAR CARDS */}
+                                    <div className="sidebar-cards">
+                                        {/* Processing Guidelines */}
+                                        <div className="guidelines-card">
+                                            <h3>Processing Guidelines</h3>
+                                            <ul className="guidelines-list">
+                                                <li>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                                    </svg>
+                                                    Verify uploaded documents are readable and complete
+                                                </li>
+                                                <li>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                                    </svg>
+                                                    Confirm old and new addresses are plausible
+                                                </li>
+                                                <li>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                                    </svg>
+                                                    Mark low-confidence cases for manual review
+                                                </li>
+                                                <li>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                                    </svg>
+                                                    Complete processing within 48 hours
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        {/* Success Rate Card */}
+                                        <div className="success-card">
+                                            <span className="success-label">This Month</span>
+                                            <span className="success-value">94.2%</span>
+                                            <span className="success-subtitle">Automation Success Rate</span>
+                                            <div className="success-bar">
+                                                <div className="success-fill" style={{ width: '94.2%' }}></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </main>
             </div>
 
             {/* FOOTER */}
-            <footer className="admin-footer">
+            < footer className="admin-footer" >
                 <div className="admin-footer-content">
                     <div className="admin-footer-links">
                         <a href="#">{t('imprint')}</a>
@@ -793,10 +811,11 @@ function AdminDashboard() {
                     </div>
                     <div className="admin-footer-copy">{t('copyright')}</div>
                 </div>
-            </footer>
+            </footer >
 
             {/* CASE DETAIL DRAWER */}
-            <aside className={`case-detail-drawer ${drawerOpen ? 'active' : ''}`}>
+            < aside className={`case-detail-drawer ${drawerOpen ? 'active' : ''}`
+            }>
                 <div
                     className="case-detail-drawer-backdrop"
                     onClick={() => setDrawerOpen(false)}

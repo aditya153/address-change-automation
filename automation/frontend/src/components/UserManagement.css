@@ -1,0 +1,162 @@
+.user-management-container {
+    padding: 24px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.user-header {
+    margin-bottom: 24px;
+}
+
+.user-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: #111827;
+}
+
+.user-header p {
+    color: #6b7280;
+    margin: 0;
+    font-size: 14px;
+}
+
+.user-loading,
+.user-error {
+    padding: 24px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.user-error {
+    color: #dc2626;
+    background-color: #fef2f2;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.users-table-wrapper {
+    overflow-x: auto;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th {
+    text-align: left;
+    padding: 12px;
+    background-color: #f9fafb;
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.users-table td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+.user-info-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.user-avatar-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-avatar-small span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #111827;
+}
+
+.badge-you {
+    font-size: 11px;
+    background-color: #dbeafe;
+    color: #1d4ed8;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.role-badge {
+    display: inline-flex;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.role-badge.admin {
+    background-color: #e0e7ff;
+    color: #4338ca;
+}
+
+.role-badge.user {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.btn-role {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.btn-promote {
+    background-color: #fff;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.btn-promote:hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.btn-demote {
+    background-color: #fff;
+    border-color: #fca5a5;
+    color: #b91c1c;
+}
+
+.btn-demote:hover {
+    background-color: #fef2f2;
+}
+
+.current-user-row {
+    background-color: #f9fafb;
+}

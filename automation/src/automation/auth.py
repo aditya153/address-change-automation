@@ -109,6 +109,42 @@ def get_or_create_user(email: str, name: str, picture: str, google_id: str) -> d
     return create_user(email, name, picture, google_id)
 
 
+def get_all_users() -> list:
+    """Get all users from the database."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT id, email, name, picture, role, created_at, last_login 
+            FROM users 
+            ORDER BY created_at DESC;
+            """
+        )
+        rows = cur.fetchall()
+        
+        # Convert datetime objects to ISO strings
+        result = []
+        for row in rows:
+            user = dict(row)
+            if user.get("created_at"):
+                user["created_at"] = user["created_at"].isoformat()
+            if user.get("last_login"):
+                user["last_login"] = user["last_login"].isoformat()
+            result.append(user)
+            
+        return result
+
+
+def update_user_role(user_id: int, new_role: str) -> dict:
+    """Update a user's role (admin/user)."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE users SET role = %s WHERE id = %s RETURNING id, email, role;",
+            (new_role, user_id),
+        )
+        updated = cur.fetchone()
+        return dict(updated) if updated else None
+
+
 # ========================
 # GOOGLE TOKEN VERIFICATION
 # ========================
