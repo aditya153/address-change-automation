@@ -346,6 +346,29 @@ async def get_all_users_admin(user: Dict = Depends(require_admin)):
     return {"users": users}
 
 
+class UserInviteRequest(BaseModel):
+    email: EmailStr
+    name: str
+    role: str = "admin"
+
+
+@app.post("/admin/users")
+async def invite_user_admin(payload: UserInviteRequest, user: Dict = Depends(require_admin)):
+    """
+    Admin-only endpoint to pre-authorize a new user.
+    """
+    from .auth import invite_user
+    try:
+        invited_user = invite_user(
+            email=payload.email,
+            name=payload.name,
+            role=payload.role
+        )
+        return {"success": True, "user": invited_user}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 class UpdateRoleRequest(BaseModel):
     role: str
 

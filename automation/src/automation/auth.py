@@ -63,6 +63,36 @@ def create_user(email: str, name: str, picture: str, google_id: str, role: str =
         return dict(row)
 
 
+def invite_user(email: str, name: str, role: str = "admin") -> dict:
+    """
+    Pre-add a user to the database so they have the correct role
+    when they login via Google for the first time.
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        # Check if user already exists
+        cur.execute("SELECT id, email, role FROM users WHERE email = %s;", (email,))
+        existing = cur.fetchone()
+        if existing:
+            # If exists, update role and return
+            cur.execute(
+                "UPDATE users SET role = %s, name = %s WHERE id = %s RETURNING *;",
+                (role, name, existing["id"])
+            )
+            return dict(cur.fetchone())
+
+        # Create new user without google_id
+        cur.execute(
+            """
+            INSERT INTO users (email, name, role, created_at)
+            VALUES (%s, %s, %s, NOW())
+            RETURNING id, email, name, role, created_at;
+            """,
+            (email, name, role),
+        )
+        row = cur.fetchone()
+        return dict(row)
+
+
 def update_user_login(user_id: int, name: str = None, picture: str = None):
     """Update user's last login time and optionally name/picture."""
     with get_conn() as conn, conn.cursor() as cur:

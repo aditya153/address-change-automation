@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { Plus, UserPlus, X, Save, Send } from 'lucide-react';
+import { Button } from './ui/button';
 import './UserManagement.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -9,6 +11,9 @@ const UserManagement = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [inviting, setInviting] = useState(false);
+    const [inviteData, setInviteData] = useState({ name: '', email: '', role: 'admin' });
     const { getAuthToken, user: currentUser } = useAuth();
 
     useEffect(() => {
@@ -31,6 +36,34 @@ const UserManagement = () => {
             setError('Failed to load users');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleInviteUser = async (e) => {
+        e.preventDefault();
+        if (!inviteData.name || !inviteData.email) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        try {
+            setInviting(true);
+            const token = getAuthToken();
+            const config = {
+                headers: { Authorization: `Bearer ${token}` }
+            };
+
+            await axios.post(`${API_URL}/admin/users`, inviteData, config);
+
+            setShowInviteModal(false);
+            setInviteData({ name: '', email: '', role: 'admin' });
+            fetchUsers();
+            alert('User invited successfully! They can now log in via Google.');
+        } catch (err) {
+            console.error('Error inviting user:', err);
+            alert('Failed to invite user: ' + (err.response?.data?.detail || err.message));
+        } finally {
+            setInviting(false);
         }
     };
 
@@ -65,11 +98,75 @@ const UserManagement = () => {
     return (
         <div className="user-management-container">
             <div className="user-header">
-                <h2>User Management</h2>
-                <p>Manage system access and roles</p>
+                <div>
+                    <h2>User Management</h2>
+                    <p>Manage system access and roles</p>
+                </div>
+                <button
+                    className="btn-add-user"
+                    onClick={() => setShowInviteModal(true)}
+                >
+                    <UserPlus size={18} />
+                    <span>Invite Admin</span>
+                </button>
             </div>
 
             {error && <div className="user-error">{error}</div>}
+
+            {/* Invite Modal */}
+            {showInviteModal && (
+                <div className="invite-modal-backdrop">
+                    <div className="invite-modal">
+                        <div className="modal-header">
+                            <h3>Invite New Admin</h3>
+                            <p>Authorized users can log in via Google to access the dashboard</p>
+                        </div>
+                        <form onSubmit={handleInviteUser} className="invite-form">
+                            <div className="form-group">
+                                <label>Full Name</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter name"
+                                    value={inviteData.name}
+                                    onChange={(e) => setInviteData({ ...inviteData, name: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Email Address</label>
+                                <input
+                                    type="email"
+                                    placeholder="email@example.com"
+                                    value={inviteData.email}
+                                    onChange={(e) => setInviteData({ ...inviteData, email: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="modal-footer">
+                                <button
+                                    type="button"
+                                    className="btn-cancel"
+                                    onClick={() => setShowInviteModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn-invite"
+                                    disabled={inviting}
+                                >
+                                    {inviting ? 'Inviting...' : (
+                                        <>
+                                            <Send size={16} />
+                                            <span>Send Invitation</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             <div className="users-table-wrapper">
                 <table className="users-table">
