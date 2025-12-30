@@ -115,7 +115,6 @@ const LoginPage = () => {
                     <span className="gov-banner-flag">🇩🇪</span>
                     <span className="gov-banner-text">An official website of the Federal Republic of Germany</span>
                 </div>
-                <button className="gov-banner-link">How you know →</button>
             </div>
 
             <div className="login-container">

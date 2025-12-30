@@ -19,26 +19,31 @@
     font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Government Banner - Only spans blue section, centered within it */
+/* Government Banner - Full screen width, text anchored to stay at same point */
 .gov-banner {
     background-color: #0d1b2a;
     color: #ffffff;
     padding: 10px 24px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+    /* Start alignment to use container for positioning */
     align-items: center;
     font-size: 14px;
     position: absolute;
     top: 0;
     left: 0;
-    width: 50%;
+    width: 100%;
+    /* Now full screen width */
     z-index: 10;
 }
 
 .gov-banner-content {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
+    width: 50%;
+    /* Same width as old banner to keep text at the same point (25% mark) */
 }
 
 .gov-banner-flag {
@@ -51,21 +56,7 @@
     font-family: 'Roboto', sans-serif;
 }
 
-.gov-banner-link {
-    position: absolute;
-    right: 24px;
-    background: none;
-    border: none;
-    color: #60a5fa;
-    cursor: pointer;
-    font-size: 14px;
-    transition: color 0.2s;
-    font-family: 'Roboto', sans-serif;
-}
-
-.gov-banner-link:hover {
-    color: #93c5fd;
-}
+/* Removed .gov-banner-link as requested */
 
 /* Main Container - Split View */
 .login-container {
@@ -74,9 +65,9 @@
     position: relative;
 }
 
-/* Left Panel - Bright Blue (50% width) */
+/* Left Panel - Bright Blue (47% width) */
 .login-left-panel {
-    width: 50%;
+    width: 47%;
     background: linear-gradient(180deg, #0066cc 0%, #0052a3 100%);
     color: #ffffff;
     display: flex;
@@ -201,9 +192,9 @@
     font-family: 'Roboto', sans-serif;
 }
 
-/* Right Panel - White (50% width) */
+/* Right Panel - White (53% width) */
 .login-right-panel {
-    width: 50%;
+    width: 53%;
     background: #ffffff;
     display: flex;
     align-items: center;
