@@ -443,8 +443,8 @@ function AdminDashboard() {
                         </svg>
                         <span>Settings</span>
                     </button>
-                    {/* Hide Users tab for Demo Admin (ID 999999) */}
-                    {(!user || user.id !== 999999) && (
+                    {/* Show Users tab ONLY for Real Admins (Not distinct users, and Not Demo Admin) */}
+                    {user && user.role === 'admin' && user.id !== 999999 && (
                         <button
                             className={`sidebar-nav-item ${activeNav === 'users' ? 'active' : ''}`}
                             onClick={() => setActiveNav('users')}
