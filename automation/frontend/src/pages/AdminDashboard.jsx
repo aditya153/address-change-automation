@@ -10,6 +10,7 @@ import UserManagement from '../components/UserManagement';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import CitizenManagement from '../components/CitizenManagement';
 import SettingsPanel from '../components/SettingsPanel';
+import EmployeeManagement from '../components/EmployeeManagement';
 import {
     Inbox,
     AlertTriangle,
@@ -42,6 +43,7 @@ function AdminDashboard() {
     const [pendingCases, setPendingCases] = useState([]);
     const [hitlCases, setHitlCases] = useState([]);
     const [completedCases, setCompletedCases] = useState([]);
+    const [myCases, setMyCases] = useState([]);
     const [loading, setLoading] = useState(false);
 
     // Navigation & UI State
@@ -91,9 +93,21 @@ function AdminDashboard() {
         }
     };
 
+    const fetchMyCases = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const res = await axios.get(`${API_URL}/admin/my-cases`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setMyCases(res.data.cases || []);
+        } catch (err) {
+            console.error('Error fetching my cases:', err);
+        }
+    };
+
     const fetchAllCases = async () => {
         setLoading(true);
-        await Promise.all([fetchPendingCases(), fetchHitlCases(), fetchCompletedCases()]);
+        await Promise.all([fetchPendingCases(), fetchHitlCases(), fetchCompletedCases(), fetchMyCases()]);
         setLoading(false);
     };
 
@@ -266,11 +280,10 @@ function AdminDashboard() {
             {/* VIEW SWITCHER */}
             {activeNav === 'users' ? (
                 <UserManagement />
+            ) : activeNav === 'employees' ? (
+                <EmployeeManagement />
             ) : activeNav === 'analytics' ? (
-                <div className="space-y-4">
-                    <Button variant="outline" onClick={() => setActiveNav('dashboard')}>← Back to Dashboard</Button>
-                    <AnalyticsDashboard />
-                </div>
+                <AnalyticsDashboard />
             ) : activeNav === 'citizens' ? (
                 <CitizenManagement />
             ) : activeNav === 'settings' ? (
@@ -292,13 +305,14 @@ function AdminDashboard() {
                                         <th>Case ID</th>
                                         <th>Citizen</th>
                                         <th>Submitted</th>
+                                        <th>Assigned To</th>
                                         <th>Status</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {allCases.length === 0 ? (
-                                        <tr><td colSpan="5" className="text-center py-8 text-muted-foreground">No cases found</td></tr>
+                                        <tr><td colSpan="6" className="text-center py-8 text-muted-foreground">No cases found</td></tr>
                                     ) : (
                                         allCases.map((item) => {
                                             const statusKey = mapStatus(item.status);
@@ -314,6 +328,11 @@ function AdminDashboard() {
                                                         </div>
                                                     </td>
                                                     <td className="text-muted-foreground">{formatDate(item.submitted_at)}</td>
+                                                    <td>
+                                                        <span className="text-sm font-medium text-slate-600">
+                                                            {item.assigned_to_name || 'Unassigned'}
+                                                        </span>
+                                                    </td>
                                                     <td>
                                                         <span className={`status-badge status-${statusKey}`}>
                                                             <span className="dot" />
@@ -386,6 +405,66 @@ function AdminDashboard() {
                         <div className="p-4 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 flex justify-between items-center">
                             <span>{message}</span>
                             <button onClick={() => setMessage('')}><X size={16} /></button>
+                        </div>
+                    )}
+
+                    {/* My Cases Section - Shows cases assigned to current user */}
+                    {myCases.length > 0 && (
+                        <div className="admin-card mb-6">
+                            <div className="p-6 border-b border-border flex flex-row items-center justify-between">
+                                <h3 className="text-lg font-bold m-0">📋 My Assigned Cases</h3>
+                                <span className="text-sm text-muted-foreground">{myCases.length} case(s)</span>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="clean-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Case ID</th>
+                                            <th>Citizen</th>
+                                            <th>Submitted</th>
+                                            <th>Status</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {myCases.slice(0, 5).map((item) => {
+                                            const statusKey = mapStatus(item.status);
+                                            const style = statusStyles[statusKey] || statusStyles.pending;
+                                            return (
+                                                <tr key={item.case_id} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="case-id-cell">AC-Case ID: {item.case_id}</td>
+                                                    <td>
+                                                        <div>
+                                                            <p className="citizen-name">{item.citizen_name || 'Unknown'}</p>
+                                                            <p className="citizen-email">{item.email}</p>
+                                                        </div>
+                                                    </td>
+                                                    <td className="text-muted-foreground">{formatDate(item.submitted_at)}</td>
+                                                    <td>
+                                                        <span className={`status-badge status-${statusKey}`}>
+                                                            <span className="dot" />
+                                                            {style.label}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                            onClick={() => {
+                                                                if (item.status === 'WAITING_FOR_HUMAN') handleOpenHitlReview(item);
+                                                                else handleViewCase(item);
+                                                            }}
+                                                        >
+                                                            <Eye className="w-4 h-4" />
+                                                        </Button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     )}
 

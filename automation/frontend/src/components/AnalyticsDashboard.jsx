@@ -1,6 +1,7 @@
 // src/components/AnalyticsDashboard.jsx
 import { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, Clock, Brain, CheckCircle2, Activity } from 'lucide-react';
+import { BarChart3, TrendingUp, Clock, Brain, CheckCircle2, Activity, Download, ArrowUpRight, ArrowDownRight, Users } from 'lucide-react';
+import { Button } from './ui/button';
 import './AnalyticsDashboard.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -12,9 +13,21 @@ export default function AnalyticsDashboard() {
     const [showPatterns, setShowPatterns] = useState(false);
     const [patternsLoading, setPatternsLoading] = useState(false);
 
+    // New state for advanced analytics
+    const [comparison, setComparison] = useState(null);
+    const [period, setPeriod] = useState('week');
+    const [exporting, setExporting] = useState(false);
+    const [kpis, setKpis] = useState(null);
+
     useEffect(() => {
         fetchAnalytics();
+        fetchComparison();
+        fetchKpis();
     }, []);
+
+    useEffect(() => {
+        fetchComparison();
+    }, [period]);
 
     const fetchAnalytics = async () => {
         setLoading(true);
@@ -30,6 +43,71 @@ export default function AnalyticsDashboard() {
             setLoading(false);
         }
     };
+
+    const fetchKpis = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const res = await fetch(`${API_BASE}/admin/analytics/kpis`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setKpis(data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch KPIs:', err);
+        }
+    };
+
+    const fetchComparison = async () => {
+        try {
+            const token = localStorage.getItem('authToken');
+            const res = await fetch(`${API_BASE}/admin/analytics/comparison?period=${period}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setComparison(data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch comparison:', err);
+        }
+    };
+
+    const handleExport = async (format) => {
+        setExporting(true);
+        try {
+            const token = localStorage.getItem('authToken');
+            const res = await fetch(`${API_BASE}/admin/reports/export?format=${format}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                if (format === 'csv') {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'cases_report.csv';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                } else {
+                    const data = await res.json();
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'cases_report.json';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
+            }
+        } catch (err) {
+            console.error('Failed to export report:', err);
+        } finally {
+            setExporting(false);
+        }
+    };
+
 
     const fetchPatterns = async () => {
         if (showPatterns) {
@@ -174,7 +252,57 @@ export default function AnalyticsDashboard() {
                     <h1 className="analytics-page-title">Analytics Overview</h1>
                     <p className="analytics-page-subtitle">Comprehensive insights into system performance and automation efficiency</p>
                 </div>
+                <div className="analytics-actions">
+                    <div className="period-selector">
+                        <button
+                            className={`period-btn ${period === 'week' ? 'active' : ''}`}
+                            onClick={() => setPeriod('week')}
+                        >
+                            Week
+                        </button>
+                        <button
+                            className={`period-btn ${period === 'month' ? 'active' : ''}`}
+                            onClick={() => setPeriod('month')}
+                        >
+                            Month
+                        </button>
+                    </div>
+                    <Button
+                        variant="outline"
+                        onClick={() => handleExport('csv')}
+                        disabled={exporting}
+                        className="export-btn"
+                    >
+                        <Download className="w-4 h-4" />
+                        {exporting ? 'Exporting...' : 'Export CSV'}
+                    </Button>
+                </div>
             </div>
+
+            {/* Comparison Card */}
+            {comparison && (
+                <div className="analytics-comparison-card">
+                    <div className="comparison-content">
+                        <div className="comparison-period">
+                            <span className="comparison-label">{comparison.current.label}</span>
+                            <span className="comparison-value">{comparison.current.count}</span>
+                        </div>
+                        <div className="comparison-vs">vs</div>
+                        <div className="comparison-period">
+                            <span className="comparison-label">{comparison.previous.label}</span>
+                            <span className="comparison-value">{comparison.previous.count}</span>
+                        </div>
+                        <div className={`comparison-change ${comparison.change_percent >= 0 ? 'positive' : 'negative'}`}>
+                            {comparison.change_percent >= 0 ? (
+                                <ArrowUpRight className="w-5 h-5" />
+                            ) : (
+                                <ArrowDownRight className="w-5 h-5" />
+                            )}
+                            <span>{Math.abs(comparison.change_percent)}%</span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Key Metrics Grid */}
             <div className="analytics-metrics-grid">
@@ -282,6 +410,32 @@ export default function AnalyticsDashboard() {
                                 <span className="status-badge-label">{status.replace(/_/g, ' ')}</span>
                                 <span className="status-badge-count">{count}</span>
                             </span>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Employee Performance */}
+            {kpis?.cases_per_employee && kpis.cases_per_employee.length > 0 && (
+                <div className="analytics-card">
+                    <div className="analytics-card-header">
+                        <Users className="w-5 h-5 text-[#0066cc]" />
+                        <h3 className="analytics-card-title">Cases per Employee</h3>
+                    </div>
+                    <div className="employee-performance-list">
+                        {kpis.cases_per_employee.map((emp, idx) => (
+                            <div key={idx} className="employee-row">
+                                <span className="employee-name">{emp.name}</span>
+                                <div className="employee-bar-container">
+                                    <div
+                                        className="employee-bar"
+                                        style={{
+                                            width: `${Math.min((emp.count / Math.max(...kpis.cases_per_employee.map(e => e.count), 1)) * 100, 100)}%`
+                                        }}
+                                    />
+                                </div>
+                                <span className="employee-count">{emp.count}</span>
+                            </div>
                         ))}
                     </div>
                 </div>

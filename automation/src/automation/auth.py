@@ -175,6 +175,102 @@ def update_user_role(user_id: int, new_role: str) -> dict:
         return dict(updated) if updated else None
 
 
+def delete_user(user_id: int) -> bool:
+    """Delete a user from the database."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM users WHERE id = %s RETURNING id;", (user_id,))
+        deleted = cur.fetchone()
+        return bool(deleted)
+
+
+# ========================
+# CASE ASSIGNMENT FUNCTIONS
+# ========================
+
+def get_all_employees() -> list:
+    """Get all employees (admins only) for case assignment."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT id, email, name, role 
+            FROM users 
+            WHERE role = 'admin'
+            ORDER BY id;
+            """
+
+        )
+        rows = cur.fetchall()
+        return [dict(row) for row in rows]
+
+
+def assign_case_to_employee(case_id: str, employee_id: int) -> bool:
+    """Assign a case to a specific employee."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE cases 
+            SET assigned_to = %s, assigned_at = NOW() 
+            WHERE case_id = %s 
+            RETURNING id;
+            """,
+            (employee_id, case_id),
+        )
+        updated = cur.fetchone()
+        return bool(updated)
+
+
+def get_random_employee_for_assignment() -> Optional[dict]:
+    """Get a random employee for case assignment."""
+    import random
+    employees = get_all_employees()
+    if not employees:
+        return None
+    return random.choice(employees)
+
+
+def auto_assign_case(case_id: str) -> Optional[dict]:
+    """Automatically assign a case to a random employee."""
+    employee = get_random_employee_for_assignment()
+    if employee:
+        success = assign_case_to_employee(case_id, employee["id"])
+        if success:
+            return employee
+    return None
+
+
+def get_cases_for_employee(employee_id: int) -> list:
+    """Get all cases assigned to a specific employee."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT c.*, u.name as assigned_to_name, u.email as assigned_to_email
+            FROM cases c
+            LEFT JOIN users u ON c.assigned_to = u.id
+            WHERE c.assigned_to = %s
+            ORDER BY c.submitted_at DESC;
+            """,
+            (employee_id,),
+        )
+        rows = cur.fetchall()
+        return [dict(row) for row in rows]
+
+
+def get_case_with_assignment(case_id: str) -> Optional[dict]:
+    """Get a case with its assignment details."""
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT c.*, u.name as assigned_to_name, u.email as assigned_to_email
+            FROM cases c
+            LEFT JOIN users u ON c.assigned_to = u.id
+            WHERE c.case_id = %s;
+            """,
+            (case_id,),
+        )
+        row = cur.fetchone()
+        return dict(row) if row else None
+
+
 # ========================
 # GOOGLE TOKEN VERIFICATION
 # ========================

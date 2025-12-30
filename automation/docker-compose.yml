@@ -28,7 +28,7 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       JWT_SECRET: ${JWT_SECRET}
     working_dir: /app
-    command: [ "uvicorn", "src.automation.api:app", "--host", "0.0.0.0", "--port", "8000" ]
+    command: [ "uvicorn", "src.automation.api:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
     ports:
       - "8000:8000"
     volumes:

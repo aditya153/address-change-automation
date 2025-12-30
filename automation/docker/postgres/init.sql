@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS cases (
     pdf_landlord_path      TEXT,                 -- path to landlord confirmation PDF
     pdf_address_change_path TEXT,                -- path to address change PDF
     ai_analysis            TEXT,                 -- AI analysis result
+    assigned_to            INTEGER,              -- employee user ID assigned to this case
+    assigned_at            TIMESTAMPTZ,          -- when case was assigned
     submitted_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()

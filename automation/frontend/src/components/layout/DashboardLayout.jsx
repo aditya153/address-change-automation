@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, Users, BarChart3, Settings, Building2, LogOut, Search, Bell, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, BarChart3, Settings, Building2, LogOut, Search, Bell, ChevronDown, UserCog } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import '../../pages/AdminDashboard.css'; // Ensure CSS is available
 
@@ -70,6 +70,16 @@ export const DashboardLayout = ({ children, activeNav, onNavChange }) => {
                             <Settings size={18} />
                             <span>Settings</span>
                         </button>
+                        {/* Show Employees tab ONLY for Real Admins */}
+                        {user && user.role === 'admin' && user.id !== 999999 && (
+                            <button
+                                className={`sidebar-nav-item ${activeNav === 'employees' ? 'active' : ''}`}
+                                onClick={() => onNavChange('employees')}
+                            >
+                                <UserCog size={18} />
+                                <span>Employees</span>
+                            </button>
+                        )}
                         {/* Show Users tab ONLY for Real Admins */}
                         {user && user.role === 'admin' && user.id !== 999999 && (
                             <button
@@ -112,14 +122,20 @@ export const DashboardLayout = ({ children, activeNav, onNavChange }) => {
                                     className="user-dropdown-trigger"
                                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                                 >
-                                    <span className="user-avatar">AD</span>
-                                    <span className="user-name">Admin</span>
+                                    <div className="user-avatar">
+                                        {user?.picture ? (
+                                            <img src={user.picture} alt={user.name} referrerPolicy="no-referrer" />
+                                        ) : (
+                                            <span>{user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'AD'}</span>
+                                        )}
+                                    </div>
+                                    <span className="user-name">{user?.name || 'Admin'}</span>
                                     <ChevronDown size={16} />
                                 </button>
                                 {userDropdownOpen && (
                                     <div className="user-dropdown-menu">
-                                        <button onClick={() => setUserDropdownOpen(false)}>Profile</button>
-                                        <button onClick={() => setUserDropdownOpen(false)}>Settings</button>
+                                        <button onClick={() => { onNavChange('settings'); setUserDropdownOpen(false); }}>Profile</button>
+                                        <button onClick={() => { onNavChange('settings'); setUserDropdownOpen(false); }}>Settings</button>
                                         <button className="signout-option" onClick={() => { logout(); navigate('/login'); }}>Sign Out</button>
                                     </div>
                                 )}

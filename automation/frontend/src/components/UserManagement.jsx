@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Plus, UserPlus, X, Save, Send } from 'lucide-react';
+import { Plus, UserPlus, X, Save, Send, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import './UserManagement.css';
 
@@ -53,7 +53,7 @@ const UserManagement = () => {
                 headers: { Authorization: `Bearer ${token}` }
             };
 
-            await axios.post(`${API_URL}/admin/users`, inviteData, config);
+            await axios.post(`${API_URL}/admin/users/invite`, inviteData, config);
 
             setShowInviteModal(false);
             setInviteData({ name: '', email: '', role: 'admin' });
@@ -93,6 +93,26 @@ const UserManagement = () => {
         }
     };
 
+    const handleDeleteUser = async (userId) => {
+        if (!window.confirm('Are you sure you want to delete this user? This action is permanent and cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const token = getAuthToken();
+            const config = {
+                headers: { Authorization: `Bearer ${token}` }
+            };
+
+            await axios.delete(`${API_URL}/admin/users/${userId}`, config);
+            fetchUsers();
+            alert('User deleted successfully.');
+        } catch (err) {
+            console.error('Error deleting user:', err);
+            alert('Failed to delete user: ' + (err.response?.data?.detail || err.message));
+        }
+    };
+
     if (loading) return <div className="user-loading">Loading users...</div>;
 
     return (
@@ -100,15 +120,8 @@ const UserManagement = () => {
             <div className="user-header">
                 <div>
                     <h2>User Management</h2>
-                    <p>Manage system access and roles</p>
+                    <p>View all users who have logged in via Google</p>
                 </div>
-                <button
-                    className="btn-add-user"
-                    onClick={() => setShowInviteModal(true)}
-                >
-                    <UserPlus size={18} />
-                    <span>Invite Admin</span>
-                </button>
             </div>
 
             {error && <div className="user-error">{error}</div>}
@@ -203,14 +216,25 @@ const UserManagement = () => {
                                     {user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}
                                 </td>
                                 <td>
-                                    {user.id !== currentUser?.id && (
-                                        <button
-                                            className={`btn-role ${user.role === 'admin' ? 'btn-demote' : 'btn-promote'}`}
-                                            onClick={() => handleRoleChange(user.id, user.role === 'admin' ? 'user' : 'admin')}
-                                        >
-                                            {user.role === 'admin' ? 'Demote to User' : 'Promote to Admin'}
-                                        </button>
-                                    )}
+                                    <div className="user-actions-cell">
+                                        {user.id !== currentUser?.id && (
+                                            <>
+                                                <button
+                                                    className={`btn-role ${user.role === 'admin' ? 'btn-demote' : 'btn-promote'}`}
+                                                    onClick={() => handleRoleChange(user.id, user.role === 'admin' ? 'user' : 'admin')}
+                                                >
+                                                    {user.role === 'admin' ? 'Demote to User' : 'Promote to Admin'}
+                                                </button>
+                                                <button
+                                                    className="btn-delete-user"
+                                                    onClick={() => handleDeleteUser(user.id)}
+                                                    title="Delete User"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}

@@ -352,7 +352,7 @@ class UserInviteRequest(BaseModel):
     role: str = "admin"
 
 
-@app.post("/admin/users")
+@app.post("/admin/users/invite")
 async def invite_user_admin(payload: UserInviteRequest, user: Dict = Depends(require_admin)):
     """
     Admin-only endpoint to pre-authorize a new user.
@@ -389,6 +389,263 @@ async def update_user_role_admin(user_id: int, payload: UpdateRoleRequest, user:
     return {"success": True, "user": updated_user}
 
 
+@app.delete("/admin/users/{user_id}")
+async def delete_user_admin(user_id: int, user: Dict = Depends(require_admin)):
+    """
+    Admin-only endpoint to delete a user.
+    Prevents admins from deleting themselves.
+    """
+    from .auth import delete_user
+    
+    # Self-deletion protection
+    if user_id == user.get("id"):
+        raise HTTPException(status_code=400, detail="You cannot delete your own account")
+        
+    success = delete_user(user_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    return {"success": True, "message": "User deleted successfully"}
+
+
+# =======================
+# CASE ASSIGNMENT ENDPOINTS
+# =======================
+
+@app.get("/admin/my-cases")
+async def get_my_cases(user: Dict = Depends(require_auth)):
+    """
+    Get cases assigned to the current user.
+    """
+    from .auth import get_cases_for_employee
+    
+    user_id = user.get("id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Invalid user")
+    
+    cases = get_cases_for_employee(user_id)
+    
+    # Format dates for JSON
+    for case in cases:
+        if case.get("submitted_at"):
+            case["submitted_at"] = case["submitted_at"].isoformat()
+        if case.get("created_at"):
+            case["created_at"] = case["created_at"].isoformat()
+        if case.get("assigned_at"):
+            case["assigned_at"] = case["assigned_at"].isoformat()
+    
+    return {"cases": cases, "count": len(cases)}
+
+
+@app.put("/admin/cases/{case_id}/assign")
+async def assign_case(case_id: str, employee_id: int, user: Dict = Depends(require_admin)):
+    """
+    Admin-only endpoint to manually assign a case to an employee.
+    """
+    from .auth import assign_case_to_employee, get_user_by_email
+    
+    success = assign_case_to_employee(case_id, employee_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Case not found")
+    
+    return {"success": True, "message": f"Case {case_id} assigned to employee {employee_id}"}
+
+
+# =======================
+# ANALYTICS ENDPOINTS
+# =======================
+
+@app.get("/admin/analytics/kpis")
+async def get_analytics_kpis(user: Dict = Depends(require_admin)):
+    """
+    Get key performance indicators for the dashboard.
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        # Total cases
+        cur.execute("SELECT COUNT(*) as total FROM cases;")
+        total_cases = cur.fetchone()["total"]
+        
+        # Cases by status
+        cur.execute("""
+            SELECT status, COUNT(*) as count 
+            FROM cases 
+            GROUP BY status;
+        """)
+        status_counts = {row["status"]: row["count"] for row in cur.fetchall()}
+        
+        # Cases today
+        cur.execute("""
+            SELECT COUNT(*) as count 
+            FROM cases 
+            WHERE DATE(submitted_at) = CURRENT_DATE;
+        """)
+        cases_today = cur.fetchone()["count"]
+        
+        # Cases this week
+        cur.execute("""
+            SELECT COUNT(*) as count 
+            FROM cases 
+            WHERE submitted_at >= CURRENT_DATE - INTERVAL '7 days';
+        """)
+        cases_this_week = cur.fetchone()["count"]
+        
+        # Average processing time (for completed cases)
+        cur.execute("""
+            SELECT AVG(EXTRACT(EPOCH FROM (updated_at - submitted_at))) as avg_time
+            FROM cases 
+            WHERE status = 'CLOSED';
+        """)
+        avg_time_row = cur.fetchone()
+        avg_processing_seconds = avg_time_row["avg_time"] if avg_time_row["avg_time"] else 0
+        
+        # Cases per employee (only admins, not regular users)
+        cur.execute("""
+            SELECT u.name, COUNT(c.id) as case_count
+            FROM users u
+            LEFT JOIN cases c ON u.id = c.assigned_to
+            WHERE u.role = 'admin'
+            GROUP BY u.id, u.name
+            ORDER BY case_count DESC;
+        """)
+        cases_per_employee = [{"name": row["name"] or "Unassigned", "count": row["case_count"]} for row in cur.fetchall()]
+        
+    return {
+        "total_cases": total_cases,
+        "cases_today": cases_today,
+        "cases_this_week": cases_this_week,
+        "status_breakdown": status_counts,
+        "avg_processing_seconds": round(avg_processing_seconds, 2),
+        "cases_per_employee": cases_per_employee
+    }
+
+
+@app.get("/admin/analytics/comparison")
+async def get_analytics_comparison(period: str = "week", user: Dict = Depends(require_admin)):
+    """
+    Compare metrics across time periods (this week vs last week, etc.).
+    """
+    with get_conn() as conn, conn.cursor() as cur:
+        if period == "week":
+            # This week
+            cur.execute("""
+                SELECT COUNT(*) as count 
+                FROM cases 
+                WHERE submitted_at >= CURRENT_DATE - INTERVAL '7 days';
+            """)
+            current_count = cur.fetchone()["count"]
+            
+            # Last week
+            cur.execute("""
+                SELECT COUNT(*) as count 
+                FROM cases 
+                WHERE submitted_at >= CURRENT_DATE - INTERVAL '14 days'
+                AND submitted_at < CURRENT_DATE - INTERVAL '7 days';
+            """)
+            previous_count = cur.fetchone()["count"]
+            
+            label_current = "This Week"
+            label_previous = "Last Week"
+        else:
+            # This month
+            cur.execute("""
+                SELECT COUNT(*) as count 
+                FROM cases 
+                WHERE submitted_at >= DATE_TRUNC('month', CURRENT_DATE);
+            """)
+            current_count = cur.fetchone()["count"]
+            
+            # Last month
+            cur.execute("""
+                SELECT COUNT(*) as count 
+                FROM cases 
+                WHERE submitted_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month'
+                AND submitted_at < DATE_TRUNC('month', CURRENT_DATE);
+            """)
+            previous_count = cur.fetchone()["count"]
+            
+            label_current = "This Month"
+            label_previous = "Last Month"
+        
+        # Calculate change percentage
+        if previous_count > 0:
+            change_percent = round(((current_count - previous_count) / previous_count) * 100, 1)
+        else:
+            change_percent = 100 if current_count > 0 else 0
+    
+    return {
+        "period": period,
+        "current": {"label": label_current, "count": current_count},
+        "previous": {"label": label_previous, "count": previous_count},
+        "change_percent": change_percent
+    }
+
+
+@app.get("/admin/reports/export")
+async def export_reports(format: str = "csv", user: Dict = Depends(require_admin)):
+    """
+    Export case data as CSV or JSON.
+    PDF export would require additional libraries.
+    """
+    from fastapi.responses import StreamingResponse
+    import io
+    import csv
+    
+    with get_conn() as conn, conn.cursor() as cur:
+        cur.execute("""
+            SELECT c.case_id, c.citizen_name, c.email, c.status, 
+                   c.old_address_raw, c.new_address_raw, 
+                   c.submitted_at, c.updated_at,
+                   u.name as assigned_to_name
+            FROM cases c
+            LEFT JOIN users u ON c.assigned_to = u.id
+            ORDER BY c.submitted_at DESC;
+        """)
+        rows = cur.fetchall()
+    
+    if format == "csv":
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Header
+        writer.writerow(["Case ID", "Citizen Name", "Email", "Status", 
+                        "Old Address", "New Address", "Submitted At", 
+                        "Updated At", "Assigned To"])
+        
+        # Data rows
+        for row in rows:
+            writer.writerow([
+                row["case_id"],
+                row["citizen_name"],
+                row["email"],
+                row["status"],
+                row["old_address_raw"],
+                row["new_address_raw"],
+                row["submitted_at"].isoformat() if row["submitted_at"] else "",
+                row["updated_at"].isoformat() if row["updated_at"] else "",
+                row["assigned_to_name"] or "Unassigned"
+            ])
+        
+        output.seek(0)
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=cases_report.csv"}
+        )
+    else:
+        # JSON format
+        data = []
+        for row in rows:
+            data.append({
+                "case_id": row["case_id"],
+                "citizen_name": row["citizen_name"],
+                "email": row["email"],
+                "status": row["status"],
+                "old_address": row["old_address_raw"],
+                "new_address": row["new_address_raw"],
+                "submitted_at": row["submitted_at"].isoformat() if row["submitted_at"] else None,
+                "assigned_to": row["assigned_to_name"] or "Unassigned"
+            })
+        return {"cases": data, "count": len(data)}
 
 
 @app.post("/address-change/run", response_model=AddressChangeResponse)
