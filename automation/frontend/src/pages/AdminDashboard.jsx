@@ -193,32 +193,32 @@ function AdminDashboard() {
             value: pendingCases.length.toString(),
             change: "+3 today",
             icon: Inbox,
-            color: "text-info",
-            bg: "bg-info/10"
+            color: "text-blue-500",
+            bg: "bg-blue-50"
         },
         {
             label: "Needs Review",
             value: hitlCases.length.toString(),
             change: `${hitlCases.length > 0 ? hitlCases.length + ' urgent' : 'All clear'}`,
             icon: AlertTriangle,
-            color: "text-warning",
-            bg: "bg-warning/10"
+            color: "text-orange-500",
+            bg: "bg-orange-50"
         },
         {
             label: "Completed",
             value: completedCases.length.toString(),
             change: "+18 this week",
             icon: CheckCircle2,
-            color: "text-success",
-            bg: "bg-success/10"
+            color: "text-green-500",
+            bg: "bg-green-50"
         },
         {
             label: "Avg. Processing",
             value: "2.4h",
             change: "-12% faster",
             icon: Clock,
-            color: "text-primary",
-            bg: "bg-primary/10"
+            color: "text-purple-500",
+            bg: "bg-purple-50"
         },
     ];
 
@@ -245,17 +245,17 @@ function AdminDashboard() {
             ) : (
                 <div className="space-y-8 animate-in">
                     {/* Page Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                         <div>
-                            <h1 className="font-serif text-2xl sm:text-3xl mb-1">Dashboard</h1>
+                            <h1 className="text-3xl font-bold tracking-tight mb-1">Dashboard</h1>
                             <p className="text-muted-foreground">Address Change Automation Overview</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Button variant="outline" className="gap-2" onClick={() => setAnalyticsOpen(true)}>
+                            <Button variant="outline" className="gap-2 bg-white border-slate-200" onClick={() => setAnalyticsOpen(true)}>
                                 <BarChart3 className="w-4 h-4" />
                                 Analytics
                             </Button>
-                            <Button className="gap-2">
+                            <Button className="gap-2 bg-[#005596] hover:bg-[#00447a] text-white border-none">
                                 <Brain className="w-4 h-4" />
                                 AI Brain
                             </Button>
@@ -271,134 +271,141 @@ function AdminDashboard() {
                     )}
 
                     {/* Stats Grid */}
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {stats.map((stat) => (
-                            <Card key={stat.label} className="border-border">
-                                <CardContent className="p-5">
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
-                                            <p className="text-3xl font-bold mt-1">{stat.value}</p>
-                                            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
-                                                <TrendingUp className="w-3 h-3" />
-                                                {stat.change}
-                                            </p>
-                                        </div>
-                                        <div className={`w-12 h-12 rounded-lg ${stat.bg} flex items-center justify-center`}>
-                                            <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                            <div key={stat.label} className="admin-card p-6">
+                                <div className="stat-card-content">
+                                    <div>
+                                        <p className="stat-label">{stat.label}</p>
+                                        <p className="stat-value">{stat.value}</p>
+                                        <div className="stat-change text-muted-foreground">
+                                            <TrendingUp className="w-3 h-3" />
+                                            {stat.change}
                                         </div>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                    <div className={`stat-icon-wrapper ${stat.bg}`}>
+                                        <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
 
                     {/* Main Content Grid */}
                     <div className="grid lg:grid-cols-3 gap-6">
                         {/* Recent Cases */}
-                        <Card className="lg:col-span-2 border-border">
-                            <CardHeader className="flex flex-row items-center justify-between pb-4">
-                                <CardTitle className="text-lg font-semibold">Recent Cases</CardTitle>
-                                <Button variant="ghost" size="sm" className="gap-1 text-primary" onClick={() => setActiveNav('cases')}>
+                        <div className="lg:col-span-2 admin-card">
+                            <div className="p-6 border-b border-border flex flex-row items-center justify-between">
+                                <h3 className="text-lg font-bold m-0">Recent Cases</h3>
+                                <Button variant="ghost" size="sm" className="gap-1 text-[#005596] p-0 h-auto hover:bg-transparent font-semibold" onClick={() => setActiveNav('cases')}>
                                     View All <ArrowRight className="w-4 h-4" />
                                 </Button>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <div className="overflow-x-auto">
-                                    <table className="clean-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Case ID</th>
-                                                <th>Citizen</th>
-                                                <th>Submitted</th>
-                                                <th>Status</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {allCases.length === 0 ? (
-                                                <tr><td colSpan="5" className="text-center py-8 text-muted-foreground">No recent cases</td></tr>
-                                            ) : (
-                                                allCases.map((item) => {
-                                                    const statusKey = mapStatus(item.status);
-                                                    const style = statusStyles[statusKey] || statusStyles.pending;
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="clean-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Case ID</th>
+                                            <th>Citizen</th>
+                                            <th>Submitted</th>
+                                            <th>Status</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {allCases.length === 0 ? (
+                                            <tr><td colSpan="5" className="text-center py-8 text-muted-foreground">No recent cases</td></tr>
+                                        ) : (
+                                            allCases.map((item) => {
+                                                const statusKey = mapStatus(item.status);
+                                                const style = statusStyles[statusKey] || statusStyles.pending;
 
-                                                    return (
-                                                        <tr key={item.case_id}>
-                                                            <td className="font-medium">AC-{item.case_id}</td>
-                                                            <td>
-                                                                <div>
-                                                                    <p className="font-medium">{item.citizen_name || 'Unknown'}</p>
-                                                                    <p className="text-muted-foreground text-xs">{item.email}</p>
-                                                                </div>
-                                                            </td>
-                                                            <td className="text-muted-foreground">{formatDate(item.submitted_at)}</td>
-                                                            <td>
-                                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${style.bg}`}>
-                                                                    <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                                                                    {style.label}
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                <div className="flex items-center gap-1">
+                                                return (
+                                                    <tr key={item.case_id} className="hover:bg-slate-50 transition-colors">
+                                                        <td className="case-id-cell">AC-Case ID: {item.case_id}</td>
+                                                        <td>
+                                                            <div>
+                                                                <p className="citizen-name">{item.citizen_name || 'Unknown'}</p>
+                                                                <p className="citizen-email">{item.email}</p>
+                                                            </div>
+                                                        </td>
+                                                        <td className="text-muted-foreground">{formatDate(item.submitted_at)}</td>
+                                                        <td>
+                                                            <span className={`status-badge status-${statusKey}`}>
+                                                                <span className="dot" />
+                                                                {style.label}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <div className="flex items-center gap-1">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                                    onClick={() => {
+                                                                        if (item.status === 'WAITING_FOR_HUMAN') handleOpenHitlReview(item);
+                                                                        else handleViewCase(item);
+                                                                    }}
+                                                                >
+                                                                    <Eye className="w-4 h-4" />
+                                                                </Button>
+                                                                {(item.pdf_landlord_path || item.pdf_address_change_path) && (
                                                                     <Button
                                                                         variant="ghost"
                                                                         size="icon"
-                                                                        className="h-8 w-8"
-                                                                        onClick={() => {
-                                                                            if (item.status === 'WAITING_FOR_HUMAN') handleOpenHitlReview(item);
-                                                                            else handleViewCase(item);
-                                                                        }}
+                                                                        className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                                        onClick={() => handlePreviewDocs(item)}
                                                                     >
-                                                                        <Eye className="w-4 h-4" />
+                                                                        <FileText className="w-4 h-4" />
                                                                     </Button>
-                                                                    {(item.pdf_landlord_path || item.pdf_address_change_path) && (
-                                                                        <Button
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            className="h-8 w-8"
-                                                                            onClick={() => handlePreviewDocs(item)}
-                                                                        >
-                                                                            <FileText className="w-4 h-4" />
-                                                                        </Button>
-                                                                    )}
-                                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                        <MoreHorizontal className="w-4 h-4" />
-                                                                    </Button>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                                                )}
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                                                                    <MoreHorizontal className="w-4 h-4" />
+                                                                </Button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
                         {/* Quick Actions & Guidelines */}
-                        <div className="space-y-6">
-                            <Card className="border-border">
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-lg font-semibold">Processing Guidelines</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
+                        <div className="lg:col-span-1 space-y-6">
+                            <div className="admin-card">
+                                <h3 className="text-lg font-bold mb-4">Processing Guidelines</h3>
+                                <div className="space-y-4">
                                     {[
                                         "Verify uploaded documents are readable and complete",
                                         "Confirm old and new addresses are plausible",
                                         "Mark low-confidence cases for manual review",
                                         "Complete processing within 48 hours",
-                                    ].map((item, i) => (
-                                        <div key={i} className="flex items-start gap-3">
-                                            <div className="w-6 h-6 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <CheckCircle2 className="w-4 h-4 text-success" />
+                                    ].map((item, index) => (
+                                        <div key={index} className="flex items-start gap-3">
+                                            <div className="w-5 h-5 rounded-full border border-success flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <CheckCircle2 className="w-3 h-3 text-success" />
                                             </div>
-                                            <p className="text-sm text-muted-foreground">{item}</p>
+                                            <p className="text-sm text-muted-foreground leading-relaxed">{item}</p>
                                         </div>
                                     ))}
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
+
+                            {/* Success Rate Card */}
+                            <div className="success-rate-card">
+                                <div>
+                                    <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest mb-1">This Month</p>
+                                    <p className="text-4xl font-bold mb-1">94.2%</p>
+                                    <p className="text-xs opacity-90">Automation Success Rate</p>
+
+                                    <div className="success-rate-progress-bg">
+                                        <div className="success-rate-progress-bar" style={{ width: '94.2%' }}></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

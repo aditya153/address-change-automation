@@ -131,19 +131,19 @@ const LoginPage = () => {
                                 </svg>
                             </div>
                             <div className="portal-info">
-                                <h2 className="portal-name">Bürgerportal</h2>
+                                <h2 className="portal-name font-serif">Bürgerportal</h2>
                                 <span className="portal-subtitle">Residents' Registration Office</span>
                             </div>
                         </div>
 
                         {/* Main Title */}
                         <div className="login-hero">
-                            <h1 className="login-title">
+                            <h1 className="login-title font-serif">
                                 Address Change<br />
                                 Automation System
                             </h1>
                             <div className="title-underline"></div>
-                            <p className="login-description">
+                            <p className="login-description font-sans">
                                 Streamlined digital services for German residents.
                                 Submit your address change documents securely
                                 online.
@@ -169,7 +169,7 @@ const LoginPage = () => {
                 {/* Right Panel - White */}
                 <div className="login-right-panel">
                     <div className="login-form-container">
-                        <h2 className="form-title">Sign In</h2>
+                        <h2 className="form-title font-serif">Sign In</h2>
                         <p className="form-subtitle">Access the administrative portal</p>
 
                         {error && <div className="error-message">{error}</div>}

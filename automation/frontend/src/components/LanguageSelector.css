@@ -21,7 +21,7 @@
     transition: all 0.2s ease;
     font-size: 13px;
     font-weight: 600;
-    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .lang-trigger:hover {
@@ -102,7 +102,7 @@
     transition: all 0.2s ease;
     text-align: left;
     font-size: 13px;
-    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .lang-option:hover {

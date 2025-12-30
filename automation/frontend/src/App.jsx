@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import UserPortal from './pages/UserPortal';
 import AdminDashboard from './pages/AdminDashboard';
 import LoginPage from './pages/Login';
@@ -13,6 +12,9 @@ function AppContent() {
   const { isAuthenticated, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   const handleHelpClick = () => {
     // Navigate to user portal and trigger chatbot open
@@ -23,7 +25,7 @@ function AppContent() {
 
   return (
     <div className="app">
-      {isAuthenticated && (
+      {isAuthenticated && !isAdminRoute && (
         <nav className="gov-navbar">
           {/* Top Bar */}
           <div className="navbar-top-bar">

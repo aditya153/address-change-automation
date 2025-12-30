@@ -16,7 +16,12 @@
     right: 0;
     bottom: 0;
     z-index: 9999;
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Roboto', sans-serif !important;
+    font-weight: 400;
+}
+
+.login-page * {
+    font-family: 'Roboto', sans-serif !important;
 }
 
 /* Government Banner - Full screen width, text anchored to stay at same point */
@@ -67,62 +72,62 @@
     overflow: hidden;
 }
 
-/* Cinematic 3D Swap Animation Keyframes */
-@keyframes cinematicSwapFromRight {
+/* Immersive 3D Perspective Swap Animation Keyframes */
+@keyframes immersiveSwapFromRight {
     0% {
-        transform: translateX(53vw) rotateY(15deg) scale(1.1);
-        filter: blur(4px);
+        transform: translateX(53vw) translateZ(-200px) rotateY(45deg);
         opacity: 0;
+        filter: blur(10px);
     }
 
-    20% {
+    40% {
         opacity: 1;
+        filter: blur(0);
     }
 
-    50% {
-        filter: blur(2px);
+    60% {
+        transform: translateX(25vw) translateZ(150px) rotateY(20deg);
     }
 
     100% {
-        transform: translateX(0) rotateY(0) scale(1);
-        filter: blur(0);
+        transform: translateX(0) translateZ(0) rotateY(0);
         opacity: 1;
     }
 }
 
-@keyframes cinematicSwapFromLeft {
+@keyframes immersiveSwapFromLeft {
     0% {
-        transform: translateX(-47vw) rotateY(-15deg) scale(1.1);
-        filter: blur(4px);
+        transform: translateX(-47vw) translateZ(-200px) rotateY(-45deg);
         opacity: 0;
+        filter: blur(10px);
     }
 
-    20% {
+    40% {
         opacity: 1;
+        filter: blur(0);
     }
 
-    50% {
-        filter: blur(2px);
+    60% {
+        transform: translateX(-20vw) translateZ(-150px) rotateY(-20deg);
     }
 
     100% {
-        transform: translateX(0) rotateY(0) scale(1);
-        filter: blur(0);
+        transform: translateX(0) translateZ(0) rotateY(0);
         opacity: 1;
     }
 }
 
-@keyframes instantReveal {
+@keyframes immersiveReveal {
 
     0%,
-    60% {
+    70% {
         opacity: 0;
-        transform: scale(0.98);
+        transform: scale(0.9) translateZ(-50px);
     }
 
     100% {
         opacity: 1;
-        transform: scale(1);
+        transform: scale(1) translateZ(0);
     }
 }
 
@@ -134,17 +139,17 @@
     display: flex;
     flex-direction: column;
     padding: 60px 48px 48px 48px;
-    animation: cinematicSwapFromRight 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: immersiveSwapFromRight 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     position: relative;
     z-index: 2;
-    transform-origin: left center;
+    transform-style: preserve-3d;
 }
 
 .login-left-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    animation: instantReveal 1.1s ease-out forwards;
+    animation: immersiveReveal 1.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 /* Portal Branding */
@@ -176,7 +181,7 @@
     font-weight: 700;
     margin: 0;
     color: #ffffff !important;
-    font-family: 'Merriweather', Georgia, serif;
+    font-family: 'Merriweather', Georgia, serif !important;
 }
 
 .portal-subtitle {
@@ -192,11 +197,11 @@
 
 .login-title {
     font-size: 48px;
-    font-weight: 700;
+    font-weight: 900;
     line-height: 1.15;
     margin: 0 0 16px 0;
     color: #ffffff !important;
-    font-family: 'Merriweather', Georgia, serif;
+    font-family: 'Merriweather', Georgia, serif !important;
 }
 
 .title-underline {
@@ -210,8 +215,8 @@
     font-size: 17px;
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.85) !important;
-    max-width: 400px;
-    font-family: 'Roboto', sans-serif;
+    max-width: 440px;
+    font-family: 'Roboto', sans-serif !important;
 }
 
 /* GDPR Section */
@@ -266,16 +271,16 @@
     align-items: center;
     justify-content: center;
     padding: 48px;
-    animation: cinematicSwapFromLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation: immersiveSwapFromLeft 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     position: relative;
     z-index: 1;
-    transform-origin: right center;
+    transform-style: preserve-3d;
 }
 
 .login-form-container {
     width: 100%;
-    max-width: 400px;
-    animation: instantReveal 1.1s ease-out forwards;
+    max-width: 460px;
+    animation: immersiveReveal 1.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 /* Form Title */
@@ -284,7 +289,7 @@
     font-weight: 700;
     color: #1a1a1a !important;
     margin: 0 0 8px 0;
-    font-family: 'Merriweather', Georgia, serif;
+    font-family: 'Merriweather', Georgia, serif !important;
 }
 
 .form-subtitle {
