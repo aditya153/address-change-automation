@@ -881,6 +881,14 @@ async def get_analytics():
         avg_time_row = cur.fetchone()
         avg_processing_time = round(avg_time_row["avg_minutes"] or 0, 1)
         
+        # Cases this week (last 7 days)
+        cur.execute("""
+            SELECT COUNT(*) as count
+            FROM cases
+            WHERE submitted_at >= CURRENT_DATE - INTERVAL '7 days';
+        """)
+        cases_this_week = cur.fetchone()["count"]
+        
     # Calculate automation rate
     auto_count = hitl_breakdown.get("auto", 0)
     manual_count = hitl_breakdown.get("manual", 0)
@@ -889,6 +897,7 @@ async def get_analytics():
     
     return {
         "total_cases": total_cases,
+        "cases_this_week": cases_this_week,
         "source_breakdown": source_breakdown,
         "hitl_breakdown": hitl_breakdown,
         "status_breakdown": status_breakdown,

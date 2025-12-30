@@ -1,10 +1,11 @@
 // src/components/AnalyticsDashboard.jsx
 import { useState, useEffect } from 'react';
+import { BarChart3, TrendingUp, Clock, Brain, CheckCircle2, Activity } from 'lucide-react';
 import './AnalyticsDashboard.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-export default function AnalyticsDashboard({ isOpen, onClose }) {
+export default function AnalyticsDashboard() {
     const [analytics, setAnalytics] = useState(null);
     const [patterns, setPatterns] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -12,12 +13,8 @@ export default function AnalyticsDashboard({ isOpen, onClose }) {
     const [patternsLoading, setPatternsLoading] = useState(false);
 
     useEffect(() => {
-        if (isOpen) {
-            fetchAnalytics();
-            setShowPatterns(false);
-            setPatterns(null);
-        }
-    }, [isOpen]);
+        fetchAnalytics();
+    }, []);
 
     const fetchAnalytics = async () => {
         setLoading(true);
@@ -54,8 +51,6 @@ export default function AnalyticsDashboard({ isOpen, onClose }) {
         }
     };
 
-    if (!isOpen) return null;
-
     const formatTime = (minutes) => {
         if (!minutes || minutes < 1) return '< 1m';
         if (minutes < 60) return `${Math.round(minutes)}m`;
@@ -65,7 +60,7 @@ export default function AnalyticsDashboard({ isOpen, onClose }) {
     // Prepare pie chart data
     const getSourcePieData = () => {
         if (!analytics?.source_breakdown) return [];
-        const colors = { portal: '#3b82f6', email: '#8b5cf6' };
+        const colors = { portal: '#0066cc', email: '#8b5cf6' };
         const labels = { portal: '🌐 Portal', email: '📧 Email' };
         return Object.entries(analytics.source_breakdown).map(([key, value]) => ({
             label: labels[key] || key,
@@ -82,13 +77,16 @@ export default function AnalyticsDashboard({ isOpen, onClose }) {
         ].filter(d => d.value > 0);
     };
 
-    // SVG Pie Chart with legend below
-    const PieChart = ({ data, title }) => {
+    // SVG Pie Chart Component
+    const PieChart = ({ data, title, icon: Icon }) => {
         const total = data.reduce((sum, d) => sum + d.value, 0);
         if (total === 0) return (
-            <div className="chart-card">
-                <h4>{title}</h4>
-                <div className="no-data">No data available</div>
+            <div className="analytics-card">
+                <div className="analytics-card-header">
+                    <Icon className="w-5 h-5 text-[#0066cc]" />
+                    <h3 className="analytics-card-title">{title}</h3>
+                </div>
+                <div className="no-data-message">No data available</div>
             </div>
         );
 
@@ -101,9 +99,12 @@ export default function AnalyticsDashboard({ isOpen, onClose }) {
         });
 
         return (
-            <div className="chart-card">
-                <h4>{title}</h4>
-                <div className="chart-content">
+            <div className="analytics-card">
+                <div className="analytics-card-header">
+                    <Icon className="w-5 h-5 text-[#0066cc]" />
+                    <h3 className="analytics-card-title">{title}</h3>
+                </div>
+                <div className="pie-chart-container">
                     <svg viewBox="0 0 100 100" className="pie-svg">
                         {segments.map((segment, i) => {
                             const radius = 40;
@@ -126,19 +127,19 @@ export default function AnalyticsDashboard({ isOpen, onClose }) {
                                 />
                             );
                         })}
-                        <text x="50" y="50" textAnchor="middle" dy=".3em" className="pie-total">
+                        <text x="50" y="50" textAnchor="middle" dy=".3em" className="pie-total-text">
                             {total}
                         </text>
                     </svg>
                 </div>
-                <div className="chart-legend">
+                <div className="pie-legend">
                     {segments.map((segment, i) => (
-                        <div key={i} className="legend-row">
-                            <div className="legend-info">
+                        <div key={i} className="legend-item">
+                            <div className="legend-label">
                                 <span className="legend-dot" style={{ backgroundColor: segment.color }}></span>
                                 <span className="legend-text">{segment.label}</span>
                             </div>
-                            <span className="legend-num">{segment.value}</span>
+                            <span className="legend-value">{segment.value} ({Math.round(segment.percent)}%)</span>
                         </div>
                     ))}
                 </div>
@@ -146,117 +147,145 @@ export default function AnalyticsDashboard({ isOpen, onClose }) {
         );
     };
 
-    return (
-        <div className="analytics-overlay" onClick={onClose}>
-            <div className="analytics-modal-wide" onClick={e => e.stopPropagation()}>
-                {/* Header */}
-                <div className="analytics-header">
-                    <div className="analytics-title">
-                        <i className="bi bi-graph-up-arrow"></i>
-                        <h2>Analytics Overview</h2>
-                    </div>
-                    <button className="analytics-close" onClick={onClose}>
-                        <i className="bi bi-x-lg"></i>
-                    </button>
-                </div>
-
-                {/* Content */}
-                <div className="analytics-body">
-                    {loading ? (
-                        <div className="analytics-loading">
-                            <div className="spinner-border text-primary" role="status">
-                                <span className="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                    ) : analytics ? (
-                        <>
-                            {/* Stats Row */}
-                            <div className="stats-grid">
-                                <div className="analytics-stat-card analytics-stat-card-blue">
-                                    <span className="stat-emoji">📥</span>
-                                    <div className="stat-number">{analytics.total_cases}</div>
-                                    <div className="stat-name">Total Cases</div>
-                                </div>
-                                <div className="analytics-stat-card analytics-stat-card-green">
-                                    <span className="stat-emoji">🤖</span>
-                                    <div className="stat-number">{analytics.automation_rate}%</div>
-                                    <div className="stat-name">Automation Rate</div>
-                                </div>
-                                <div className="analytics-stat-card analytics-stat-card-orange">
-                                    <span className="stat-emoji">⏱️</span>
-                                    <div className="stat-number">{formatTime(analytics.avg_processing_time_minutes)}</div>
-                                    <div className="stat-name">Avg. Processing</div>
-                                </div>
-                                <div className="analytics-stat-card analytics-stat-card-blue stat-card-click" onClick={fetchPatterns}>
-                                    <span className="stat-emoji">🧠</span>
-                                    <div className="stat-number">{analytics.learned_patterns}</div>
-                                    <div className="stat-name">Learned Patterns</div>
-                                    <span className="click-hint">{showPatterns ? '▲ Hide' : '▼ Show'}</span>
-                                </div>
-                            </div>
-
-                            {/* Patterns Panel */}
-                            {showPatterns && (
-                                <div className="patterns-panel">
-                                    <h4>🧠 AI Memory - Learned Patterns</h4>
-                                    {patternsLoading ? (
-                                        <div className="patterns-loading">Loading...</div>
-                                    ) : patterns && patterns.length > 0 ? (
-                                        <div className="patterns-scroll">
-                                            <table className="patterns-tbl">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Original</th>
-                                                        <th></th>
-                                                        <th>Corrected</th>
-                                                        <th>Type</th>
-                                                        <th>Uses</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {patterns.map((p, i) => (
-                                                        <tr key={i}>
-                                                            <td><code className="code-red">{p.original}</code></td>
-                                                            <td className="arrow-col">→</td>
-                                                            <td><code className="code-green">{p.corrected}</code></td>
-                                                            <td className="type-col">{p.type.replace(/_/g, ' ')}</td>
-                                                            <td className="uses-col">{p.frequency}×</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    ) : (
-                                        <div className="no-patterns">No patterns learned yet</div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Charts Row */}
-                            <div className="charts-grid">
-                                <PieChart data={getSourcePieData()} title="📨 Submission Sources" />
-                                <PieChart data={getHitlPieData()} title="⚙️ Processing Method" />
-                            </div>
-
-                            {/* Status Distribution */}
-                            {analytics.status_breakdown && Object.keys(analytics.status_breakdown).length > 0 && (
-                                <div className="status-panel">
-                                    <h4>📊 Status Distribution</h4>
-                                    <div className="status-tags">
-                                        {Object.entries(analytics.status_breakdown).map(([status, count]) => (
-                                            <span key={status} className="status-tag">
-                                                {status.replace(/_/g, ' ')} <b>{count}</b>
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    ) : (
-                        <div className="no-data">Failed to load analytics</div>
-                    )}
+    if (loading) {
+        return (
+            <div className="analytics-loading-container">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-10 h-10 border-4 border-[#0066cc]/30 border-t-[#0066cc] rounded-full animate-spin"></div>
+                    <p className="text-slate-500">Loading analytics...</p>
                 </div>
             </div>
+        );
+    }
+
+    if (!analytics) {
+        return (
+            <div className="analytics-error-container">
+                <p className="text-slate-500">Failed to load analytics data</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="analytics-dashboard">
+            {/* Page Header */}
+            <div className="analytics-page-header">
+                <div>
+                    <h1 className="analytics-page-title">Analytics Overview</h1>
+                    <p className="analytics-page-subtitle">Comprehensive insights into system performance and automation efficiency</p>
+                </div>
+            </div>
+
+            {/* Key Metrics Grid */}
+            <div className="analytics-metrics-grid">
+                <div className="analytics-stat-card stat-blue">
+                    <div className="analytics-stat-icon bg-blue-50">
+                        <Activity className="w-6 h-6 text-[#0066cc]" />
+                    </div>
+                    <div className="analytics-stat-content">
+                        <p className="analytics-stat-label">Total Cases</p>
+                        <p className="analytics-stat-value">{analytics.total_cases}</p>
+                    </div>
+                </div>
+
+                <div className="analytics-stat-card stat-green">
+                    <div className="analytics-stat-icon bg-green-50">
+                        <TrendingUp className="w-6 h-6 text-green-600" />
+                    </div>
+                    <div className="analytics-stat-content">
+                        <p className="analytics-stat-label">Cases This Week</p>
+                        <p className="analytics-stat-value">{analytics.cases_this_week || 0}</p>
+                    </div>
+                </div>
+
+                <div className="analytics-stat-card stat-orange">
+                    <div className="analytics-stat-icon bg-orange-50">
+                        <Clock className="w-6 h-6 text-orange-600" />
+                    </div>
+                    <div className="analytics-stat-content">
+                        <p className="analytics-stat-label">Avg. Processing Time</p>
+                        <p className="analytics-stat-value">{formatTime(analytics.avg_processing_time_minutes)}</p>
+                    </div>
+                </div>
+
+                <div className="analytics-stat-card stat-purple" onClick={fetchPatterns} style={{ cursor: 'pointer' }}>
+                    <div className="analytics-stat-icon bg-purple-50">
+                        <Brain className="w-6 h-6 text-purple-600" />
+                    </div>
+                    <div className="analytics-stat-content">
+                        <p className="analytics-stat-label">Learned Patterns</p>
+                        <p className="analytics-stat-value">{analytics.learned_patterns}</p>
+                        <span className="analytics-stat-hint">{showPatterns ? '▲ Hide' : '▼ Show Details'}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Learned Patterns Panel */}
+            {showPatterns && (
+                <div className="analytics-card patterns-card">
+                    <div className="analytics-card-header">
+                        <Brain className="w-5 h-5 text-[#0066cc]" />
+                        <h3 className="analytics-card-title">AI Memory - Learned Patterns</h3>
+                    </div>
+                    {patternsLoading ? (
+                        <div className="patterns-loading">
+                            <div className="w-6 h-6 border-4 border-[#0066cc]/30 border-t-[#0066cc] rounded-full animate-spin"></div>
+                            <p className="text-slate-500">Loading patterns...</p>
+                        </div>
+                    ) : patterns && patterns.length > 0 ? (
+                        <div className="patterns-table-container">
+                            <table className="patterns-table">
+                                <thead>
+                                    <tr>
+                                        <th>Original</th>
+                                        <th></th>
+                                        <th>Corrected</th>
+                                        <th>Type</th>
+                                        <th>Frequency</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {patterns.map((p, i) => (
+                                        <tr key={i}>
+                                            <td><code className="code-red">{p.original}</code></td>
+                                            <td className="arrow-cell">→</td>
+                                            <td><code className="code-green">{p.corrected}</code></td>
+                                            <td className="type-cell">{p.type.replace(/_/g, ' ')}</td>
+                                            <td className="freq-cell">{p.frequency}×</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="no-data-message">No patterns learned yet</div>
+                    )}
+                </div>
+            )}
+
+            {/* Charts Grid */}
+            <div className="analytics-charts-grid">
+                <PieChart data={getSourcePieData()} title="Submission Sources" icon={TrendingUp} />
+                <PieChart data={getHitlPieData()} title="Processing Method" icon={BarChart3} />
+            </div>
+
+            {/* Status Distribution */}
+            {analytics.status_breakdown && Object.keys(analytics.status_breakdown).length > 0 && (
+                <div className="analytics-card">
+                    <div className="analytics-card-header">
+                        <Activity className="w-5 h-5 text-[#0066cc]" />
+                        <h3 className="analytics-card-title">Status Distribution</h3>
+                    </div>
+                    <div className="status-badges-container">
+                        {Object.entries(analytics.status_breakdown).map(([status, count]) => (
+                            <span key={status} className="status-badge">
+                                <span className="status-badge-label">{status.replace(/_/g, ' ')}</span>
+                                <span className="status-badge-count">{count}</span>
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

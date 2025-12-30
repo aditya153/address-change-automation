@@ -45,7 +45,6 @@ function AdminDashboard() {
     // Navigation & UI State
     const [activeNav, setActiveNav] = useState('dashboard');
     const [message, setMessage] = useState('');
-    const [analyticsOpen, setAnalyticsOpen] = useState(false);
 
     // Modal States
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -265,10 +264,89 @@ function AdminDashboard() {
             {/* VIEW SWITCHER */}
             {activeNav === 'users' ? (
                 <UserManagement />
-            ) : activeNav === 'analytics' || analyticsOpen ? (
+            ) : activeNav === 'analytics' ? (
                 <div className="space-y-4">
-                    <Button variant="outline" onClick={() => { setAnalyticsOpen(false); setActiveNav('dashboard'); }}>← Back to Dashboard</Button>
+                    <Button variant="outline" onClick={() => setActiveNav('dashboard')}>← Back to Dashboard</Button>
                     <AnalyticsDashboard />
+                </div>
+            ) : activeNav === 'cases' ? (
+                <div className="space-y-8 animate-in" style={{ paddingTop: 0, marginTop: 0, alignSelf: 'flex-start', width: '100%' }}>
+                    <div className="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight mb-1">All Cases</h1>
+                            <p className="text-muted-foreground">Complete list of all address change requests</p>
+                        </div>
+                        <Button variant="outline" onClick={() => setActiveNav('dashboard')}>← Back to Dashboard</Button>
+                    </div>
+                    <div className="admin-card">
+                        <div className="overflow-x-auto">
+                            <table className="clean-table">
+                                <thead>
+                                    <tr>
+                                        <th>Case ID</th>
+                                        <th>Citizen</th>
+                                        <th>Submitted</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {allCases.length === 0 ? (
+                                        <tr><td colSpan="5" className="text-center py-8 text-muted-foreground">No cases found</td></tr>
+                                    ) : (
+                                        allCases.map((item) => {
+                                            const statusKey = mapStatus(item.status);
+                                            const style = statusStyles[statusKey] || statusStyles.pending;
+
+                                            return (
+                                                <tr key={item.case_id} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="case-id-cell">AC-Case ID: {item.case_id}</td>
+                                                    <td>
+                                                        <div>
+                                                            <p className="citizen-name">{item.citizen_name || 'Unknown'}</p>
+                                                            <p className="citizen-email">{item.email}</p>
+                                                        </div>
+                                                    </td>
+                                                    <td className="text-muted-foreground">{formatDate(item.submitted_at)}</td>
+                                                    <td>
+                                                        <span className={`status-badge status-${statusKey}`}>
+                                                            <span className="dot" />
+                                                            {style.label}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div className="flex items-center gap-1">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                                onClick={() => {
+                                                                    if (item.status === 'WAITING_FOR_HUMAN') handleOpenHitlReview(item);
+                                                                    else handleOpenDetailDrawer(item.case_id);
+                                                                }}
+                                                            >
+                                                                <Eye className="w-4 h-4" />
+                                                            </Button>
+                                                            {item.status === 'WAITING_FOR_HUMAN' && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                                    onClick={() => handleOpenHitlReview(item)}
+                                                                >
+                                                                    <FileEdit className="w-4 h-4" />
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             ) : (
                 <div className="space-y-8 animate-in">
@@ -282,7 +360,7 @@ function AdminDashboard() {
                             <Button
                                 variant="outline"
                                 className="gap-2 bg-white border-slate-200 text-[#0066cc] hover:bg-[#f8fafc] hover:text-[#0052a3] transition-colors"
-                                onClick={() => setAnalyticsOpen(true)}
+                                onClick={() => setActiveNav('analytics')}
                             >
                                 <BarChart3 className="w-4 h-4" />
                                 Analytics
@@ -351,7 +429,7 @@ function AdminDashboard() {
                                         {allCases.length === 0 ? (
                                             <tr><td colSpan="5" className="text-center py-8 text-muted-foreground">No recent cases</td></tr>
                                         ) : (
-                                            allCases.map((item) => {
+                                            allCases.slice(0, 5).map((item) => {
                                                 const statusKey = mapStatus(item.status);
                                                 const style = statusStyles[statusKey] || statusStyles.pending;
 
