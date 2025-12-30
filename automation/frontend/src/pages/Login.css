@@ -65,6 +65,45 @@
     position: relative;
 }
 
+/* Panel Swap Animation Keyframes */
+@keyframes slideFromRight {
+
+    0%,
+    60% {
+        transform: translateX(53vw);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideFromLeft {
+
+    0%,
+    60% {
+        transform: translateX(-47vw);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes contentFadeIn {
+
+    0%,
+    80% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Left Panel - Bright Blue (47% width) */
 .login-left-panel {
     width: 47%;
@@ -73,12 +112,16 @@
     display: flex;
     flex-direction: column;
     padding: 60px 48px 48px 48px;
+    animation: slideFromRight 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    position: relative;
+    z-index: 2;
 }
 
 .login-left-content {
     flex: 1;
     display: flex;
     flex-direction: column;
+    animation: contentFadeIn 3s ease-out forwards;
 }
 
 /* Portal Branding */
@@ -200,11 +243,15 @@
     align-items: center;
     justify-content: center;
     padding: 48px;
+    animation: dynamicSwapFromLeft 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    position: relative;
+    z-index: 1;
 }
 
 .login-form-container {
     width: 100%;
     max-width: 400px;
+    animation: contentQuickReveal 1.8s ease-out forwards;
 }
 
 /* Form Title */
