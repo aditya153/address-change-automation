@@ -202,19 +202,19 @@
 }
 
 .gdpr-text strong {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: #ffffff;
 }
 
 .gdpr-text span {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .copyright {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6) !important;
     margin: 0;
 }
 
