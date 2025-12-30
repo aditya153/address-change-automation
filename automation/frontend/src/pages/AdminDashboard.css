@@ -879,3 +879,50 @@ h6 {
 .drawer-content {
     @apply fixed top-0 right-0 bottom-0 w-[400px] bg-background border-l border-border shadow-2xl z-50 p-0 flex flex-col transition-transform duration-300;
 }
+
+/* NEW CASE DETAIL MODAL STYLES */
+.section-label {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    letter-spacing: 0.1em !important;
+    margin-bottom: 12px !important;
+}
+
+.section-value {
+    color: #1a202c !important;
+}
+
+.info-box {
+    transition: all 0.2s ease;
+}
+
+.info-box:hover {
+    border-color: #0066cc/30;
+    background-color: #f8fafc !important;
+}
+
+.stats-gradient-box {
+    background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
+    box-shadow: 0 4px 15px rgba(244, 114, 182, 0.3);
+    min-height: 120px;
+    width: 60%;
+}
+
+.timeline-entry {
+    transition: transform 0.2s ease;
+}
+
+.timeline-entry:hover {
+    transform: translateX(4px);
+}
+
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -2px;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, #e2e8f0, transparent);
+}

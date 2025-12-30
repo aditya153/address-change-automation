@@ -58,6 +58,9 @@ function AdminDashboard() {
     const [aiAnalysis, setAiAnalysis] = useState(null);
     const [correctedAddressInput, setCorrectedAddressInput] = useState('');
     const [loadingAi, setLoadingAi] = useState(false);
+    const [caseDetails, setCaseDetails] = useState(null);
+    const [auditLog, setAuditLog] = useState([]);
+    const [loadingDetails, setLoadingDetails] = useState(false);
 
     // Fetching Logic
     const fetchPendingCases = async () => {
@@ -138,9 +141,34 @@ function AdminDashboard() {
         setDocPreviewOpen(true);
     };
 
-    const handleViewCase = (caseItem) => {
+    const handleViewCase = async (caseItem) => {
         setSelectedCase(caseItem);
         setDrawerOpen(true);
+        setLoadingDetails(true);
+        setCaseDetails(null);
+        setAuditLog([]);
+
+        try {
+            // Fetch full details and audit log in parallel
+            const [detailsRes, auditRes] = await Promise.all([
+                axios.get(`${API_URL}/cases/${encodeURIComponent(caseItem.case_id)}`),
+                axios.get(`${API_URL}/cases/${encodeURIComponent(caseItem.case_id)}/audit`).catch(() => ({ data: { entries: [] } }))
+            ]);
+            setCaseDetails(detailsRes.data);
+            setAuditLog(auditRes.data.entries || []);
+        } catch (err) {
+            console.error('Error fetching case details:', err);
+            // Fallback to what we already have
+            setCaseDetails({
+                ...caseItem,
+                dob: 'N/A',
+                landlord_name: 'N/A',
+                move_in_date_raw: 'N/A',
+                old_address_raw: 'N/A'
+            });
+        } finally {
+            setLoadingDetails(false);
+        }
     };
 
     const handleOpenHitlReview = async (caseItem) => {
@@ -466,78 +494,121 @@ function AdminDashboard() {
                 </div>
             )}
 
-            {/* 2. CASE DETAIL DRAWER */}
+            {/* 2. CASE DETAIL MODAL (Redesigned) */}
             {drawerOpen && selectedCase && (
-                <>
-                    <div className="drawer-overlay" onClick={() => setDrawerOpen(false)} />
-                    <div className="drawer-content slide-in-right">
-                        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
-                            <div>
-                                <h2 className="text-xl font-bold">Case AC-{selectedCase.case_id}</h2>
-                                <span className={`text-sm px-2 py-1 rounded-full ${statusStyles[mapStatus(selectedCase.status)].bg}`}>
+                <div className="modal-overlay" onClick={() => setDrawerOpen(false)}>
+                    <div className="modal-content w-11/12 max-w-6xl h-[85vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header bg-[#0066cc] text-white py-4">
+                            <div className="flex items-center gap-3">
+                                <Inbox className="w-5 h-5 text-white/80" />
+                                <h3 className="text-xl font-bold">Case ID: {selectedCase.case_id.replace('Case ID: ', '')}</h3>
+                                <span className="status-badge bg-green-500/20 text-green-100 text-[10px] uppercase tracking-wider py-0.5 px-2 rounded">
                                     {selectedCase.status}
                                 </span>
                             </div>
-                            <button onClick={() => setDrawerOpen(false)}><X /></button>
+                            <button onClick={() => setDrawerOpen(false)} className="bg-white/10 hover:bg-white/20 text-white rounded-md px-3 py-1 text-sm flex items-center gap-2">
+                                <X size={16} /> Close
+                            </button>
                         </div>
-                        <div className="p-6 overflow-y-auto flex-1 space-y-6">
-                            <div>
-                                <h4 className="text-sm font-bold text-gray-500 uppercase mb-2">Citizen</h4>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                                        <User className="text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="font-bold">{selectedCase.citizen_name || 'Unknown'}</p>
-                                        <p className="text-sm text-gray-500">{selectedCase.email}</p>
+
+                        <div className="modal-body flex-1 overflow-y-auto p-0 bg-white">
+                            {loadingDetails ? (
+                                <div className="h-full flex items-center justify-center text-slate-400">
+                                    <div className="flex flex-col items-center gap-4">
+                                        <div className="w-8 h-8 border-4 border-[#0066cc]/30 border-t-[#0066cc] rounded-full animate-spin"></div>
+                                        <p>Loading case data...</p>
                                     </div>
                                 </div>
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-bold text-gray-500 uppercase mb-2">New Address</h4>
-                                <div className="flex items-start gap-3 bg-gray-50 p-3 rounded">
-                                    <MapPin className="text-gray-400 mt-1" size={16} />
-                                    <p className="text-sm">{selectedCase.new_address_raw || 'No address extracted'}</p>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <h4 className="text-sm font-bold text-gray-500 uppercase mb-2">Submitted</h4>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Calendar size={14} /> {formatDate(selectedCase.submitted_at)}
+                            ) : (
+                                <div className="flex h-full min-h-0">
+                                    {/* Left Column: Info Sections */}
+                                    <div className="flex-1 p-8 overflow-y-auto border-r border-slate-100 space-y-8">
+                                        <div className="space-y-6">
+                                            <div>
+                                                <p className="section-label flex items-center gap-2"><Calendar className="w-4 h-4" /> SUBMITTED ON</p>
+                                                <p className="section-value text-lg font-bold">{formatDate(caseDetails?.created_at || selectedCase.submitted_at)}</p>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <p className="section-label flex items-center gap-2"><User className="w-4 h-4" /> CITIZEN INFORMATION</p>
+                                                <div className="info-box bg-slate-50/50 p-4 rounded-lg border border-slate-100">
+                                                    <div className="grid grid-cols-[100px_1fr] gap-y-3 gap-x-4 text-sm">
+                                                        <span className="text-slate-500">Name</span>
+                                                        <span className="font-bold text-slate-800">{caseDetails?.citizen_name || 'N/A'}</span>
+                                                        <span className="text-slate-500">Email</span>
+                                                        <span className="font-bold text-slate-[#0066cc]">{caseDetails?.email || 'N/A'}</span>
+                                                        <span className="text-slate-500">Date of Birth</span>
+                                                        <span className="font-bold text-slate-800">{caseDetails?.dob ? new Date(caseDetails.dob).toLocaleDateString() : 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <p className="section-label flex items-center gap-2"><File className="w-4 h-4" /> LANDLORD INFORMATION</p>
+                                                <div className="info-box bg-slate-50/50 p-4 rounded-lg border border-slate-100">
+                                                    <div className="grid grid-cols-[100px_1fr] gap-y-3 gap-x-4 text-sm">
+                                                        <span className="text-slate-500">Landlord Name</span>
+                                                        <span className="font-bold text-slate-800">{caseDetails?.landlord_name || 'N/A'}</span>
+                                                        <span className="text-slate-500">Move-in Date</span>
+                                                        <span className="font-bold text-slate-800">{caseDetails?.move_in_date_raw || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <p className="section-label flex items-center gap-2"><MapPin className="w-4 h-4" /> OLD ADDRESS</p>
+                                                <div className="p-4 rounded-lg bg-red-50/30 border border-red-100 text-slate-700 text-sm">
+                                                    {caseDetails?.old_address_raw || 'N/A'}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <p className="section-label flex items-center gap-2 text-[#0066cc]"><MapPin className="w-4 h-4" /> NEW ADDRESS</p>
+                                                <div className="p-4 rounded-lg bg-green-50/30 border border-green-100 text-slate-700 text-sm font-semibold">
+                                                    {caseDetails?.new_address_raw || 'N/A'}
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <p className="section-label flex items-center gap-2"><Brain className="w-4 h-4" /> PROCESSING STATS</p>
+                                                <div className="stats-gradient-box p-6 rounded-2xl text-white flex flex-col items-center justify-center text-center">
+                                                    <p className="text-[10px] uppercase tracking-widest opacity-80 mb-1">TOTAL PROCESSING TIME</p>
+                                                    <p className="text-2xl font-bold">1m 21s</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Right Column: Timeline */}
+                                    <div className="w-[45%] bg-[#fcfdfe] p-8 overflow-y-auto">
+                                        <p className="section-label flex items-center gap-2 mb-6"><Clock className="w-4 h-4" /> AUDIT LOG TIMELINE</p>
+                                        <div className="timeline-container relative pl-8 pb-10 border-l-2 border-slate-100 ml-2">
+                                            {auditLog.length > 0 ? (
+                                                auditLog.map((entry, idx) => (
+                                                    <div key={idx} className="timeline-entry mb-8 relative">
+                                                        <div className="absolute -left-[41px] top-1.5 w-4 h-4 rounded-full border-2 border-white bg-[#0066cc] z-10"></div>
+                                                        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <span className="bg-[#0066cc] text-white text-[10px] font-mono px-2 py-0.5 rounded">
+                                                                    {new Date(entry.timestamp).toLocaleDateString('de-DE')} {new Date(entry.timestamp).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-sm text-slate-700 leading-relaxed font-medium">
+                                                                {entry.message}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="text-slate-400 text-sm italic">No audit entries yet.</div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-gray-500 uppercase mb-2">Move ID</h4>
-                                    <p className="text-sm font-mono bg-gray-100 inline-block px-2 rounded">
-                                        {selectedCase.move_id || 'N/A'}
-                                    </p>
-                                </div>
-                            </div>
-                            <div>
-                                <h4 className="text-sm font-bold text-gray-500 uppercase mb-2">Docs</h4>
-                                <div className="space-y-2">
-                                    {selectedCase.pdf_landlord_path ? (
-                                        <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => handlePreviewDocs(selectedCase)}>
-                                            <FileText size={14} /> Landlord Confirmation
-                                        </Button>
-                                    ) : <p className="text-xs text-red-500">Missing Landlord Doc</p>}
-                                    {selectedCase.pdf_address_change_path ? (
-                                        <Button variant="outline" size="sm" className="w-full justify-start gap-2" onClick={() => handlePreviewDocs(selectedCase)}>
-                                            <FileText size={14} /> Address Form
-                                        </Button>
-                                    ) : <p className="text-xs text-red-500">Missing Address Doc</p>}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-4 border-t bg-gray-50">
-                            <div className="grid grid-cols-2 gap-2">
-                                <Button variant="outline" onClick={() => setDrawerOpen(false)}>Close</Button>
-                                <Button>Actions</Button>
-                            </div>
+                            )}
                         </div>
                     </div>
-                </>
+                </div>
             )}
 
             {/* 3. HITL REVIEW MODAL */}
