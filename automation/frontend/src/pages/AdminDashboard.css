@@ -864,7 +864,7 @@ h6 {
 .modal-header {
     @apply flex items-center justify-between p-6;
     background-color: #0066cc !important;
-    color: white !important;
+    color: #ffffff !important;
     border-bottom: none !important;
 }
 
@@ -887,11 +887,12 @@ h6 {
 
 /* NEW CASE DETAIL MODAL STYLES */
 .section-label {
-    font-size: 11px !important;
+    font-size: 10px !important;
     font-weight: 700 !important;
     color: #94a3b8 !important;
-    letter-spacing: 0.1em !important;
-    margin-bottom: 12px !important;
+    letter-spacing: 0.12em !important;
+    margin-bottom: 8px !important;
+    text-transform: uppercase !important;
 }
 
 .section-value {
@@ -910,7 +911,7 @@ h6 {
 .stats-gradient-box {
     background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
     box-shadow: 0 4px 15px rgba(244, 114, 182, 0.3);
-    min-height: 120px;
+    min-height: 100px;
     width: 60%;
 }
 
@@ -962,12 +963,35 @@ h6 {
 .modal-header span,
 .modal-header button,
 .modal-header .text-white,
-.modal-header .text-white\/80 {
-    color: white !important;
+.modal-header .text-white\/80,
+.modal-header div {
+    color: #ffffff !important;
+}
+
+.case-id-header {
+    color: #ffffff !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
 }
 
 .case-detail-modal {
     width: 95% !important;
     max-width: 1400px !important;
     height: 90vh !important;
+}
+
+.case-detail-left {
+    width: 45% !important;
+    flex: none !important;
+}
+
+.case-detail-right {
+    width: 55% !important;
+    flex: none !important;
+    font-size: 16px !important;
+}
+
+.case-detail-right .text-sm {
+    font-size: 15px !important;
+    line-height: 1.6 !important;
 }

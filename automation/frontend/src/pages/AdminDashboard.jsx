@@ -504,7 +504,7 @@ function AdminDashboard() {
                                     <Inbox className="w-5 h-5 text-white" />
                                 </div>
                                 <div className="flex flex-col">
-                                    <h3 className="text-xl font-bold m-0 leading-tight">Case ID: {selectedCase.case_id.replace('Case ID: ', '')}</h3>
+                                    <h3 className="case-id-header m-0 leading-tight">Case ID: {selectedCase.case_id.replace('Case ID: ', '')}</h3>
                                     <div className="flex items-center gap-2 mt-1">
                                         <span className="status-badge bg-white/20 text-white text-[10px] uppercase font-bold tracking-widest py-0.5 px-2 rounded border border-white/30">
                                             {selectedCase.status}
@@ -530,66 +530,66 @@ function AdminDashboard() {
                                 </div>
                             ) : (
                                 <div className="flex h-full min-h-0">
-                                    {/* Left Column: Info Sections */}
-                                    <div className="flex-1 p-8 overflow-y-auto border-r border-slate-100 space-y-8">
-                                        <div className="space-y-6">
+                                    {/* Left Column: Info Sections (45%) */}
+                                    <div className="case-detail-left p-6 overflow-y-auto border-r border-slate-100 space-y-5">
+                                        <div className="space-y-5">
                                             <div>
                                                 <p className="section-label flex items-center gap-2"><Calendar className="w-4 h-4" /> SUBMITTED ON</p>
-                                                <p className="section-value text-lg font-bold">{formatDate(caseDetails?.created_at || selectedCase.submitted_at)}</p>
+                                                <p className="section-value text-base font-bold">{formatDate(caseDetails?.created_at || selectedCase.submitted_at)}</p>
                                             </div>
 
-                                            <div className="space-y-4">
+                                            <div className="space-y-3">
                                                 <p className="section-label flex items-center gap-2"><User className="w-4 h-4" /> CITIZEN INFORMATION</p>
-                                                <div className="info-box bg-slate-50/50 p-4 rounded-lg border border-slate-100">
-                                                    <div className="grid grid-cols-[100px_1fr] gap-y-3 gap-x-4 text-sm">
-                                                        <span className="text-slate-500">Name</span>
+                                                <div className="info-box bg-slate-50/50 p-3 rounded-lg border border-slate-100">
+                                                    <div className="grid grid-cols-[80px_1fr] gap-y-2 gap-x-4 text-sm">
+                                                        <span className="text-slate-400">Name</span>
                                                         <span className="font-bold text-slate-800">{caseDetails?.citizen_name || 'N/A'}</span>
-                                                        <span className="text-slate-500">Email</span>
-                                                        <span className="font-bold text-slate-[#0066cc]">{caseDetails?.email || 'N/A'}</span>
-                                                        <span className="text-slate-500">Date of Birth</span>
+                                                        <span className="text-slate-400">Email</span>
+                                                        <span className="font-bold text-slate-[#0066cc] truncate">{caseDetails?.email || 'N/A'}</span>
+                                                        <span className="text-slate-400">DOB</span>
                                                         <span className="font-bold text-slate-800">{caseDetails?.dob ? new Date(caseDetails.dob).toLocaleDateString() : 'N/A'}</span>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-4">
+                                            <div className="space-y-3">
                                                 <p className="section-label flex items-center gap-2"><File className="w-4 h-4" /> LANDLORD INFORMATION</p>
-                                                <div className="info-box bg-slate-50/50 p-4 rounded-lg border border-slate-100">
-                                                    <div className="grid grid-cols-[100px_1fr] gap-y-3 gap-x-4 text-sm">
-                                                        <span className="text-slate-500">Landlord Name</span>
+                                                <div className="info-box bg-slate-50/50 p-3 rounded-lg border border-slate-100">
+                                                    <div className="grid grid-cols-[100px_1fr] gap-y-2 gap-x-4 text-sm">
+                                                        <span className="text-slate-400">Landlord</span>
                                                         <span className="font-bold text-slate-800">{caseDetails?.landlord_name || 'N/A'}</span>
-                                                        <span className="text-slate-500">Move-in Date</span>
+                                                        <span className="text-slate-400">Move-in</span>
                                                         <span className="font-bold text-slate-800">{caseDetails?.move_in_date_raw || 'N/A'}</span>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-4">
+                                            <div className="space-y-2">
                                                 <p className="section-label flex items-center gap-2"><MapPin className="w-4 h-4" /> OLD ADDRESS</p>
-                                                <div className="p-4 rounded-lg bg-red-50/30 border border-red-100 text-slate-700 text-sm">
+                                                <div className="p-3 rounded-lg bg-red-50/30 border border-red-100 text-slate-700 text-sm">
                                                     {caseDetails?.old_address_raw || 'N/A'}
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-4">
+                                            <div className="space-y-2">
                                                 <p className="section-label flex items-center gap-2 text-[#0066cc]"><MapPin className="w-4 h-4" /> NEW ADDRESS</p>
-                                                <div className="p-4 rounded-lg bg-green-50/30 border border-green-100 text-slate-700 text-sm font-semibold">
+                                                <div className="p-3 rounded-lg bg-green-50/30 border border-green-100 text-slate-700 text-sm font-semibold">
                                                     {caseDetails?.new_address_raw || 'N/A'}
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-4">
+                                            <div className="space-y-3">
                                                 <p className="section-label flex items-center gap-2"><Brain className="w-4 h-4" /> PROCESSING STATS</p>
-                                                <div className="stats-gradient-box p-6 rounded-2xl text-white flex flex-col items-center justify-center text-center">
-                                                    <p className="text-[10px] uppercase tracking-widest opacity-80 mb-1">TOTAL PROCESSING TIME</p>
-                                                    <p className="text-2xl font-bold">1m 21s</p>
+                                                <div className="stats-gradient-box p-4 rounded-2xl text-white flex flex-col items-center justify-center text-center">
+                                                    <p className="text-[9px] uppercase tracking-widest opacity-80 mb-0.5">PROCESSING TIME</p>
+                                                    <p className="text-xl font-bold">1m 21s</p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Right Column: Timeline */}
-                                    <div className="w-[45%] bg-[#fcfdfe] p-8 overflow-y-auto">
+                                    {/* Right Column: Timeline (55%) */}
+                                    <div className="case-detail-right bg-[#fcfdfe] p-8 overflow-y-auto">
                                         <p className="section-label flex items-center gap-2 mb-6"><Clock className="w-4 h-4" /> AUDIT LOG TIMELINE</p>
                                         <div className="timeline-container relative pl-8 pb-10 border-l-2 border-slate-100 ml-2">
                                             {auditLog.length > 0 ? (
