@@ -148,9 +148,9 @@
     margin-bottom: 8px;
 }
 
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="time"] {
+.settings-panel .form-group input[type="text"],
+.settings-panel .form-group input[type="email"],
+.settings-panel .form-group input[type="time"] {
     width: 100%;
     max-width: 400px;
     padding: 10px 14px;
