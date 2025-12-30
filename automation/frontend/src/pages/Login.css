@@ -19,9 +19,47 @@
     font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Government Banner - Hidden (text moves to blue section) */
+/* Government Banner - Full width dark bar at top */
 .gov-banner {
-    display: none;
+    background-color: #0d1b2a;
+    color: #ffffff;
+    padding: 10px 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.gov-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gov-banner-flag {
+    font-size: 14px;
+}
+
+.gov-banner-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+}
+
+.gov-banner-link {
+    position: absolute;
+    right: 24px;
+    background: none;
+    border: none;
+    color: #60a5fa;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.gov-banner-link:hover {
+    color: #93c5fd;
 }
 
 /* Main Container - Split View */
@@ -38,27 +76,12 @@
     display: flex;
     flex-direction: column;
     padding: 48px;
-    position: relative;
-}
-
-/* Government text at top of blue section */
-.login-left-panel::before {
-    content: '🇩🇪  An official website of the Federal Republic of Germany';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: 12px 48px;
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(0, 0, 0, 0.15);
 }
 
 .login-left-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding-top: 40px;
 }
 
 /* Portal Branding */
