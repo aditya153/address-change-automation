@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
 import TerminalWidget from '../components/TerminalWidget';
 import './AdminDashboard.css';
@@ -10,6 +12,12 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function AdminDashboard() {
     const { t } = useLanguage();
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+
+    // Navigation state
+    const [activeNav, setActiveNav] = useState('dashboard');
+    const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
     // Data state
     const [pendingCases, setPendingCases] = useState([]);
@@ -354,68 +362,184 @@ function AdminDashboard() {
 
     return (
         <div className="admin-dashboard-root">
-            {/* MAIN CONTENT */}
-            <main className="page-content">
-                <div className="container-fluid">
+            {/* Government Banner */}
+            <div className="admin-gov-banner">
+                <div className="gov-banner-left">
+                    <span className="gov-flag">🇩🇪</span>
+                    <span>An official website of the Federal Republic of Germany</span>
+                </div>
+            </div>
 
-                    {/* PAGE HEADER + FILTERS */}
-                    <div className="row mb-3">
-                        <div className="col-12">
-                            <div className="card card-page-header">
-                                <div className="card-body d-flex flex-wrap align-items-center justify-content-between">
-                                    <div className="mb-2 mb-md-0">
-                                        <h2 className="h4 mb-1">Address Change – Admin Dashboard</h2>
-                                        <p className="text-muted mb-0">
-                                            Manage and review submitted address change cases.
-                                        </p>
-                                    </div>
-
-                                    <div className="admin-filters">
-                                        {/* Status filter */}
-                                        <select
-                                            id="filterStatus"
-                                            className="form-select form-select-sm"
-                                            value={filterStatus}
-                                            onChange={(e) => setFilterStatus(e.target.value)}
-                                        >
-                                            <option value="">All statuses</option>
-                                            <option value="pending">Pending</option>
-                                            <option value="review">Needs review</option>
-                                            <option value="completed">Completed</option>
-                                        </select>
-
-                                        {/* Date range */}
-                                        <input
-                                            type="text"
-                                            id="filterDate"
-                                            className="form-control form-control-sm"
-                                            placeholder="Date range"
-                                        />
-
-                                        {/* Search */}
-                                        <div className="input-group input-group-sm">
-                                            <input
-                                                type="text"
-                                                id="searchCases"
-                                                className="form-control"
-                                                placeholder="Search by Case ID or e-mail"
-                                                value={searchQuery}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                            />
-                                            <button className="btn btn-outline-secondary" type="button">
-                                                <i className="bi bi-search" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            {/* SIDEBAR */}
+            <aside className="admin-sidebar">
+                <div className="sidebar-header">
+                    <div className="sidebar-brand">
+                        <div className="sidebar-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                <line x1="3" y1="9" x2="21" y2="9" />
+                                <line x1="9" y1="21" x2="9" y2="9" />
+                            </svg>
+                        </div>
+                        <div className="sidebar-brand-text">
+                            <span className="brand-name">Bürgerportal</span>
+                            <span className="brand-subtitle">Admin Panel</span>
                         </div>
                     </div>
+                </div>
+                <nav className="sidebar-nav">
+                    <button
+                        className={`sidebar-nav-item ${activeNav === 'dashboard' ? 'active' : ''}`}
+                        onClick={() => setActiveNav('dashboard')}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="3" y="3" width="7" height="7" />
+                            <rect x="14" y="3" width="7" height="7" />
+                            <rect x="14" y="14" width="7" height="7" />
+                            <rect x="3" y="14" width="7" height="7" />
+                        </svg>
+                        <span>Dashboard</span>
+                    </button>
+                    <button
+                        className={`sidebar-nav-item ${activeNav === 'cases' ? 'active' : ''}`}
+                        onClick={() => setActiveNav('cases')}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                        </svg>
+                        <span>Cases</span>
+                    </button>
+                    <button
+                        className={`sidebar-nav-item ${activeNav === 'citizens' ? 'active' : ''}`}
+                        onClick={() => setActiveNav('citizens')}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        <span>Citizens</span>
+                    </button>
+                    <button
+                        className={`sidebar-nav-item ${activeNav === 'analytics' ? 'active' : ''}`}
+                        onClick={() => { setActiveNav('analytics'); setAnalyticsOpen(true); }}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="20" x2="18" y2="10" />
+                            <line x1="12" y1="20" x2="12" y2="4" />
+                            <line x1="6" y1="20" x2="6" y2="14" />
+                        </svg>
+                        <span>Analytics</span>
+                    </button>
+                    <button
+                        className={`sidebar-nav-item ${activeNav === 'settings' ? 'active' : ''}`}
+                        onClick={() => setActiveNav('settings')}
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="3" />
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                        <span>Settings</span>
+                    </button>
+                </nav>
+                <div className="sidebar-footer">
+                    <button className="sidebar-signout" onClick={() => { logout(); navigate('/login'); }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+            </aside>
 
-                    {/* ALERT MESSAGE */}
-                    {message && (
-                        <div className="row mb-3">
-                            <div className="col-12">
+            {/* MAIN WRAPPER */}
+            <div className="admin-main-wrapper">
+                {/* TOP HEADER */}
+                <header className="admin-top-header">
+                    <div className="header-search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Search cases, citizens..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <div className="header-actions">
+                        <button className="header-notification">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                            </svg>
+                            {hitlCases.length > 0 && <span className="notification-badge"></span>}
+                        </button>
+                        <div className="header-user">
+                            <button
+                                className="user-dropdown-trigger"
+                                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                            >
+                                <span className="user-avatar">AD</span>
+                                <span className="user-name">Admin</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polyline points="6 9 12 15 18 9" />
+                                </svg>
+                            </button>
+                            {userDropdownOpen && (
+                                <div className="user-dropdown-menu">
+                                    <button onClick={() => setUserDropdownOpen(false)}>Profile</button>
+                                    <button onClick={() => setUserDropdownOpen(false)}>Settings</button>
+                                    <button className="signout-option" onClick={() => { logout(); navigate('/login'); }}>Sign Out</button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </header>
+
+                {/* MAIN CONTENT */}
+                <main className="page-content">
+                    <div className="container-fluid">
+
+                        {/* PAGE HEADER */}
+                        <div className="dashboard-header">
+                            <div className="dashboard-title-section">
+                                <h1>Dashboard</h1>
+                                <p>Address Change Automation Overview</p>
+                            </div>
+                            <div className="dashboard-actions">
+                                <button
+                                    className="btn-analytics"
+                                    onClick={() => setAnalyticsOpen(true)}
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <line x1="18" y1="20" x2="18" y2="10" />
+                                        <line x1="12" y1="20" x2="12" y2="4" />
+                                        <line x1="6" y1="20" x2="6" y2="14" />
+                                    </svg>
+                                    Analytics
+                                </button>
+                                <button
+                                    className="btn-ai-brain"
+                                    onClick={() => setAiBrainOpen(true)}
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M12 16v-4" />
+                                        <path d="M12 8h.01" />
+                                    </svg>
+                                    AI Brain
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* ALERT MESSAGE */}
+                        {message && (
+                            <div className="alert-container">
                                 <div
                                     className={`alert ${message.includes('✅')
                                         ? 'alert-success'
@@ -432,333 +556,234 @@ function AdminDashboard() {
                                     />
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* ANALYTICS & AI BRAIN BUTTONS */}
-                    <div className="row mb-3">
-                        <div className="col-12 d-flex justify-content-end gap-2">
-                            <button
-                                className="btn btn-primary btn-sm d-flex align-items-center gap-2"
-                                onClick={() => setAnalyticsOpen(true)}
-                            >
-                                <i className="bi bi-graph-up-arrow"></i>
-                                📊 View Analytics Dashboard
-                            </button>
-                            <button
-                                className="btn btn-primary btn-sm d-flex align-items-center gap-2"
-                                onClick={() => setAiBrainOpen(true)}
-                            >
-                                <i className="bi bi-cpu"></i>
-                                🧠 Live AI Brain
-                            </button>
-                        </div>
-                    </div>
-
-
-
-                    {/* SUMMARY CARDS */}
-                    <div className="row g-3 mb-4">
-                        {/* Pending */}
-                        <div className="col-12 col-sm-6 col-lg-3">
+                        {/* SUMMARY CARDS */}
+                        <div className="stats-grid">
+                            {/* Pending */}
                             <div
-                                className={`card card-stat card-stat-primary card-stat-clickable ${filterStatus === 'pending' ? 'card-stat-active' : ''}`}
+                                className={`stat-card stat-pending ${filterStatus === 'pending' ? 'active' : ''}`}
                                 onClick={() => setFilterStatus(filterStatus === 'pending' ? '' : 'pending')}
                             >
-                                <div className="card-body">
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div className="card-stat-label text-uppercase small">
-                                                Pending cases
-                                            </div>
-                                            <div className="card-stat-value display-6">
-                                                {pendingCases.length}
-                                            </div>
-                                            <div className="small">Awaiting approval</div>
-                                        </div>
-                                        <div className="card-stat-icon">
-                                            <i className="bi bi-inbox-fill" />
-                                        </div>
-                                    </div>
+                                <div className="stat-content">
+                                    <span className="stat-label">Pending Cases</span>
+                                    <span className="stat-value">{pendingCases.length}</span>
+                                    <span className="stat-trend">↗ +3 today</span>
+                                </div>
+                                <div className="stat-icon pending">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                                    </svg>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Needs review */}
-                        <div className="col-12 col-sm-6 col-lg-3">
+                            {/* Needs Review */}
                             <div
-                                className={`card card-stat card-stat-warning card-stat-clickable ${filterStatus === 'review' ? 'card-stat-active' : ''}`}
+                                className={`stat-card stat-review ${filterStatus === 'review' ? 'active' : ''}`}
                                 onClick={() => setFilterStatus(filterStatus === 'review' ? '' : 'review')}
                             >
-                                <div className="card-body">
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div className="card-stat-label text-uppercase small">
-                                                Needs review
-                                            </div>
-                                            <div className="card-stat-value display-6">
-                                                {hitlCases.length}
-                                            </div>
-                                            <div className="small">Requires manual correction</div>
-                                        </div>
-                                        <div className="card-stat-icon">
-                                            <i className="bi bi-exclamation-triangle-fill" />
-                                        </div>
-                                    </div>
+                                <div className="stat-content">
+                                    <span className="stat-label">Needs Review</span>
+                                    <span className="stat-value">{hitlCases.length}</span>
+                                    <span className="stat-trend warning">↗ 2 urgent</span>
+                                </div>
+                                <div className="stat-icon review">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                        <line x1="12" y1="9" x2="12" y2="13" />
+                                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                                    </svg>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Completed */}
-                        <div className="col-12 col-sm-6 col-lg-3">
+                            {/* Completed */}
                             <div
-                                className={`card card-stat card-stat-success card-stat-clickable ${filterStatus === 'completed' ? 'card-stat-active' : ''}`}
+                                className={`stat-card stat-completed ${filterStatus === 'completed' ? 'active' : ''}`}
                                 onClick={() => setFilterStatus(filterStatus === 'completed' ? '' : 'completed')}
                             >
-                                <div className="card-body">
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div className="card-stat-label text-uppercase small">
-                                                Completed
-                                            </div>
-                                            <div className="card-stat-value display-6">
-                                                {completedCases.length}
-                                            </div>
-                                            <div className="small">Successfully processed</div>
-                                        </div>
-                                        <div className="card-stat-icon">
-                                            <i className="bi bi-check-circle-fill" />
-                                        </div>
-                                    </div>
+                                <div className="stat-content">
+                                    <span className="stat-label">Completed</span>
+                                    <span className="stat-value">{completedCases.length}</span>
+                                    <span className="stat-trend success">↗ +18 this week</span>
+                                </div>
+                                <div className="stat-icon completed">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            {/* Avg Processing */}
+                            <div className="stat-card stat-time">
+                                <div className="stat-content">
+                                    <span className="stat-label">Avg. Processing</span>
+                                    <span className="stat-value">2.4h</span>
+                                    <span className="stat-trend success">↘ -12% faster</span>
+                                </div>
+                                <div className="stat-icon time">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Avg processing time (placeholder for now) */}
-                        <div className="col-12 col-sm-6 col-lg-3">
-                            <div className="card card-stat card-stat-neutral">
-                                <div className="card-body">
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <div className="card-stat-label text-uppercase text-muted small">
-                                                Avg. processing time
-                                            </div>
-                                            <div className="card-stat-value h3 mb-0">–</div>
-                                            <div className="text-muted small">Last 30 days</div>
-                                        </div>
-                                        <div className="card-stat-icon text-muted">
-                                            <i className="bi bi-clock-history" />
-                                        </div>
-                                    </div>
+                        {/* MAIN CONTENT ROW */}
+                        <div className="content-row">
+                            {/* CASES TABLE */}
+                            <div className="cases-section">
+                                <div className="section-header">
+                                    <h2>Recent Cases</h2>
+                                    <button className="view-all-btn" onClick={() => setFilterStatus('')}>
+                                        View All →
+                                    </button>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* MAIN ROW: CASES TABLE + SIDE HELP */}
-                    <div className="row">
-                        {/* CASES TABLE */}
-                        <div className="col-12 col-xl-9">
-                            <div className="card">
-                                <div className="card-header d-flex justify-content-between align-items-center">
-                                    <h3 className="h5 mb-0">
-                                        <i className="bi bi-list-ul me-1" />
-                                        {filterStatus === 'pending'
-                                            ? 'Pending cases'
-                                            : filterStatus === 'review'
-                                                ? 'Cases needing review'
-                                                : filterStatus === 'completed'
-                                                    ? 'Completed cases'
-                                                    : 'Pending cases'}
-                                    </h3>
-                                    <div className="d-flex align-items-center gap-2">
-                                        <span className="badge bg-secondary">
-                                            {filteredCases.length} cases
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="card-body p-0">
-                                    <div className="table-responsive">
-                                        <table className="table table-hover mb-0 align-middle">
-                                            <thead className="table-light">
-                                                <tr>
-                                                    <th scope="col">Case ID</th>
-                                                    <th scope="col">Citizen e-mail</th>
-                                                    <th scope="col">Submitted on</th>
-                                                    <th scope="col">Status</th>
-                                                    <th scope="col" className="text-end">
-                                                        Actions
-                                                    </th>
+                                <div className="cases-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>CASE ID</th>
+                                                <th>CITIZEN</th>
+                                                <th>SUBMITTED</th>
+                                                <th>STATUS</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {filteredCases.length === 0 ? (
+                                                <tr className="empty-row">
+                                                    <td colSpan={5}>
+                                                        <div className="empty-state">
+                                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                                                <polyline points="22,6 12,13 2,6" />
+                                                            </svg>
+                                                            <p>No cases at the moment</p>
+                                                            <span>New submissions will appear here</span>
+                                                        </div>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                {filteredCases.length === 0 ? (
-                                                    <tr className="table-empty-state">
-                                                        <td colSpan={5} className="text-center py-5">
-                                                            <div className="mb-2">
-                                                                <i className="bi bi-mailbox fs-1 text-muted" />
-                                                            </div>
-                                                            <p className="mb-0 fw-semibold">
-                                                                No pending cases at the moment
-                                                            </p>
-                                                            <p className="text-muted small mb-0">
-                                                                New submissions will appear here automatically.
-                                                            </p>
+                                            ) : (
+                                                filteredCases.slice(0, 5).map((caseItem) => (
+                                                    <tr key={caseItem.case_id}>
+                                                        <td className="case-id">AC-{caseItem.case_id}</td>
+                                                        <td className="citizen-info">
+                                                            <span className="citizen-name">{caseItem.citizen_name || 'Unknown'}</span>
+                                                            <span className="citizen-email">{caseItem.email}</span>
+                                                        </td>
+                                                        <td className="submitted-date">
+                                                            {formatDate(caseItem.submitted_at)}
+                                                        </td>
+                                                        <td>
+                                                            <span className={`status-badge status-${caseItem.status?.toLowerCase().replace('_', '-')}`}>
+                                                                <span className="status-dot"></span>
+                                                                {getStatusDisplay(caseItem.status)}
+                                                            </span>
+                                                        </td>
+                                                        <td className="actions-cell">
+                                                            <button
+                                                                className="action-btn"
+                                                                onClick={() => {
+                                                                    if (caseItem.status === 'CLOSED') {
+                                                                        handleViewCaseDetail(caseItem);
+                                                                    } else if (caseItem.status === 'WAITING_FOR_HUMAN') {
+                                                                        handleOpenHitlReview(caseItem);
+                                                                    } else {
+                                                                        handleViewCase(caseItem);
+                                                                    }
+                                                                }}
+                                                                title="View"
+                                                            >
+                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                                    <circle cx="12" cy="12" r="3" />
+                                                                </svg>
+                                                            </button>
+                                                            {(caseItem.pdf_landlord_path || caseItem.pdf_address_change_path) && (
+                                                                <button
+                                                                    className="action-btn"
+                                                                    onClick={() => handlePreviewDocs(caseItem)}
+                                                                    title="Documents"
+                                                                >
+                                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                                        <polyline points="14 2 14 8 20 8" />
+                                                                    </svg>
+                                                                </button>
+                                                            )}
+                                                            <button className="action-btn" title="More">
+                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                    <circle cx="12" cy="12" r="1" />
+                                                                    <circle cx="19" cy="12" r="1" />
+                                                                    <circle cx="5" cy="12" r="1" />
+                                                                </svg>
+                                                            </button>
                                                         </td>
                                                     </tr>
-                                                ) : (
-                                                    filteredCases.map((caseItem) => (
-                                                        <tr key={caseItem.case_id} className="case-row">
-                                                            <td>AC-{caseItem.case_id}</td>
-                                                            <td>{caseItem.email}</td>
-                                                            <td>{formatDate(caseItem.submitted_at)}</td>
-                                                            <td>
-                                                                <span
-                                                                    className={`badge ${getStatusBadge(
-                                                                        caseItem.status
-                                                                    )}`}
-                                                                >
-                                                                    {getStatusDisplay(caseItem.status)}
-                                                                </span>
-                                                            </td>
-                                                            <td className="text-end">
-                                                                <div className="btn-group btn-group-sm">
-                                                                    <button
-                                                                        type="button"
-                                                                        className="btn btn-outline-secondary btn-view-case"
-                                                                        onClick={() => {
-                                                                            if (caseItem.status === 'CLOSED') {
-                                                                                handleViewCaseDetail(caseItem);
-                                                                            } else if (caseItem.status === 'WAITING_FOR_HUMAN') {
-                                                                                handleOpenHitlReview(caseItem);
-                                                                            } else {
-                                                                                handleViewCase(caseItem);
-                                                                            }
-                                                                        }}
-                                                                    >
-                                                                        View
-                                                                    </button>
-                                                                    {(caseItem.status === 'PENDING' || caseItem.status === 'PENDING_REVIEW') && (
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btn btn-outline-success"
-                                                                            onClick={() =>
-                                                                                handleApprove(caseItem.case_id)
-                                                                            }
-                                                                            disabled={
-                                                                                processingCase === caseItem.case_id
-                                                                            }
-                                                                        >
-                                                                            {processingCase === caseItem.case_id
-                                                                                ? 'Processing...'
-                                                                                : 'Approve & Process'}
-                                                                        </button>
-                                                                    )}
-                                                                    {caseItem.status === 'CLOSED' && (caseItem.pdf_landlord_path || caseItem.pdf_address_change_path) && (
-                                                                        <button
-                                                                            type="button"
-                                                                            className="btn btn-outline-info"
-                                                                            onClick={() => handlePreviewDocs(caseItem)}
-                                                                            title="Preview uploaded documents"
-                                                                        >
-                                                                            <i className="bi bi-file-earmark-pdf me-1" />
-                                                                            Docs
-                                                                        </button>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                {/* Simple pagination placeholder */}
-                                <div className="card-footer d-flex justify-content-between align-items-center">
-                                    <div className="text-muted small">
-                                        Showing {filteredCases.length} of {filteredCases.length} cases
-                                    </div>
-                                    <nav>
-                                        <ul className="pagination pagination-sm mb-0">
-                                            <li className="page-item disabled">
-                                                <button className="page-link" type="button">
-                                                    «
-                                                </button>
-                                            </li>
-                                            <li className="page-item active">
-                                                <button className="page-link" type="button">
-                                                    1
-                                                </button>
-                                            </li>
-                                            <li className="page-item disabled">
-                                                <button className="page-link" type="button">
-                                                    »
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* SIDE HELP / CONTACT */}
-                        <div className="col-12 col-xl-3 mt-3 mt-xl-0">
-                            <div className="card mb-3">
-                                <div className="card-header">
-                                    <i className="bi bi-info-circle me-1" />
-                                    Processing guidelines
-                                </div>
-                                <div className="card-body">
-                                    <ul className="list-unstyled small mb-0">
-                                        <li className="mb-2">
-                                            ✔ Verify that uploaded documents are readable and complete.
+                            {/* SIDEBAR CARDS */}
+                            <div className="sidebar-cards">
+                                {/* Processing Guidelines */}
+                                <div className="guidelines-card">
+                                    <h3>Processing Guidelines</h3>
+                                    <ul className="guidelines-list">
+                                        <li>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                <polyline points="22 4 12 14.01 9 11.01" />
+                                            </svg>
+                                            Verify uploaded documents are readable and complete
                                         </li>
-                                        <li className="mb-2">
-                                            ✔ Check that old and new addresses are plausible.
+                                        <li>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                <polyline points="22 4 12 14.01 9 11.01" />
+                                            </svg>
+                                            Confirm old and new addresses are plausible
                                         </li>
-                                        <li className="mb-2">
-                                            ✔ If confidence is low, mark the case as{' '}
-                                            <strong>Needs review</strong>.
+                                        <li>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                <polyline points="22 4 12 14.01 9 11.01" />
+                                            </svg>
+                                            Mark low-confidence cases for manual review
+                                        </li>
+                                        <li>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                                <polyline points="22 4 12 14.01 9 11.01" />
+                                            </svg>
+                                            Complete processing within 48 hours
                                         </li>
                                     </ul>
                                 </div>
-                            </div>
 
-                            <div className="card">
-                                <div className="card-header">
-                                    <i className="bi bi-telephone me-1" />
-                                    Contact &amp; Help
-                                </div>
-                                <div className="card-body small">
-                                    <p className="mb-2">
-                                        <strong>E-mail</strong>
-                                        <br />
-                                        <a href="mailto:buergerservice@stadt.de">
-                                            buergerservice@stadt.de
-                                        </a>
-                                    </p>
-                                    <p className="mb-2">
-                                        <strong>Phone</strong>
-                                        <br />
-                                        +49 (0) 123 456 789
-                                    </p>
-                                    <p className="mb-0">
-                                        <strong>Opening hours</strong>
-                                        <br />
-                                        Mon–Fri: 8:00 – 16:00
-                                    </p>
+                                {/* Success Rate Card */}
+                                <div className="success-card">
+                                    <span className="success-label">This Month</span>
+                                    <span className="success-value">94.2%</span>
+                                    <span className="success-subtitle">Automation Success Rate</span>
+                                    <div className="success-bar">
+                                        <div className="success-fill" style={{ width: '94.2%' }}></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </main >
 
-            {/* FOOTER (light, admin-specific) */}
-            < footer className="admin-footer" >
+                    </div>
+                </main>
+            </div>
+
+            {/* FOOTER */}
+            <footer className="admin-footer">
                 <div className="admin-footer-content">
                     <div className="admin-footer-links">
                         <a href="#">{t('imprint')}</a>
@@ -768,11 +793,10 @@ function AdminDashboard() {
                     </div>
                     <div className="admin-footer-copy">{t('copyright')}</div>
                 </div>
-            </footer >
+            </footer>
 
             {/* CASE DETAIL DRAWER */}
-            < aside className={`case-detail-drawer ${drawerOpen ? 'active' : ''}`
-            }>
+            <aside className={`case-detail-drawer ${drawerOpen ? 'active' : ''}`}>
                 <div
                     className="case-detail-drawer-backdrop"
                     onClick={() => setDrawerOpen(false)}
@@ -1349,19 +1373,21 @@ function AdminDashboard() {
             />
 
             {/* AI BRAIN MODAL */}
-            {aiBrainOpen && (
-                <div className="modal-backdrop-custom" onClick={() => setAiBrainOpen(false)}>
-                    <div className="ai-brain-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="ai-brain-modal-header">
-                            <h5><i className="bi bi-cpu me-2"></i>🧠 Live AI Brain</h5>
-                            <button className="btn-close btn-close-white" onClick={() => setAiBrainOpen(false)}></button>
-                        </div>
-                        <div className="ai-brain-modal-body">
-                            <TerminalWidget />
+            {
+                aiBrainOpen && (
+                    <div className="modal-backdrop-custom" onClick={() => setAiBrainOpen(false)}>
+                        <div className="ai-brain-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="ai-brain-modal-header">
+                                <h5><i className="bi bi-cpu me-2"></i>🧠 Live AI Brain</h5>
+                                <button className="btn-close btn-close-white" onClick={() => setAiBrainOpen(false)}></button>
+                            </div>
+                            <div className="ai-brain-modal-body">
+                                <TerminalWidget />
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
         </div >
     );
 }

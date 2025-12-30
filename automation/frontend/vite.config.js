@@ -12,7 +12,7 @@ export default defineConfig({
     // Proxy only works in development
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:8000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },

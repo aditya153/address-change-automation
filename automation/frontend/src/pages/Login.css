@@ -1,8 +1,13 @@
+/* ================================================
+   LOGIN PAGE - German Government Portal Style
+   Split-view layout: Dark blue left, White right
+   ================================================ */
+
+/* Full page container */
 .login-page {
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    flex-direction: column;
     background-color: #ffffff;
     position: fixed;
     top: 0;
@@ -12,151 +17,378 @@
     z-index: 9999;
 }
 
-/* GRAY OUTER BOX */
-.login-outer-box {
-    background-color: #f0f0f0;
-    padding: 220px 330px;
-    border-radius: 20px;
+/* Government Banner */
+.gov-banner {
+    background-color: #1e3a5f;
+    color: #ffffff;
+    padding: 8px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
 }
 
-/* WHITE LOGIN CARD */
-.login-card {
-    background: white;
-    padding: 40px 50px;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    width: 100%;
-    max-width: 450px;
-    min-width: 400px;
+.gov-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.login-card h2 {
-    margin-bottom: 8px;
-    color: #1a1a1a !important;
-    font-weight: 600;
-    text-align: center !important;
-    display: block !important;
-    width: 100%;
-}
-
-.login-subtitle {
-    color: #6c757d;
-    margin-bottom: 32px;
+.gov-banner-flag {
     font-size: 14px;
-    text-align: center !important;
 }
 
-.login-card .form-group {
+.gov-banner-text {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.gov-banner-link {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+
+.gov-banner-link:hover {
+    color: #ffffff;
+}
+
+/* Main Container - Split View */
+.login-container {
+    flex: 1;
+    display: flex;
+}
+
+/* Left Panel - Dark Blue */
+.login-left-panel {
+    width: 45%;
+    background: linear-gradient(135deg, #1e3a5f 0%, #0d2840 100%);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    padding: 48px;
+}
+
+.login-left-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Portal Branding */
+.portal-branding {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 60px;
+}
+
+.portal-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+.portal-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.portal-name {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: #ffffff !important;
+}
+
+.portal-subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Hero Section */
+.login-hero {
+    flex: 1;
+}
+
+.login-title {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 16px 0;
+    color: #ffffff !important;
+}
+
+.title-underline {
+    width: 60px;
+    height: 4px;
+    background-color: #dc2626;
+    margin-bottom: 24px;
+}
+
+.login-description {
+    font-size: 16px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8) !important;
+    max-width: 380px;
+}
+
+/* GDPR Section */
+.gdpr-section {
+    margin-top: auto;
+}
+
+.gdpr-badge {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
     margin-bottom: 20px;
-    text-align: left;
 }
 
-.login-card .form-group label {
+.gdpr-badge svg {
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.gdpr-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.gdpr-text strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.gdpr-text span {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.copyright {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5) !important;
+    margin: 0;
+}
+
+/* Right Panel - White */
+.login-right-panel {
+    width: 55%;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+}
+
+.login-form-container {
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Form Title */
+.form-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: #1a1a1a !important;
+    margin: 0 0 8px 0;
+}
+
+.form-subtitle {
+    font-size: 15px;
+    color: #6b7280 !important;
+    margin: 0 0 32px 0;
+}
+
+/* Form Groups */
+.login-form-container .form-group {
+    margin-bottom: 20px;
+}
+
+.login-form-container .form-group label {
     display: block;
-    margin-bottom: 8px;
     font-size: 14px;
     font-weight: 500;
-    color: #343a40;
+    color: #374151;
+    margin-bottom: 8px;
 }
 
-.login-card .form-group input {
-    width: 100% !important;
-    padding: 12px 14px !important;
-    border: 2px solid #adb5bd !important;
-    border-radius: 6px !important;
-    font-size: 14px;
-    background-color: #f8f9fa !important;
-    box-sizing: border-box;
-    display: block !important;
-    color: #1a1a1a !important;
+/* Input Wrapper with Icon */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.login-card .form-group input::placeholder {
-    color: #6c757d;
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: #9ca3af;
+    pointer-events: none;
 }
 
-.login-card .form-group input:focus {
-    outline: none;
-    border-color: #0d47a1 !important;
-    background-color: #ffffff !important;
-}
-
-.login-card .btn-login {
+.login-form-container .form-group input {
     width: 100%;
-    padding: 12px;
-    background-color: #1a1a1a;
-    color: white;
+    padding: 14px 14px 14px 44px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    background-color: #ffffff;
+    color: #1a1a1a;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.login-form-container .form-group input::placeholder {
+    color: #9ca3af;
+}
+
+.login-form-container .form-group input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Login Button */
+.login-form-container .btn-login {
+    width: 100%;
+    padding: 14px 24px;
+    background-color: #1e3a5f;
+    color: #ffffff;
     border: none;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: 8px;
+    font-size: 15px;
     font-weight: 500;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     transition: background-color 0.2s;
+    margin-top: 8px;
 }
 
-.login-card .btn-login:hover {
-    background-color: #333;
+.login-form-container .btn-login:hover {
+    background-color: #15304d;
 }
 
-.login-card .error-message {
-    background-color: #ffebee;
-    color: #c62828;
-    padding: 10px;
-    border-radius: 6px;
-    font-size: 13px;
-    margin-bottom: 20px;
-    text-align: center;
+.btn-arrow {
+    font-size: 18px;
+    font-weight: 400;
 }
 
-/* Responsive Design for Login */
-@media (max-width: 768px) {
-    .login-outer-box {
-        padding: 20px !important;
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .login-card {
-        padding: 30px 20px;
-        min-width: 0 !important;
-        /* Allow shrinking below 400px */
-        width: 100% !important;
-        max-width: 100%;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .login-page {
-        height: 100%;
-        /* Prevent fixed height issues on mobile browsers */
-        position: relative;
-    }
-}
-
-/* Demo Credentials Box */
-.demo-credentials {
-    margin-top: 24px;
-    padding: 16px;
-    background-color: #e3f2fd;
-    border: 1px solid #90caf9;
+/* Error Message */
+.login-form-container .error-message {
+    background-color: #fef2f2;
+    color: #dc2626;
+    padding: 12px 16px;
     border-radius: 8px;
-    text-align: center;
+    font-size: 14px;
+    margin-bottom: 20px;
+    border: 1px solid #fecaca;
+}
+
+/* Demo Credentials */
+.demo-credentials {
+    margin-top: 28px;
+    padding: 20px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
 }
 
 .demo-credentials .demo-title {
     font-size: 14px;
     font-weight: 600;
-    color: #1565c0;
-    margin-bottom: 8px;
+    color: #374151;
+    margin: 0 0 12px 0;
 }
 
-.demo-credentials p {
+.credentials-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.credential-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.credential-label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.credential-item code {
     font-size: 13px;
-    color: #424242;
-    margin: 4px 0;
+    color: #1a1a1a;
+    font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+    background: transparent;
+    padding: 0;
 }
 
-.demo-credentials strong {
-    color: #1a1a1a;
+/* Protection Notice */
+.protection-notice {
+    text-align: center;
+    font-size: 13px;
+    color: #9ca3af !important;
+    margin: 24px 0 0 0;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+    .login-container {
+        flex-direction: column;
+    }
+
+    .login-left-panel {
+        width: 100%;
+        padding: 32px 24px;
+    }
+
+    .login-hero {
+        margin-bottom: 32px;
+    }
+
+    .login-title {
+        font-size: 32px;
+    }
+
+    .login-right-panel {
+        width: 100%;
+        padding: 32px 24px;
+    }
+
+    .gdpr-section {
+        margin-top: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    .gov-banner {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+        padding: 12px 16px;
+    }
+
+    .login-title {
+        font-size: 28px;
+    }
+
+    .credentials-grid {
+        grid-template-columns: 1fr;
+    }
 }
