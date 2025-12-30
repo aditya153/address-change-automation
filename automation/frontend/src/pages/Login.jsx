@@ -17,7 +17,8 @@ const LoginPage = () => {
     // Redirect if already authenticated
     useEffect(() => {
         if (isAuthenticated && user) {
-            if (user.role === 'admin') {
+            const role = user.role ? user.role.toLowerCase() : 'user';
+            if (role === 'admin') {
                 navigate('/admin');
             } else {
                 navigate('/');
@@ -75,7 +76,8 @@ const LoginPage = () => {
         try {
             const result = await loginWithGoogle(response.credential);
             if (result.success) {
-                if (result.user.role === 'admin') {
+                const role = result.user.role ? result.user.role.toLowerCase() : 'user';
+                if (role === 'admin') {
                     navigate('/admin');
                 } else {
                     navigate('/');
