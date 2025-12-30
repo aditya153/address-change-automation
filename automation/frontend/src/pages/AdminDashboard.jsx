@@ -497,7 +497,7 @@ function AdminDashboard() {
             {/* 2. CASE DETAIL MODAL (Redesigned) */}
             {drawerOpen && selectedCase && (
                 <div className="modal-overlay" onClick={() => setDrawerOpen(false)}>
-                    <div className="modal-content w-[95%] max-w-7xl h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+                    <div className="modal-content case-detail-modal flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
                         <div className="modal-header bg-[#0066cc] py-5 px-8 flex items-center justify-between border-none">
                             <div className="flex items-center gap-4">
                                 <div className="bg-white/20 p-2 rounded-lg">

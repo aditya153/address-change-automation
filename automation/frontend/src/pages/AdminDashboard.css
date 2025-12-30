@@ -862,7 +862,10 @@ h6 {
 }
 
 .modal-header {
-    @apply flex items-center justify-between p-6 border-b border-border;
+    @apply flex items-center justify-between p-6;
+    background-color: #0066cc !important;
+    color: white !important;
+    border-bottom: none !important;
 }
 
 .modal-body {
@@ -957,6 +960,14 @@ h6 {
 
 .modal-header h3,
 .modal-header span,
-.modal-header button {
+.modal-header button,
+.modal-header .text-white,
+.modal-header .text-white\/80 {
     color: white !important;
+}
+
+.case-detail-modal {
+    width: 95% !important;
+    max-width: 1400px !important;
+    height: 90vh !important;
 }
