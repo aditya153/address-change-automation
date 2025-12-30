@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import UserManagement from '../components/UserManagement';
 import AnalyticsDashboard from '../components/AnalyticsDashboard';
+import CitizenManagement from '../components/CitizenManagement';
+import SettingsPanel from '../components/SettingsPanel';
 import {
     Inbox,
     AlertTriangle,
@@ -269,6 +271,10 @@ function AdminDashboard() {
                     <Button variant="outline" onClick={() => setActiveNav('dashboard')}>← Back to Dashboard</Button>
                     <AnalyticsDashboard />
                 </div>
+            ) : activeNav === 'citizens' ? (
+                <CitizenManagement />
+            ) : activeNav === 'settings' ? (
+                <SettingsPanel />
             ) : activeNav === 'cases' ? (
                 <div className="space-y-8 animate-in" style={{ paddingTop: 0, marginTop: 0, alignSelf: 'flex-start', width: '100%' }}>
                     <div className="flex items-center justify-between mb-6">
@@ -322,7 +328,7 @@ function AdminDashboard() {
                                                                 className="h-8 w-8 text-muted-foreground hover:text-primary"
                                                                 onClick={() => {
                                                                     if (item.status === 'WAITING_FOR_HUMAN') handleOpenHitlReview(item);
-                                                                    else handleOpenDetailDrawer(item.case_id);
+                                                                    else handleViewCase(item);
                                                                 }}
                                                             >
                                                                 <Eye className="w-4 h-4" />
