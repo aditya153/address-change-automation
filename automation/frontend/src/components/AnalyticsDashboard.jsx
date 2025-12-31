@@ -26,7 +26,7 @@ export default function AnalyticsDashboard() {
     const fetchAnalytics = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE}/admin/analytics?period=${period}`);
+            const res = await fetch(`${API_URL}/admin/analytics?period=${period}`);
             if (res.ok) {
                 const data = await res.json();
                 setAnalytics(data);
@@ -41,7 +41,7 @@ export default function AnalyticsDashboard() {
     const fetchKpis = async () => {
         try {
             const token = localStorage.getItem('authToken');
-            const res = await fetch(`${API_BASE}/admin/analytics/kpis?period=${period}`, {
+            const res = await fetch(`${API_URL}/admin/analytics/kpis?period=${period}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -56,7 +56,7 @@ export default function AnalyticsDashboard() {
     const fetchComparison = async () => {
         try {
             const token = localStorage.getItem('authToken');
-            const res = await fetch(`${API_BASE}/admin/analytics/comparison?period=${period}`, {
+            const res = await fetch(`${API_URL}/admin/analytics/comparison?period=${period}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -72,7 +72,7 @@ export default function AnalyticsDashboard() {
         setExporting(true);
         try {
             const token = localStorage.getItem('authToken');
-            const res = await fetch(`${API_BASE}/admin/reports/export?format=${format}`, {
+            const res = await fetch(`${API_URL}/admin/reports/export?format=${format}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -109,7 +109,7 @@ export default function AnalyticsDashboard() {
         }
         setPatternsLoading(true);
         try {
-            const res = await fetch(`${API_BASE}/admin/learned-patterns`);
+            const res = await fetch(`${API_URL}/admin/learned-patterns`);
             if (res.ok) {
                 const data = await res.json();
                 setPatterns(data.patterns);
