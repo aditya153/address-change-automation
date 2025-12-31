@@ -208,12 +208,13 @@ main:has(.admin-dashboard-root) {
   background: linear-gradient(90deg, #f59e0b, #ec4899, #8b5cf6);
 }
 
-/* Typography - Light Text */
-h2 {
+/* Typography - Admin Dashboard Scoped */
+.admin-dashboard-root h2,
+.admin-dashboard h2 {
   font-size: 2rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
-  color: white;
+  color: #1e293b;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -225,11 +226,12 @@ h2 {
   font-size: 1.125rem;
 }
 
-h3 {
+.admin-dashboard-root h3,
+.admin-dashboard h3 {
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  color: white;
+  color: #1e293b;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -640,7 +642,7 @@ input[type="file"]:hover {
 
 .stat-card p {
   color: rgba(255, 255, 255, 0.95);
-  font-size: 1rem;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-weight: 700;
