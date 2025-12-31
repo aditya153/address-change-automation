@@ -139,13 +139,23 @@ import os
 
 # Default to known Vercel URL and Localhost
 DEFAULT_ORIGINS = "http://localhost:5173,http://localhost:3000"
-FRONTEND_URL = os.getenv("FRONTEND_URL", DEFAULT_ORIGINS)
+raw_frontend_url = os.getenv("FRONTEND_URL", DEFAULT_ORIGINS)
 
-allowed_origins = [origin.strip().rstrip("/") for origin in FRONTEND_URL.split(",")]
+# Split and clean origins, ensuring they start with https:// if they look like domains
+allowed_origins = ["http://localhost:5173", "http://localhost:3000"]
+for origin in raw_frontend_url.split(","):
+    clean_origin = origin.strip().rstrip("/")
+    if not clean_origin:
+        continue
+    if not clean_origin.startswith("http"):
+        allowed_origins.append(f"https://{clean_origin}")
+        allowed_origins.append(f"http://{clean_origin}")
+    else:
+        allowed_origins.append(clean_origin)
 
 # Regex to allow ANY Vercel deployment (preview or production)
-# This matches https://anything.vercel.app
-ALLOWED_ORIGIN_REGEX = r"https://.*\.vercel\.app"
+# Matches https://anything.vercel.app
+ALLOWED_ORIGIN_REGEX = r"https?://.*\.vercel\.app"
 
 print(f"🚀 CORS Configured. Static origins: {allowed_origins}")
 print(f"🚀 CORS Regex enabled: {ALLOWED_ORIGIN_REGEX}")
@@ -153,7 +163,7 @@ print(f"🚀 CORS Regex enabled: {ALLOWED_ORIGIN_REGEX}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_origin_regex=ALLOWED_ORIGIN_REGEX,  # <--- The magic fix
+    allow_origin_regex=ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

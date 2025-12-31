@@ -19,7 +19,7 @@ import {
 import { Button } from './ui/button';
 import './CitizenManagement.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import API_URL from '../utils/api';
 
 const CitizenManagement = () => {
     const [citizens, setCitizens] = useState([]);

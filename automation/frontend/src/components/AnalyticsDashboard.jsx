@@ -4,7 +4,7 @@ import { BarChart3, TrendingUp, Clock, Brain, Activity, Download, ArrowUpRight, 
 import { Button } from './ui/button';
 import './AnalyticsDashboard.css';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import API_URL from '../utils/api';
 
 export default function AnalyticsDashboard() {
     const [analytics, setAnalytics] = useState(null);

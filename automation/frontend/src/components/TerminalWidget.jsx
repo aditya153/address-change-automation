@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './TerminalWidget.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import API_URL from '../utils/api';
 
 export default function TerminalWidget() {
     const [logs, setLogs] = useState([]);

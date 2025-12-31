@@ -20,7 +20,7 @@ import {
 import { Button } from './ui/button';
 import './SettingsPanel.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import API_URL from '../utils/api';
 
 const SettingsPanel = () => {
     const { user, getAuthToken, logout } = useAuth();

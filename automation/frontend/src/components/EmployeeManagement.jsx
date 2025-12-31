@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { UserCog, Plus, Trash2, Shield, Mail, Clock, X, Send } from 'lucide-react';
 import './UserManagement.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+import API_URL from '../utils/api';
 
 export default function EmployeeManagement() {
     const [employees, setEmployees] = useState([]);
