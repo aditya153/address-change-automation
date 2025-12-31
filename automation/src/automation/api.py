@@ -169,6 +169,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/health")
+async def health_check():
+    """Diagnostic endpoint to verify CORS and backend status."""
+    return {
+        "status": "healthy",
+        "frontend_url": os.getenv("FRONTEND_URL"),
+        "allowed_origins": allowed_origins,
+        "vercel_regex": ALLOWED_ORIGIN_REGEX
+    }
+
 
 # =======================
 # LOG STREAMING SETUP

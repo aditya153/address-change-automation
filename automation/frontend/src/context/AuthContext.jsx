@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 import API_URL from '../utils/api';
 
 const AuthContext = createContext();
@@ -59,21 +60,22 @@ export const AuthProvider = ({ children }) => {
 
     // Google OAuth login
     const loginWithGoogle = async (googleCredential) => {
+        console.log("🔍 Attempting Google Login...");
+        console.log("📍 API URL:", API_URL);
+        console.log("🌐 Origin:", window.location.origin);
+
         try {
-            const response = await fetch(`${API_URL}/auth/google`, {
-                method: 'POST',
+            const response = await axios.post(`${API_URL}/auth/google`, {
+                credential: googleCredential
+            }, {
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ credential: googleCredential }),
+                // Add a timeout to distinguish between slow server and dead server
+                timeout: 10000
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Google login failed');
-            }
-
-            const data = await response.json();
+            const data = response.data;
 
             if (data.success) {
                 setIsAuthenticated(true);
@@ -85,8 +87,16 @@ export const AuthProvider = ({ children }) => {
                 return { success: false, message: 'Login failed' };
             }
         } catch (error) {
-            console.error('Google login error:', error);
-            return { success: false, message: error.message };
+            console.error('❌ Google login error:', error);
+
+            // Extract more detail from axios error
+            const errorMessage = error.response ?
+                `Server Error: ${error.response.status} - ${JSON.stringify(error.response.data)}` :
+                error.request ?
+                    "Communication Error: No response from server. Check CORS or URL." :
+                    `Request Error: ${error.message}`;
+
+            return { success: false, message: errorMessage };
         }
     };
 
