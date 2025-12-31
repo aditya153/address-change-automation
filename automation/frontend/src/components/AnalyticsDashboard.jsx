@@ -23,16 +23,12 @@ export default function AnalyticsDashboard() {
         fetchAnalytics();
         fetchComparison();
         fetchKpis();
-    }, []);
-
-    useEffect(() => {
-        fetchComparison();
     }, [period]);
 
     const fetchAnalytics = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE}/admin/analytics`);
+            const res = await fetch(`${API_BASE}/admin/analytics?period=${period}`);
             if (res.ok) {
                 const data = await res.json();
                 setAnalytics(data);
@@ -47,7 +43,7 @@ export default function AnalyticsDashboard() {
     const fetchKpis = async () => {
         try {
             const token = localStorage.getItem('authToken');
-            const res = await fetch(`${API_BASE}/admin/analytics/kpis`, {
+            const res = await fetch(`${API_BASE}/admin/analytics/kpis?period=${period}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.ok) {
@@ -321,8 +317,8 @@ export default function AnalyticsDashboard() {
                         <TrendingUp className="w-6 h-6 text-green-600" />
                     </div>
                     <div className="analytics-stat-content">
-                        <p className="analytics-stat-label">Cases This Week</p>
-                        <p className="analytics-stat-value">{analytics.cases_this_week || 0}</p>
+                        <p className="analytics-stat-label">Cases This {period === 'week' ? 'Week' : 'Month'}</p>
+                        <p className="analytics-stat-value">{period === 'week' ? (analytics.cases_this_week || 0) : (analytics.cases_this_month || analytics.cases_this_week || 0)}</p>
                     </div>
                 </div>
 
