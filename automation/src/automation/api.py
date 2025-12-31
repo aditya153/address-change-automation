@@ -1106,33 +1106,53 @@ async def get_completed_cases():
 
 
 @app.get("/admin/analytics")
-async def get_analytics():
+async def get_analytics(period: str = "week"):
     """
     Admin endpoint - get aggregated analytics for the dashboard.
-    Returns real statistics based on case data.
+    Returns real statistics based on case data, filtered by period.
+    
+    Args:
+        period: 'week' or 'month' - filters all data by the selected period
     """
+    # Define the date filter based on period
+    if period == "month":
+        date_filter = "submitted_at >= DATE_TRUNC('month', CURRENT_DATE)"
+        date_filter_closed = "updated_at >= DATE_TRUNC('month', CURRENT_DATE)"
+    else:  # week (default)
+        date_filter = "submitted_at >= CURRENT_DATE - INTERVAL '7 days'"
+        date_filter_closed = "updated_at >= CURRENT_DATE - INTERVAL '7 days'"
+    
     with get_conn() as conn, conn.cursor() as cur:
-        # Total cases count
+        # Total cases count (all time)
         cur.execute("SELECT COUNT(*) as total FROM cases;")
         total_cases = cur.fetchone()["total"]
         
-        # Source breakdown (portal vs email)
-        cur.execute("""
+        # Cases this period
+        cur.execute(f"""
+            SELECT COUNT(*) as count
+            FROM cases
+            WHERE {date_filter};
+        """)
+        cases_this_period = cur.fetchone()["count"]
+        
+        # Source breakdown (portal vs email) - FILTERED BY PERIOD
+        cur.execute(f"""
             SELECT 
                 COALESCE(source, 'portal') as source,
                 COUNT(*) as count 
             FROM cases 
+            WHERE {date_filter}
             GROUP BY COALESCE(source, 'portal');
         """)
         source_breakdown = {row["source"]: row["count"] for row in cur.fetchall()}
         
-        # HITL breakdown
-        cur.execute("""
+        # HITL breakdown - FILTERED BY PERIOD
+        cur.execute(f"""
             SELECT 
                 COALESCE(had_hitl, FALSE) as had_hitl,
                 COUNT(*) as count 
             FROM cases 
-            WHERE status = 'CLOSED'
+            WHERE status = 'CLOSED' AND {date_filter_closed}
             GROUP BY COALESCE(had_hitl, FALSE);
         """)
         hitl_breakdown = {}
@@ -1140,34 +1160,43 @@ async def get_analytics():
             key = "manual" if row["had_hitl"] else "auto"
             hitl_breakdown[key] = row["count"]
         
-        # Status breakdown
-        cur.execute("""
+        # Status breakdown - FILTERED BY PERIOD
+        cur.execute(f"""
             SELECT status, COUNT(*) as count 
             FROM cases 
+            WHERE {date_filter}
             GROUP BY status;
         """)
         status_breakdown = {row["status"]: row["count"] for row in cur.fetchall()}
         
-        # Learned patterns count
+        # Learned patterns count (all time)
         cur.execute("SELECT COUNT(*) as total FROM case_resolutions;")
         learned_patterns = cur.fetchone()["total"]
         
-        # Average processing time for completed cases (in minutes)
-        cur.execute("""
+        # Average processing time for completed cases in this period (in minutes)
+        cur.execute(f"""
             SELECT AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) / 60) as avg_minutes
             FROM cases
-            WHERE status = 'CLOSED';
+            WHERE status = 'CLOSED' AND {date_filter_closed};
         """)
         avg_time_row = cur.fetchone()
         avg_processing_time = round(avg_time_row["avg_minutes"] or 0, 1)
         
-        # Cases this week (last 7 days)
+        # Cases this week (for backward compatibility)
         cur.execute("""
             SELECT COUNT(*) as count
             FROM cases
             WHERE submitted_at >= CURRENT_DATE - INTERVAL '7 days';
         """)
         cases_this_week = cur.fetchone()["count"]
+        
+        # Cases this month
+        cur.execute("""
+            SELECT COUNT(*) as count
+            FROM cases
+            WHERE submitted_at >= DATE_TRUNC('month', CURRENT_DATE);
+        """)
+        cases_this_month = cur.fetchone()["count"]
         
     # Calculate automation rate
     auto_count = hitl_breakdown.get("auto", 0)
@@ -1177,14 +1206,18 @@ async def get_analytics():
     
     return {
         "total_cases": total_cases,
+        "cases_this_period": cases_this_period,
         "cases_this_week": cases_this_week,
+        "cases_this_month": cases_this_month,
         "source_breakdown": source_breakdown,
         "hitl_breakdown": hitl_breakdown,
         "status_breakdown": status_breakdown,
         "automation_rate": automation_rate,
         "avg_processing_time_minutes": avg_processing_time,
         "learned_patterns": learned_patterns,
+        "period": period,
     }
+
 
 
 @app.get("/admin/learned-patterns")

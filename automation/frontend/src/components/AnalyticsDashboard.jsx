@@ -1,6 +1,6 @@
 // src/components/AnalyticsDashboard.jsx
 import { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, Clock, Brain, CheckCircle2, Activity, Download, ArrowUpRight, ArrowDownRight, Users } from 'lucide-react';
+import { BarChart3, TrendingUp, Clock, Brain, Activity, Download, ArrowUpRight, ArrowDownRight, Users, PieChart as PieChartIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import './AnalyticsDashboard.css';
 
@@ -12,8 +12,6 @@ export default function AnalyticsDashboard() {
     const [loading, setLoading] = useState(true);
     const [showPatterns, setShowPatterns] = useState(false);
     const [patternsLoading, setPatternsLoading] = useState(false);
-
-    // New state for advanced analytics
     const [comparison, setComparison] = useState(null);
     const [period, setPeriod] = useState('week');
     const [exporting, setExporting] = useState(false);
@@ -104,7 +102,6 @@ export default function AnalyticsDashboard() {
         }
     };
 
-
     const fetchPatterns = async () => {
         if (showPatterns) {
             setShowPatterns(false);
@@ -157,10 +154,10 @@ export default function AnalyticsDashboard() {
         if (total === 0) return (
             <div className="analytics-card">
                 <div className="analytics-card-header">
-                    <Icon className="w-5 h-5 text-[#0066cc]" />
+                    <Icon className="w-5 h-5" style={{ color: '#0066cc' }} />
                     <h3 className="analytics-card-title">{title}</h3>
                 </div>
-                <div className="no-data-message">No data available</div>
+                <div className="no-data-message">No data for this period</div>
             </div>
         );
 
@@ -175,8 +172,9 @@ export default function AnalyticsDashboard() {
         return (
             <div className="analytics-card">
                 <div className="analytics-card-header">
-                    <Icon className="w-5 h-5 text-[#0066cc]" />
+                    <Icon className="w-5 h-5" style={{ color: '#0066cc' }} />
                     <h3 className="analytics-card-title">{title}</h3>
+                    <span className="period-badge">{period === 'week' ? 'This Week' : 'This Month'}</span>
                 </div>
                 <div className="pie-chart-container">
                     <svg viewBox="0 0 100 100" className="pie-svg">
@@ -224,9 +222,9 @@ export default function AnalyticsDashboard() {
     if (loading) {
         return (
             <div className="analytics-loading-container">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-4 border-[#0066cc]/30 border-t-[#0066cc] rounded-full animate-spin"></div>
-                    <p className="text-slate-500">Loading analytics...</p>
+                <div className="loading-spinner-container">
+                    <div className="loading-spinner"></div>
+                    <p className="loading-text">Loading analytics...</p>
                 </div>
             </div>
         );
@@ -235,18 +233,21 @@ export default function AnalyticsDashboard() {
     if (!analytics) {
         return (
             <div className="analytics-error-container">
-                <p className="text-slate-500">Failed to load analytics data</p>
+                <p className="error-text">Failed to load analytics data</p>
             </div>
         );
     }
+
+    const periodLabel = period === 'week' ? 'Week' : 'Month';
+    const casesThisPeriod = period === 'week' ? analytics.cases_this_week : analytics.cases_this_month;
 
     return (
         <div className="analytics-dashboard">
             {/* Page Header */}
             <div className="analytics-page-header">
                 <div>
-                    <h1 className="analytics-page-title">Analytics Overview</h1>
-                    <p className="analytics-page-subtitle">Comprehensive insights into system performance and automation efficiency</p>
+                    <h1 className="analytics-page-title">Analytics Dashboard</h1>
+                    <p className="analytics-page-subtitle">System performance and automation efficiency insights</p>
                 </div>
                 <div className="analytics-actions">
                     <div className="period-selector">
@@ -302,44 +303,44 @@ export default function AnalyticsDashboard() {
 
             {/* Key Metrics Grid */}
             <div className="analytics-metrics-grid">
-                <div className="analytics-stat-card stat-blue">
-                    <div className="analytics-stat-icon bg-blue-50">
-                        <Activity className="w-6 h-6 text-[#0066cc]" />
+                <div className="analytics-stat-card">
+                    <div className="analytics-stat-icon" style={{ backgroundColor: '#ebf8ff' }}>
+                        <Activity className="w-6 h-6" style={{ color: '#0066cc' }} />
                     </div>
                     <div className="analytics-stat-content">
-                        <p className="analytics-stat-label">Total Cases</p>
+                        <p className="analytics-stat-label">TOTAL CASES</p>
                         <p className="analytics-stat-value">{analytics.total_cases}</p>
                     </div>
                 </div>
 
-                <div className="analytics-stat-card stat-green">
-                    <div className="analytics-stat-icon bg-green-50">
-                        <TrendingUp className="w-6 h-6 text-green-600" />
+                <div className="analytics-stat-card">
+                    <div className="analytics-stat-icon" style={{ backgroundColor: '#dcfce7' }}>
+                        <TrendingUp className="w-6 h-6" style={{ color: '#22c55e' }} />
                     </div>
                     <div className="analytics-stat-content">
-                        <p className="analytics-stat-label">Cases This {period === 'week' ? 'Week' : 'Month'}</p>
-                        <p className="analytics-stat-value">{period === 'week' ? (analytics.cases_this_week || 0) : (analytics.cases_this_month || analytics.cases_this_week || 0)}</p>
+                        <p className="analytics-stat-label">CASES THIS {periodLabel.toUpperCase()}</p>
+                        <p className="analytics-stat-value">{casesThisPeriod || 0}</p>
                     </div>
                 </div>
 
-                <div className="analytics-stat-card stat-orange">
-                    <div className="analytics-stat-icon bg-orange-50">
-                        <Clock className="w-6 h-6 text-orange-600" />
+                <div className="analytics-stat-card">
+                    <div className="analytics-stat-icon" style={{ backgroundColor: '#ffedd5' }}>
+                        <Clock className="w-6 h-6" style={{ color: '#f97316' }} />
                     </div>
                     <div className="analytics-stat-content">
-                        <p className="analytics-stat-label">Avg. Processing Time</p>
+                        <p className="analytics-stat-label">AVG. PROCESSING TIME</p>
                         <p className="analytics-stat-value">{formatTime(analytics.avg_processing_time_minutes)}</p>
                     </div>
                 </div>
 
-                <div className="analytics-stat-card stat-purple" onClick={fetchPatterns} style={{ cursor: 'pointer' }}>
-                    <div className="analytics-stat-icon bg-purple-50">
-                        <Brain className="w-6 h-6 text-purple-600" />
+                <div className="analytics-stat-card clickable" onClick={fetchPatterns}>
+                    <div className="analytics-stat-icon" style={{ backgroundColor: '#f3e8ff' }}>
+                        <Brain className="w-6 h-6" style={{ color: '#a855f7' }} />
                     </div>
                     <div className="analytics-stat-content">
-                        <p className="analytics-stat-label">Learned Patterns</p>
+                        <p className="analytics-stat-label">LEARNED PATTERNS</p>
                         <p className="analytics-stat-value">{analytics.learned_patterns}</p>
-                        <span className="analytics-stat-hint">{showPatterns ? '▲ Hide' : '▼ Show Details'}</span>
+                        <span className="analytics-stat-hint">{showPatterns ? '▲ Hide Details' : '▼ Show Details'}</span>
                     </div>
                 </div>
             </div>
@@ -348,13 +349,13 @@ export default function AnalyticsDashboard() {
             {showPatterns && (
                 <div className="analytics-card patterns-card">
                     <div className="analytics-card-header">
-                        <Brain className="w-5 h-5 text-[#0066cc]" />
+                        <Brain className="w-5 h-5" style={{ color: '#0066cc' }} />
                         <h3 className="analytics-card-title">AI Memory - Learned Patterns</h3>
                     </div>
                     {patternsLoading ? (
                         <div className="patterns-loading">
-                            <div className="w-6 h-6 border-4 border-[#0066cc]/30 border-t-[#0066cc] rounded-full animate-spin"></div>
-                            <p className="text-slate-500">Loading patterns...</p>
+                            <div className="loading-spinner small"></div>
+                            <p className="loading-text">Loading patterns...</p>
                         </div>
                     ) : patterns && patterns.length > 0 ? (
                         <div className="patterns-table-container">
@@ -397,8 +398,9 @@ export default function AnalyticsDashboard() {
             {analytics.status_breakdown && Object.keys(analytics.status_breakdown).length > 0 && (
                 <div className="analytics-card">
                     <div className="analytics-card-header">
-                        <Activity className="w-5 h-5 text-[#0066cc]" />
+                        <Activity className="w-5 h-5" style={{ color: '#0066cc' }} />
                         <h3 className="analytics-card-title">Status Distribution</h3>
+                        <span className="period-badge">{period === 'week' ? 'This Week' : 'This Month'}</span>
                     </div>
                     <div className="status-badges-container">
                         {Object.entries(analytics.status_breakdown).map(([status, count]) => (
@@ -415,7 +417,7 @@ export default function AnalyticsDashboard() {
             {kpis?.cases_per_employee && kpis.cases_per_employee.length > 0 && (
                 <div className="analytics-card">
                     <div className="analytics-card-header">
-                        <Users className="w-5 h-5 text-[#0066cc]" />
+                        <Users className="w-5 h-5" style={{ color: '#0066cc' }} />
                         <h3 className="analytics-card-title">Cases per Employee</h3>
                     </div>
                     <div className="employee-performance-list">
