@@ -469,49 +469,64 @@
     border-radius: 10px;
 }
 
-/* Employee Performance */
-.employee-performance-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.employee-row {
-    display: flex;
-    align-items: center;
+/* Employee Performance - Card Grid */
+.employee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 16px;
 }
 
-.employee-name {
+.employee-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.employee-card:hover {
+    background-color: #f1f5f9;
+    border-color: #0066cc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 102, 204, 0.1);
+}
+
+.employee-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0066cc 0%, #3b82f6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Roboto', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.employee-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.employee-card-name {
     font-family: 'Roboto', sans-serif;
     font-size: 14px;
     font-weight: 600;
-    color: #475569;
-    min-width: 120px;
+    color: #1a202c;
 }
 
-.employee-bar-container {
-    flex: 1;
-    height: 20px;
-    background-color: #f1f5f9;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.employee-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #0066cc 0%, #3b82f6 100%);
-    border-radius: 10px;
-    transition: width 0.5s ease;
-}
-
-.employee-count {
+.employee-card-count {
     font-family: 'Roboto', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    color: #0066cc;
-    min-width: 40px;
-    text-align: right;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
 }
 
 /* Loading & Error States */

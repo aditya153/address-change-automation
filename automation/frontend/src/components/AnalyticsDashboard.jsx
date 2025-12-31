@@ -276,30 +276,6 @@ export default function AnalyticsDashboard() {
                 </div>
             </div>
 
-            {/* Comparison Card */}
-            {comparison && (
-                <div className="analytics-comparison-card">
-                    <div className="comparison-content">
-                        <div className="comparison-period">
-                            <span className="comparison-label">{comparison.current.label}</span>
-                            <span className="comparison-value">{comparison.current.count}</span>
-                        </div>
-                        <div className="comparison-vs">vs</div>
-                        <div className="comparison-period">
-                            <span className="comparison-label">{comparison.previous.label}</span>
-                            <span className="comparison-value">{comparison.previous.count}</span>
-                        </div>
-                        <div className={`comparison-change ${comparison.change_percent >= 0 ? 'positive' : 'negative'}`}>
-                            {comparison.change_percent >= 0 ? (
-                                <ArrowUpRight className="w-5 h-5" />
-                            ) : (
-                                <ArrowDownRight className="w-5 h-5" />
-                            )}
-                            <span>{Math.abs(comparison.change_percent)}%</span>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Key Metrics Grid */}
             <div className="analytics-metrics-grid">
@@ -394,45 +370,24 @@ export default function AnalyticsDashboard() {
                 <PieChart data={getHitlPieData()} title="Processing Method" icon={BarChart3} />
             </div>
 
-            {/* Status Distribution */}
-            {analytics.status_breakdown && Object.keys(analytics.status_breakdown).length > 0 && (
-                <div className="analytics-card">
-                    <div className="analytics-card-header">
-                        <Activity className="w-5 h-5" style={{ color: '#0066cc' }} />
-                        <h3 className="analytics-card-title">Status Distribution</h3>
-                        <span className="period-badge">{period === 'week' ? 'This Week' : 'This Month'}</span>
-                    </div>
-                    <div className="status-badges-container">
-                        {Object.entries(analytics.status_breakdown).map(([status, count]) => (
-                            <span key={status} className="status-badge">
-                                <span className="status-badge-label">{status.replace(/_/g, ' ')}</span>
-                                <span className="status-badge-count">{count}</span>
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            )}
 
-            {/* Employee Performance */}
+            {/* Employee Performance - Table Style */}
             {kpis?.cases_per_employee && kpis.cases_per_employee.length > 0 && (
                 <div className="analytics-card">
                     <div className="analytics-card-header">
                         <Users className="w-5 h-5" style={{ color: '#0066cc' }} />
-                        <h3 className="analytics-card-title">Cases per Employee</h3>
+                        <h3 className="analytics-card-title">Team Performance</h3>
                     </div>
-                    <div className="employee-performance-list">
+                    <div className="employee-grid">
                         {kpis.cases_per_employee.map((emp, idx) => (
-                            <div key={idx} className="employee-row">
-                                <span className="employee-name">{emp.name}</span>
-                                <div className="employee-bar-container">
-                                    <div
-                                        className="employee-bar"
-                                        style={{
-                                            width: `${Math.min((emp.count / Math.max(...kpis.cases_per_employee.map(e => e.count), 1)) * 100, 100)}%`
-                                        }}
-                                    />
+                            <div key={idx} className="employee-card">
+                                <div className="employee-avatar">
+                                    {emp.name ? emp.name.charAt(0).toUpperCase() : 'U'}
                                 </div>
-                                <span className="employee-count">{emp.count}</span>
+                                <div className="employee-info">
+                                    <span className="employee-card-name">{emp.name || 'Unassigned'}</span>
+                                    <span className="employee-card-count">{emp.count} cases</span>
+                                </div>
                             </div>
                         ))}
                     </div>
