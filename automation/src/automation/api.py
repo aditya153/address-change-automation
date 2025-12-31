@@ -168,15 +168,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/health")
-async def health_check():
-    """Diagnostic endpoint to verify CORS and backend status."""
-    return {
-        "status": "healthy",
-        "frontend_url": os.getenv("FRONTEND_URL"),
-        "allowed_origins": allowed_origins,
-        "vercel_regex": ALLOWED_ORIGIN_REGEX
-    }
+
 
 
 # =======================
@@ -215,11 +207,16 @@ async def stream_logs():
 # =======================
 
 @app.get("/health")
-def health_check() -> Dict[str, str]:
+def health_check() -> Dict[str, Any]:
     """
-    Simple health endpoint to check that the backend is running.
+    Diagnostic endpoint to check backend status and CORS configuration.
     """
-    return {"status": "ok", "service": "address-change-backend"}
+    return {
+        "status": "healthy", 
+        "service": "address-change-backend",
+        "allowed_origins": allowed_origins,
+        "frontend_url_env": os.getenv("FRONTEND_URL")
+    }
 
 
 # =======================
