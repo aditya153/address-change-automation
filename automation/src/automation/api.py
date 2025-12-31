@@ -163,10 +163,16 @@ print(f"🚀 CORS Configured. Allowed origins: {allowed_origins}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
+    allow_origin_regex=r"https?://.*\.vercel\.app",
     allow_credentials=True, # Essential for cookies/auth headers
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.options("/auth/google")
+async def auth_google_options():
+    """Explicit OPTIONS handler to ensure CORS preflight succeeds."""
+    return {}
 
 
 
