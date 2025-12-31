@@ -381,7 +381,7 @@ export default function AnalyticsDashboard() {
                     <div className="employee-grid">
                         {kpis.cases_per_employee.map((emp, idx) => (
                             <div key={idx} className="employee-card">
-                                <div className="employee-avatar">
+                                <div className="employee-avatar" style={{ color: '#ffffff', fontWeight: 800 }}>
                                     {emp.name ? emp.name.charAt(0).toUpperCase() : 'U'}
                                 </div>
                                 <div className="employee-info">
