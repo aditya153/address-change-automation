@@ -246,7 +246,7 @@ export default function AnalyticsDashboard() {
             {/* Page Header */}
             <div className="analytics-page-header">
                 <div>
-                    <h1 className="analytics-page-title">Analytics Dashboard</h1>
+                    <h1 className="analytics-page-title">Analytics</h1>
                     <p className="analytics-page-subtitle">System performance and automation efficiency insights</p>
                 </div>
                 <div className="analytics-actions">
