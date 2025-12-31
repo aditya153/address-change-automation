@@ -65,6 +65,10 @@ function AdminDashboard() {
     const [auditLog, setAuditLog] = useState([]);
     const [loadingDetails, setLoadingDetails] = useState(false);
 
+    // AI Brain Modal State
+    const [aiBrainOpen, setAiBrainOpen] = useState(false);
+    const [aiBrainLogs, setAiBrainLogs] = useState([]);
+
     // Fetching Logic
     const fetchPendingCases = async () => {
         try {
@@ -116,6 +120,31 @@ function AdminDashboard() {
         const interval = setInterval(fetchAllCases, 10000);
         return () => clearInterval(interval);
     }, []);
+
+    // SSE Connection for AI Brain
+    useEffect(() => {
+        if (!aiBrainOpen) return;
+
+        setAiBrainLogs([]);
+        const eventSource = new EventSource(`${API_URL}/stream-logs`);
+
+        eventSource.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                setAiBrainLogs(prev => [...prev.slice(-50), data]); // Keep last 50 logs
+            } catch (e) {
+                console.error('SSE parse error:', e);
+            }
+        };
+
+        eventSource.onerror = () => {
+            console.error('SSE connection error');
+        };
+
+        return () => {
+            eventSource.close();
+        };
+    }, [aiBrainOpen]);
 
     // Helper Functions
     const getPdfUrl = (path) => {
@@ -392,6 +421,7 @@ function AdminDashboard() {
                             </Button>
                             <Button
                                 className="gap-2 bg-[#0066cc] hover:bg-[#0052a3] text-white border-none shadow-md transition-all px-6"
+                                onClick={() => setAiBrainOpen(true)}
                             >
                                 <Brain className="w-4 h-4" />
                                 AI Brain
@@ -873,6 +903,51 @@ function AdminDashboard() {
                             <Button variant="ghost" onClick={() => setHitlModalOpen(false)}>Cancel</Button>
                             <Button onClick={handleSubmitCorrection} className="bg-success hover:bg-success/90">
                                 Approve Correction
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* AI Brain Modal */}
+            {aiBrainOpen && (
+                <div className="modal-overlay" onClick={() => setAiBrainOpen(false)}>
+                    <div className="ai-brain-modal" onClick={e => e.stopPropagation()}>
+                        <div className="ai-brain-header">
+                            <div className="ai-brain-title">
+                                <Brain size={24} />
+                                <span>AI Brain - Live Processing</span>
+                            </div>
+                            <button className="close-btn" onClick={() => setAiBrainOpen(false)}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div className="ai-brain-content">
+                            {aiBrainLogs.length === 0 ? (
+                                <div className="ai-brain-empty">
+                                    <Brain size={48} className="pulse-icon" />
+                                    <p>Waiting for AI activity...</p>
+                                    <span>Submit a new case or process existing ones to see live updates</span>
+                                </div>
+                            ) : (
+                                <div className="ai-brain-logs">
+                                    {aiBrainLogs.map((log, idx) => (
+                                        <div key={idx} className={`ai-log-item ${log.type || 'info'}`}>
+                                            <span className="ai-log-time">{log.timestamp}</span>
+                                            <span className="ai-log-agent">{log.agent}</span>
+                                            <span className="ai-log-message">{log.message}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className="ai-brain-footer">
+                            <div className="connection-status">
+                                <span className="status-dot connected"></span>
+                                Connected to AI Brain
+                            </div>
+                            <Button variant="outline" onClick={() => setAiBrainLogs([])}>
+                                Clear Logs
                             </Button>
                         </div>
                     </div>
