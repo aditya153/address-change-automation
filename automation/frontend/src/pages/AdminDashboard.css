@@ -1230,6 +1230,33 @@ h6 {
     font-weight: 600 !important;
 }
 
+/* Next Processing Batch Card Readability Fix */
+.next-batch-card,
+.next-batch-card * {
+    color: #ffffff !important;
+}
+
+.next-batch-card p,
+.next-batch-card .text-slate-400,
+.next-batch-card .text-slate-300 {
+    color: #94a3b8 !important;
+    /* Slate 400 */
+}
+
+.next-batch-card {
+    background-color: #0f172a !important;
+    /* Slate 900 */
+    border-radius: 16px !important;
+    padding: 24px !important;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.next-batch-card .bg-slate-800 {
+    background-color: #1e293b !important;
+}
+
 /* Stat Cards Grid */
 .stat-card-redesign {
     background-color: #ffffff !important;

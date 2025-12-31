@@ -374,9 +374,9 @@ function AdminDashboard() {
                     </div>
                 </div>
             ) : (
-                <div className="space-y-4 animate-in">
+                <div className="space-y-6 animate-in pt-7">
                     {/* Page Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-7">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight mb-2">Dashboard</h1>
                             <p className="text-muted-foreground">Address Change Automation Overview</p>
