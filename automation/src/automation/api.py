@@ -141,26 +141,29 @@ import os
 DEFAULT_ORIGINS = "http://localhost:5173,http://localhost:3000"
 raw_frontend_url = os.getenv("FRONTEND_URL", DEFAULT_ORIGINS)
 
-# Split and clean origins
-allowed_origins = ["*"] # Switch to wildcard for immediate unblocking in production
-raw_frontend_url = os.getenv("FRONTEND_URL", DEFAULT_ORIGINS)
+# Explicitly listed origins for production and dev
+# This is safer and more reliable than wildcards or regex for credentials
+allowed_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://address-change-automation.vercel.app",
+    "https://address-change-automation.vercel.app/" 
+]
 
-# Log configured origins for /health
-diagnostic_origins = ["http://localhost:5173", "http://localhost:3000"]
-for origin in raw_frontend_url.split(","):
-    clean_origin = origin.strip().rstrip("/")
-    if clean_origin:
-        diagnostic_origins.append(clean_origin)
+# Just in case FRONTEND_URL is set in backend env, add it too
+if raw_frontend_url and raw_frontend_url != DEFAULT_ORIGINS:
+    for origin in raw_frontend_url.split(","):
+        clean = origin.strip().rstrip("/")
+        if clean and clean not in allowed_origins:
+            allowed_origins.append(clean)
+            allowed_origins.append(f"{clean}/") 
 
-# Regex to allow ANY Vercel deployment (preview or production)
-ALLOWED_ORIGIN_REGEX = r"https?://.*\.vercel\.app"
-
-print(f"🚀 CORS Configured with WILDCARD for unblocking.")
+print(f"🚀 CORS Configured. Allowed origins: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Extreme permissive for debugging
-    allow_credentials=False, # Must be False if allow_origins is ["*"]
+    allow_origins=allowed_origins,
+    allow_credentials=True, # Essential for cookies/auth headers
     allow_methods=["*"],
     allow_headers=["*"],
 )
