@@ -160,19 +160,48 @@ if raw_frontend_url and raw_frontend_url != DEFAULT_ORIGINS:
 
 print(f"🚀 CORS Configured. Allowed origins: {allowed_origins}")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_origin_regex=r"https?://.*\.vercel\.app",
-    allow_credentials=True, # Essential for cookies/auth headers
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# ==========================================
+# ☢️ NUCLEAR CORS SOLUTION ☢️
+# Manually force headers on EVERY request
+# ==========================================
+from fastapi import Request, Response
 
-@app.options("/auth/google")
-async def auth_google_options():
-    """Explicit OPTIONS handler to ensure CORS preflight succeeds."""
-    return {}
+@app.middleware("http")
+async def cors_override_middleware(request: Request, call_next):
+    origin = request.headers.get("Origin")
+    
+    # Allow logic
+    allow = False
+    if origin:
+        if "localhost" in origin:
+            allow = True
+        elif ".vercel.app" in origin:
+            allow = True
+            
+    response = await call_next(request)
+    
+    if allow:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        
+    return response
+
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(rest_of_path: str):
+    """
+    Catch-all OPTIONS handler for preflight checks.
+    """
+    return Response(
+        content="OK",
+        media_type="text/plain",
+        headers={
+            "Access-Control-Allow-Origin": "*", # Will be overwritten by middleware if matched
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
 
 
 
