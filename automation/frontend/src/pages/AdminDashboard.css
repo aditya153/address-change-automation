@@ -1418,23 +1418,68 @@ h6 {
 
 .ai-brain-modal {
     background-color: #ffffff;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 700px;
-    max-height: 85vh;
+    border-radius: 20px;
+    width: 95%;
+    max-width: 900px;
+    height: 85vh;
+    max-height: 750px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    border: 1px solid #e2e8f0;
+    box-shadow:
+        0 25px 80px -12px rgba(0, 102, 204, 0.35),
+        0 0 40px rgba(0, 102, 204, 0.1);
+    border: 1px solid rgba(0, 102, 204, 0.2);
     overflow: hidden;
+    animation: modalEntrance 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+@keyframes modalEntrance {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(40px) rotateX(10deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0) rotateX(0deg);
+    }
 }
 
 .ai-brain-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 24px 28px;
+    padding: 28px 32px;
     background: linear-gradient(135deg, #0066cc 0%, #004c99 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated gradient shimmer effect */
+.ai-brain-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+    animation: headerShimmer 3s infinite;
+}
+
+@keyframes headerShimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
 }
 
 .ai-brain-title {
@@ -1539,37 +1584,45 @@ h6 {
 .ai-brain-logs {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .ai-log-item {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
+    gap: 20px;
+    padding: 20px 24px;
     background-color: #ffffff;
-    border-radius: 12px;
+    border-radius: 14px;
     border: 1px solid #e2e8f0;
-    font-size: 14px;
-    transition: all 0.2s;
-    animation: slideIn 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    font-size: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: logSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transform-style: preserve-3d;
 }
 
 .ai-log-item:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
+    box-shadow:
+        0 10px 30px rgba(0, 102, 204, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-3px) scale(1.01);
+    border-color: rgba(0, 102, 204, 0.3);
 }
 
-@keyframes slideIn {
-    from {
+@keyframes logSlideIn {
+    0% {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateX(-30px) scale(0.95);
     }
 
-    to {
+    60% {
+        transform: translateX(5px) scale(1.02);
+    }
+
+    100% {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0) scale(1);
     }
 }
 
