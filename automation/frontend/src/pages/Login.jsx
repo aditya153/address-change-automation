@@ -3,8 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
-// Google OAuth Client ID
-const GOOGLE_CLIENT_ID = '935768783873-v90c1cqjql902dt5sq1nvcri0cq3fbpd.apps.googleusercontent.com';
+// Google OAuth Client ID - Use environment variable or fallback to development ID
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '935768783873-v90c1cqjql902dt5sq1nvcri0cq3fbpd.apps.googleusercontent.com';
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
