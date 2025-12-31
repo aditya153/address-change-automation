@@ -289,7 +289,7 @@ function AdminDashboard() {
             ) : activeNav === 'settings' ? (
                 <SettingsPanel />
             ) : activeNav === 'cases' ? (
-                <div className="space-y-8 animate-in" style={{ paddingTop: 0, marginTop: 0, alignSelf: 'flex-start', width: '100%' }}>
+                <div className="space-y-8 animate-in pt-7" style={{ alignSelf: 'flex-start', width: '100%' }}>
                     <div className="flex items-center justify-between mb-6">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight mb-1">All Cases</h1>

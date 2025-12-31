@@ -2,6 +2,7 @@
 
 .citizen-management-container {
     width: 100%;
+    padding-top: 28px;
     animation: fadeIn 0.3s ease-out;
 }
 
