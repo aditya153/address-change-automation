@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import NeighborhoodMap from '../components/NeighborhoodMap';
 import './UserPortal.css';
 
@@ -8,6 +10,8 @@ import API_URL from '../utils/api';
 
 function UserPortal() {
     const { t, language } = useLanguage();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [landlordPdf, setLandlordPdf] = useState(null);
     const [addressPdf, setAddressPdf] = useState(null);
@@ -32,9 +36,6 @@ function UserPortal() {
 
     // Goodbye toast state
     const [showGoodbye, setShowGoodbye] = useState(false);
-
-    // Show info alert initially
-    const [showInfo, setShowInfo] = useState(true);
 
     // Initialize chat greeting based on language
     useEffect(() => {
@@ -79,16 +80,13 @@ function UserPortal() {
                 ? 'Bitte füllen Sie alle Pflichtfelder aus.'
                 : 'Please fill in all required fields.');
             setSuccess(false);
-            setShowInfo(false);
             return;
         }
 
         setLoading(true);
         setMessage('');
         setSuccess(false);
-        // Reset validation errors when attempting new submission
         setDocumentValidationErrors({ landlord: false, address: false });
-        setShowInfo(false);
 
         try {
             const formData = new FormData();
@@ -110,11 +108,9 @@ function UserPortal() {
             setLandlordPdf(null);
             setAddressPdf(null);
         } catch (error) {
-            // Handle document validation errors
             const errorData = error.response?.data;
 
             if (error.response?.status === 400 && errorData?.errors) {
-                // Document validation failed - show detailed error
                 const errorMessages = errorData.errors;
                 const helpMessage = language === 'de'
                     ? 'Benötigen Sie Hilfe? Klicken Sie auf den Chatbot unten rechts für Unterstützung.'
@@ -124,20 +120,15 @@ function UserPortal() {
                     ? '❌ Dokumente ungültig:\n\n'
                     : '❌ Invalid documents:\n\n';
 
-                // Determine which document(s) failed validation
                 const validationErrors = { landlord: false, address: false };
                 errorMessages.forEach(err => {
                     displayMessage += `• ${err}\n`;
                     const errLower = err.toLowerCase();
-                    // Check for landlord document errors - match backend error patterns
-                    // Backend uses: "Landlord document invalid: ..." or "First document is not..."
                     if (errLower.startsWith('landlord document') ||
                         errLower.includes('first document') ||
                         errLower.includes('wohnungsgeberbestätigung')) {
                         validationErrors.landlord = true;
                     }
-                    // Check for address form errors - match backend error patterns
-                    // Backend uses: "Address form invalid: ..." or "Second document is not..."
                     if (errLower.startsWith('address form') ||
                         errLower.includes('second document') ||
                         errLower.includes('meldebescheinigung')) {
@@ -149,7 +140,6 @@ function UserPortal() {
 
                 setMessage(displayMessage);
             } else {
-                // Generic error
                 setMessage(error.response?.data?.detail || (language === 'de'
                     ? 'Einreichung fehlgeschlagen. Bitte versuchen Sie es erneut.'
                     : 'Submission failed. Please try again.'));
@@ -201,7 +191,6 @@ function UserPortal() {
     const getStepStatus = () => {
         const hasEmail = email && email.includes('@');
 
-        // Determine step2 status (address certificate)
         let step2Status = '';
         if (addressPdf) {
             step2Status = documentValidationErrors.address ? 'error' : 'completed';
@@ -209,7 +198,6 @@ function UserPortal() {
             step2Status = 'active';
         }
 
-        // Determine step3 status (landlord certificate)
         let step3Status = '';
         if (landlordPdf) {
             step3Status = documentValidationErrors.landlord ? 'error' : 'completed';
@@ -226,85 +214,159 @@ function UserPortal() {
 
     const steps = getStepStatus();
 
-    return (
-        <div className="gov-portal">
-            {/* Main Content */}
-            <div className="main-content">
-                {/* Form Section */}
-                <div className="form-section">
-                    <div className="form-header">
-                        <h2>{t('registeringApartment')}</h2>
-                        <p>{t('registrationSubtitle')}</p>
-                    </div>
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
-                    <div className="form-body">
-                        {/* Status Bar */}
-                        <div className="status-bar">
-                            <div className={`status-step ${steps.step1}`}>
-                                <div className="status-icon">{steps.step1 === 'completed' ? '✓' : '1'}</div>
-                                <span className="status-label">{t('personalData')}</span>
+    return (
+        <div className="citizen-portal-page">
+            {/* Top Government Banner */}
+            <div className="gov-banner">
+                <div className="gov-banner-content">
+                    <span className="gov-banner-flag">🇩🇪</span>
+                    <span className="gov-banner-text">An official website of the Federal Republic of Germany</span>
+                </div>
+                <div className="gov-banner-actions">
+                    {user?.role === 'admin' && (
+                        <button className="admin-dashboard-btn" onClick={() => navigate('/admin')}>
+                            Admin Dashboard
+                        </button>
+                    )}
+                    <button className="logout-btn" onClick={handleLogout}>Log out</button>
+                </div>
+            </div>
+
+            {/* Main Split Container */}
+            <div className="portal-container">
+                {/* Left Panel - Blue */}
+                <div className="portal-left-panel">
+                    <div className="portal-left-content">
+                        {/* Branding */}
+                        <div className="portal-branding">
+                            <div className="portal-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="3" y1="9" x2="21" y2="9" />
+                                    <line x1="9" y1="21" x2="9" y2="9" />
+                                </svg>
                             </div>
-                            <div className={`status-step ${steps.step2}`}>
-                                <div className="status-icon">
-                                    {steps.step2 === 'completed' ? '✓' : steps.step2 === 'error' ? '✕' : '2'}
-                                </div>
-                                <span className="status-label">{t('registrationCertificate')}</span>
-                            </div>
-                            <div className={`status-step ${steps.step3}`}>
-                                <div className="status-icon">
-                                    {steps.step3 === 'completed' ? '✓' : steps.step3 === 'error' ? '✕' : '3'}
-                                </div>
-                                <span className="status-label">{t('landlordConfirmation')}</span>
+                            <div className="portal-info">
+                                <h2 className="portal-name">Citizen Portal</h2>
+                                <span className="portal-subtitle">Residents' Registration Office</span>
                             </div>
                         </div>
 
-                        {/* Info Alert */}
-                        {showInfo && !message && (
-                            <div className="gov-alert info">
-                                <span className="alert-icon">ℹ️</span>
-                                <div>
-                                    <strong>{t('note')}</strong> {t('noteText')}
+                        {/* Hero Section */}
+                        <div className="portal-hero">
+                            <h1 className="portal-title">
+                                Address Change<br />
+                                Registration
+                            </h1>
+                            <div className="title-underline"></div>
+                            <p className="portal-description">
+                                Submit your address change documents securely online. Our automated system will process your request within 48 hours.
+                            </p>
+                        </div>
+
+                        {/* Step Progress */}
+                        <div className="step-progress-vertical">
+                            <div className={`step-item ${steps.step1}`}>
+                                <div className="step-indicator">
+                                    {steps.step1 === 'completed' ? '✓' : '1'}
+                                </div>
+                                <div className="step-content">
+                                    <span className="step-title">{t('personalData')}</span>
+                                    <span className="step-desc">Enter your email address</span>
                                 </div>
                             </div>
-                        )}
+                            <div className={`step-item ${steps.step2}`}>
+                                <div className="step-indicator">
+                                    {steps.step2 === 'completed' ? '✓' : steps.step2 === 'error' ? '✕' : '2'}
+                                </div>
+                                <div className="step-content">
+                                    <span className="step-title">{t('registrationCertificate')}</span>
+                                    <span className="step-desc">Upload Meldebescheinigung</span>
+                                </div>
+                            </div>
+                            <div className={`step-item ${steps.step3}`}>
+                                <div className="step-indicator">
+                                    {steps.step3 === 'completed' ? '✓' : steps.step3 === 'error' ? '✕' : '3'}
+                                </div>
+                                <div className="step-content">
+                                    <span className="step-title">{t('landlordConfirmation')}</span>
+                                    <span className="step-desc">Upload Wohnungsgeberbestätigung</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Required Documents Info */}
+                        <div className="required-docs-section">
+                            <h4>📋 {t('requiredDocuments')}</h4>
+                            <ul>
+                                <li>✓ {t('validId')}</li>
+                                <li>✓ {t('landlordConfirmationDoc')}</li>
+                                <li>✓ {t('completedForm')}</li>
+                            </ul>
+                        </div>
+
+                        {/* GDPR Footer */}
+                        <div className="gdpr-section">
+                            <div className="gdpr-badge">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg>
+                                <div className="gdpr-text">
+                                    <strong>GDPR Compliant</strong>
+                                    <span>Your data is protected by German law</span>
+                                </div>
+                            </div>
+                            <p className="copyright">© 2025 Citizen Portal. All rights reserved.</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Panel - White */}
+                <div className="portal-right-panel">
+                    <div className="portal-form-container">
+                        <h2 className="form-title">Submit Documents</h2>
+                        <p className="form-subtitle">Complete your address registration</p>
 
                         {/* Success/Error Alert */}
                         {message && (
-                            <div className={`gov-alert ${success ? 'success' : 'error'}`}>
+                            <div className={`portal-alert ${success ? 'success' : 'error'}`}>
                                 <span className="alert-icon">{success ? '✅' : ''}</span>
                                 <div style={{ whiteSpace: 'pre-line' }}>{message}</div>
                             </div>
                         )}
 
-                        {/* Form */}
                         <form onSubmit={handleSubmit}>
-                            {/* Email */}
-                            <div className="form-row">
-                                <label className="form-label">
-                                    {t('emailAddress')} <span className="required">*</span>
-                                </label>
-                                <div className="input-with-icon">
+                            {/* Email Input */}
+                            <div className="form-group">
+                                <label>{t('emailAddress')} <span className="required">*</span></label>
+                                <div className="input-wrapper">
+                                    <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                        <polyline points="22,6 12,13 2,6" />
+                                    </svg>
                                     <input
                                         type="email"
-                                        className="form-input"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder={t('emailPlaceholder')}
                                         required
                                     />
                                     {email && email.includes('@') && (
-                                        <span className="input-icon success">✓</span>
+                                        <span className="input-check">✓</span>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Address Certificate */}
-                            <div className="form-row">
-                                <label className="form-label">
-                                    Meldebescheinigung (Address Certificate) <span className="required">*</span>
-                                </label>
+                            {/* Address Certificate Upload */}
+                            <div className="form-group">
+                                <label>Meldebescheinigung (Address Certificate) <span className="required">*</span></label>
                                 <div
-                                    className={`file-upload-area ${addressPdf ? 'has-file' : ''} ${documentValidationErrors.address ? 'has-error' : ''}`}
+                                    className={`file-upload-card ${addressPdf ? 'has-file' : ''} ${documentValidationErrors.address ? 'has-error' : ''}`}
                                     onClick={() => handleFileClick('addressPdf')}
                                 >
                                     <input
@@ -313,52 +375,45 @@ function UserPortal() {
                                         accept=".pdf"
                                         onChange={(e) => {
                                             setAddressPdf(e.target.files[0]);
-                                            // Clear validation error when new file is selected
                                             if (documentValidationErrors.address) {
                                                 setDocumentValidationErrors(prev => ({ ...prev, address: false }));
                                             }
                                         }}
                                     />
-                                    <div className="upload-content">
-                                        <span className="upload-icon">📄</span>
-                                        <div className="upload-text">
-                                            Datei hier ablegen oder <strong>durchsuchen</strong>
-                                        </div>
-                                        <div className="upload-hint">Nur PDF-Dateien (max. 10 MB)</div>
-                                    </div>
-                                    <div className="file-selected-info">
-                                        <div className={`file-icon-box ${documentValidationErrors.address ? 'error' : ''}`}>
-                                            {documentValidationErrors.address ? '✕' : '✓'}
-                                        </div>
-                                        <div className="file-info">
-                                            <div className={`file-info-name ${documentValidationErrors.address ? 'error' : ''}`}>{addressPdf?.name}</div>
-                                            <div className={`file-info-status ${documentValidationErrors.address ? 'error' : ''}`}>
-                                                {documentValidationErrors.address
-                                                    ? (language === 'de' ? 'Dokument ungültig' : 'Document invalid')
-                                                    : 'Bereit zum Hochladen'}
+                                    {!addressPdf ? (
+                                        <div className="upload-placeholder">
+                                            <div className="upload-icon-box">📄</div>
+                                            <div className="upload-text-content">
+                                                <span className="upload-primary">Drop file here or <strong>browse</strong></span>
+                                                <span className="upload-secondary">PDF files only (max. 10 MB)</span>
                                             </div>
                                         </div>
-                                        <button
-                                            type="button"
-                                            className="file-remove-btn"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setAddressPdf(null);
-                                            }}
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
+                                    ) : (
+                                        <div className="file-selected">
+                                            <div className={`file-status-icon ${documentValidationErrors.address ? 'error' : 'success'}`}>
+                                                {documentValidationErrors.address ? '✕' : '✓'}
+                                            </div>
+                                            <div className="file-details">
+                                                <span className="file-name">{addressPdf.name}</span>
+                                                <span className={`file-status ${documentValidationErrors.address ? 'error' : ''}`}>
+                                                    {documentValidationErrors.address ? 'Invalid document' : 'Ready to upload'}
+                                                </span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="file-remove"
+                                                onClick={(e) => { e.stopPropagation(); setAddressPdf(null); }}
+                                            >✕</button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* Landlord Certificate */}
-                            <div className="form-row">
-                                <label className="form-label">
-                                    Wohnungsgeberbestätigung (Landlord Certificate) <span className="required">*</span>
-                                </label>
+                            {/* Landlord Certificate Upload */}
+                            <div className="form-group">
+                                <label>Wohnungsgeberbestätigung (Landlord Certificate) <span className="required">*</span></label>
                                 <div
-                                    className={`file-upload-area ${landlordPdf ? 'has-file' : ''} ${documentValidationErrors.landlord ? 'has-error' : ''}`}
+                                    className={`file-upload-card ${landlordPdf ? 'has-file' : ''} ${documentValidationErrors.landlord ? 'has-error' : ''}`}
                                     onClick={() => handleFileClick('landlordPdf')}
                                 >
                                     <input
@@ -367,142 +422,75 @@ function UserPortal() {
                                         accept=".pdf"
                                         onChange={(e) => {
                                             setLandlordPdf(e.target.files[0]);
-                                            // Clear validation error when new file is selected
                                             if (documentValidationErrors.landlord) {
                                                 setDocumentValidationErrors(prev => ({ ...prev, landlord: false }));
                                             }
                                         }}
                                     />
-                                    <div className="upload-content">
-                                        <span className="upload-icon">🏠</span>
-                                        <div className="upload-text">
-                                            Datei hier ablegen oder <strong>durchsuchen</strong>
-                                        </div>
-                                        <div className="upload-hint">Nur PDF-Dateien (max. 10 MB)</div>
-                                    </div>
-                                    <div className="file-selected-info">
-                                        <div className={`file-icon-box ${documentValidationErrors.landlord ? 'error' : ''}`}>
-                                            {documentValidationErrors.landlord ? '✕' : '✓'}
-                                        </div>
-                                        <div className="file-info">
-                                            <div className={`file-info-name ${documentValidationErrors.landlord ? 'error' : ''}`}>{landlordPdf?.name}</div>
-                                            <div className={`file-info-status ${documentValidationErrors.landlord ? 'error' : ''}`}>
-                                                {documentValidationErrors.landlord
-                                                    ? (language === 'de' ? 'Dokument ungültig' : 'Document invalid')
-                                                    : 'Bereit zum Hochladen'}
+                                    {!landlordPdf ? (
+                                        <div className="upload-placeholder">
+                                            <div className="upload-icon-box">🏠</div>
+                                            <div className="upload-text-content">
+                                                <span className="upload-primary">Drop file here or <strong>browse</strong></span>
+                                                <span className="upload-secondary">PDF files only (max. 10 MB)</span>
                                             </div>
                                         </div>
-                                        <button
-                                            type="button"
-                                            className="file-remove-btn"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setLandlordPdf(null);
-                                            }}
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
+                                    ) : (
+                                        <div className="file-selected">
+                                            <div className={`file-status-icon ${documentValidationErrors.landlord ? 'error' : 'success'}`}>
+                                                {documentValidationErrors.landlord ? '✕' : '✓'}
+                                            </div>
+                                            <div className="file-details">
+                                                <span className="file-name">{landlordPdf.name}</span>
+                                                <span className={`file-status ${documentValidationErrors.landlord ? 'error' : ''}`}>
+                                                    {documentValidationErrors.landlord ? 'Invalid document' : 'Ready to upload'}
+                                                </span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="file-remove"
+                                                onClick={(e) => { e.stopPropagation(); setLandlordPdf(null); }}
+                                            >✕</button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* Submit */}
-                            <div className="submit-section">
-                                <button
-                                    type="submit"
-                                    className={`gov-submit-btn ${loading ? 'loading' : ''}`}
-                                    disabled={loading}
-                                >
-                                    <span className="btn-spinner"></span>
-                                    <span className="btn-text">{t('submitApplication')}</span>
-                                    <span className="loading-text">{t('processing')}</span>
-                                </button>
-                            </div>
+                            {/* Submit Button */}
+                            <button type="submit" className={`submit-btn ${loading ? 'loading' : ''}`} disabled={loading}>
+                                <span className="btn-spinner"></span>
+                                <span className="btn-text">{t('submitApplication')} →</span>
+                                <span className="loading-text">{t('processing')}</span>
+                            </button>
                         </form>
 
-                        <div className="form-footer">
-                            <span className="form-footer-icon">🔒</span>
-                            <span>{t('dataEncrypted')}</span>
+                        {/* Contact Info */}
+                        <div className="contact-section">
+                            <h4>📞 {t('contactHelp')}</h4>
+                            <div className="contact-grid">
+                                <div className="contact-item">
+                                    <span className="contact-label">{t('email')}</span>
+                                    <span className="contact-value">buergerservice@stadt.de</span>
+                                </div>
+                                <div className="contact-item">
+                                    <span className="contact-label">{t('phone')}</span>
+                                    <span className="contact-value">+49 (0) 123 456 789</span>
+                                </div>
+                            </div>
                         </div>
+
+                        {/* Data Protection Notice */}
+                        <p className="protection-notice">
+                            Protected under the Federal Data Protection Act (BDSG)
+                        </p>
 
                         {/* Show Neighborhood Map after successful submission */}
                         {success && (
                             <NeighborhoodMap address="Kaiserslautern, Germany" />
                         )}
-
-                    </div>
-                </div>
-
-                {/* Sidebar */}
-                <div className="sidebar">
-
-                    <div className="info-card">
-                        <div className="info-card-header">
-                            {t('requiredDocuments')}
-                        </div>
-                        <div className="info-card-body">
-                            <ul className="info-list">
-                                <li>
-                                    <span className="info-list-icon">✓</span>
-                                    <span>{t('validId')}</span>
-                                </li>
-                                <li>
-                                    <span className="info-list-icon">✓</span>
-                                    <span>{t('landlordConfirmationDoc')}</span>
-                                </li>
-                                <li>
-                                    <span className="info-list-icon">✓</span>
-                                    <span>{t('completedForm')}</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div className="info-card">
-                        <div className="info-card-header">
-                            {t('contactHelp')}
-                        </div>
-                        <div className="info-card-body">
-                            <div className="contact-item">
-                                <div className="contact-icon">📧</div>
-                                <div className="contact-info">
-                                    <strong>{t('email')}</strong>
-                                    <span>buergerservice@stadt.de</span>
-                                </div>
-                            </div>
-                            <div className="contact-item">
-                                <div className="contact-icon">📞</div>
-                                <div className="contact-info">
-                                    <strong>{t('phone')}</strong>
-                                    <span>+49 (0) 123 456 789</span>
-                                </div>
-                            </div>
-                            <div className="contact-item">
-                                <div className="contact-icon">🕐</div>
-                                <div className="contact-info">
-                                    <strong>{t('openingHours')}</strong>
-                                    <span>{t('openingTime')}</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-
-            {/* Footer */}
-            <footer className="gov-footer">
-                <div className="footer-content">
-                    <div className="footer-links">
-                        <a href="#">{t('imprint')}</a>
-                        <a href="#">{t('dataProtection')}</a>
-                        <a href="#">{t('accessibility')}</a>
-                        <a href="#">{t('termsOfUse')}</a>
-                    </div>
-                    <div className="footer-copyright">
-                        {t('copyright')}
-                    </div>
-                </div>
-            </footer>
 
             {/* Chatbot FAB */}
             <button
@@ -544,7 +532,7 @@ function UserPortal() {
                                                 })}
                                             >
                                                 <img src={`${API_URL}${msg.documentUrl}`} alt="Document 1" />
-                                                <span>📎 Wohnungsgeberbestätigung - Klicken zur Vorschau</span>
+                                                <span>📎 Wohnungsgeberbestätigung - Click to preview</span>
                                             </div>
                                             {msg.documentUrl2 && (
                                                 <div
@@ -555,7 +543,7 @@ function UserPortal() {
                                                     })}
                                                 >
                                                     <img src={`${API_URL}${msg.documentUrl2}`} alt="Document 2" />
-                                                    <span>📎 Meldebescheinigung - Klicken zur Vorschau</span>
+                                                    <span>📎 Meldebescheinigung - Click to preview</span>
                                                 </div>
                                             )}
                                         </div>
@@ -580,7 +568,7 @@ function UserPortal() {
                             type="text"
                             value={chatInput}
                             onChange={(e) => setChatInput(e.target.value)}
-                            placeholder="Ihre Nachricht..."
+                            placeholder="Your message..."
                             disabled={chatLoading}
                         />
                         <button type="submit" disabled={chatLoading || !chatInput.trim()}>
