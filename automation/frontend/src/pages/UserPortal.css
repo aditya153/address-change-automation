@@ -39,15 +39,16 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    width: 100%;
 }
 
 .header-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 24px;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 40px;
     height: 64px;
     display: flex;
     align-items: center;
@@ -62,33 +63,33 @@
 
 .brand-logo {
     position: relative;
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #2563eb;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
 }
 
 .brand-logo svg {
     color: white;
 }
 
-.brand-logo .ai-badge {
+.sparkle-badge {
     position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 18px;
-    height: 18px;
-    background: #fbbf24;
+    top: -6px;
+    right: -6px;
+    width: 16px;
+    height: 16px;
+    background: #ef4444;
     border-radius: 50%;
-    font-size: 10px;
+    font-size: 9px;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+    border: 2px solid white;
 }
 
 .brand-text {
@@ -115,22 +116,19 @@
 .header-nav {
     display: flex;
     align-items: center;
-    gap: 4px;
-    background: rgba(241, 245, 249, 0.6);
-    border-radius: 100px;
-    padding: 4px;
+    gap: 32px;
 }
 
 .nav-btn {
-    padding: 8px 16px;
+    padding: 8px 0;
     border: none;
     background: transparent;
-    border-radius: 100px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s;
+    position: relative;
 }
 
 .nav-btn:hover {
@@ -138,9 +136,19 @@
 }
 
 .nav-btn.active {
-    background: white;
     color: var(--primary);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+}
+
+.nav-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 1px;
 }
 
 .header-user {
@@ -151,41 +159,38 @@
 
 .notification-btn {
     position: relative;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border: none;
     background: transparent;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 16px;
-    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    transition: all 0.2s;
 }
 
 .notification-btn:hover {
-    background: var(--bg);
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.notification-btn svg {
+    width: 20px;
+    height: 20px;
 }
 
 .notif-dot {
     position: absolute;
-    top: 6px;
-    right: 8px;
+    top: 8px;
+    right: 10px;
     width: 8px;
     height: 8px;
-    background: #fbbf24;
+    background: #ef4444;
     border-radius: 50%;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.5;
-    }
+    border: 2px solid white;
 }
 
 .user-info {
@@ -198,24 +203,27 @@
 
 .user-avatar {
     position: relative;
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+    background: #2563eb;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
-    border: 2px solid white;
+    border: 2px solid #e2e8f0;
 }
 
-.status-dot {
+.user-avatar svg {
+    color: white;
+}
+
+.avatar-dot {
     position: absolute;
     bottom: 0;
     right: 0;
     width: 10px;
     height: 10px;
-    background: var(--success);
+    background: #ef4444;
     border-radius: 50%;
     border: 2px solid white;
 }
@@ -259,16 +267,23 @@
     width: 36px;
     height: 36px;
     border: none;
-    background: transparent;
+    background: #dbeafe;
     border-radius: 50%;
-    font-size: 16px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
     transition: all 0.2s;
 }
 
 .logout-btn:hover {
-    background: #fef2f2;
-    color: var(--danger);
+    background: #bfdbfe;
+}
+
+.logout-btn svg {
+    width: 16px;
+    height: 16px;
 }
 
 /* ==================== HERO SECTION ==================== */

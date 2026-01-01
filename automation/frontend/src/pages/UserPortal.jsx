@@ -218,36 +218,42 @@ function UserPortal() {
                 <div className="header-inner">
                     <div className="header-brand">
                         <div className="brand-logo">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                 <polyline points="14 2 14 8 20 8" />
                                 <line x1="16" y1="13" x2="8" y2="13" />
                                 <line x1="16" y1="17" x2="8" y2="17" />
                             </svg>
-                            <span className="ai-badge">✨</span>
+                            <span className="sparkle-badge">✦</span>
                         </div>
                         <div className="brand-text">
                             <span className="brand-name">Bürgerportal</span>
-                            <span className="brand-sub">DIGITALE VERWALTUNG</span>
+                            <span className="brand-sub">DIGITAL ADMINISTRATION</span>
                         </div>
                     </div>
 
                     <nav className="header-nav">
-                        <button className="nav-btn active">Meine Anträge</button>
-                        <button className="nav-btn">Dokumente</button>
-                        <button className="nav-btn">Nachrichten</button>
-                        <button className="nav-btn">Hilfe</button>
+                        <button className="nav-btn active">My Applications</button>
+                        <button className="nav-btn">Documents</button>
+                        <button className="nav-btn">Messages</button>
+                        <button className="nav-btn">Help</button>
                     </nav>
 
                     <div className="header-user">
                         <button className="notification-btn">
-                            <span>🔔</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                            </svg>
                             <span className="notif-dot"></span>
                         </button>
                         <div className="user-info">
                             <div className="user-avatar">
-                                <span>👤</span>
-                                <span className="status-dot"></span>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                                <span className="avatar-dot"></span>
                             </div>
                             <div className="user-details">
                                 <span className="user-name">{user?.name || 'Max Mustermann'}</span>
@@ -257,7 +263,13 @@ function UserPortal() {
                         {user?.role === 'admin' && (
                             <button className="admin-btn" onClick={() => navigate('/admin')}>Admin</button>
                         )}
-                        <button className="logout-btn" onClick={handleLogout}>↪</button>
+                        <button className="logout-btn" onClick={handleLogout} title="Logout">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <polyline points="16 17 21 12 16 7" />
+                                <line x1="21" y1="12" x2="9" y2="12" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </header>
@@ -272,15 +284,15 @@ function UserPortal() {
                 <div className="hero-content">
                     <div className="ai-tag">
                         <span>✨</span>
-                        <span>KI-gestützte Datenextraktion</span>
+                        <span>AI-Powered Data Extraction</span>
                     </div>
                     <h1 className="hero-title">
-                        Adressänderung<br />
-                        <span>schnell & einfach</span>
+                        Address Change<br />
+                        <span>Fast & Easy</span>
                     </h1>
                     <p className="hero-desc">
-                        Laden Sie Ihr Dokument hoch – unsere KI erledigt den Rest.
-                        Keine manuelle Dateneingabe mehr nötig.
+                        Upload your document – our AI does the rest.
+                        No more manual data entry required.
                     </p>
                 </div>
                 <div className="hero-wave">
@@ -301,10 +313,10 @@ function UserPortal() {
                             ></div>
                         </div>
                         {[
-                            { id: 1, title: 'Dokument', desc: 'Hochladen' },
-                            { id: 2, title: 'Persönliches', desc: 'Verifizieren' },
-                            { id: 3, title: 'Adressen', desc: 'Prüfen' },
-                            { id: 4, title: 'Absenden', desc: 'Fertig' }
+                            { id: 1, title: 'Document', desc: 'Upload' },
+                            { id: 2, title: 'Personal', desc: 'Verify' },
+                            { id: 3, title: 'Address', desc: 'Review' },
+                            { id: 4, title: 'Submit', desc: 'Done' }
                         ].map(step => (
                             <div key={step.id} className={`step ${completedSteps.includes(step.id) ? 'completed' : ''} ${currentStep === step.id ? 'current' : ''}`}>
                                 <div className="step-circle">
@@ -339,8 +351,8 @@ function UserPortal() {
                                     <span className="icon-badge">✨</span>
                                 </div>
                                 <div className="card-title-group">
-                                    <h2>Dokumente hochladen</h2>
-                                    <p>Unsere KI analysiert Ihre Dokumente und füllt alle Felder automatisch aus</p>
+                                    <h2>Upload Documents</h2>
+                                    <p>Our AI analyzes your documents and fills all fields automatically</p>
                                 </div>
                             </div>
 
@@ -363,7 +375,7 @@ function UserPortal() {
                                     {extracting && addressPdf ? (
                                         <div className="upload-loading">
                                             <div className="loader"></div>
-                                            <span>KI analysiert...</span>
+                                            <span>AI analyzing...</span>
                                         </div>
                                     ) : addressPdf ? (
                                         <div className="upload-success">
@@ -373,7 +385,7 @@ function UserPortal() {
                                     ) : (
                                         <div className="upload-placeholder">
                                             <span className="upload-icon">📋</span>
-                                            <span className="upload-label">Meldebescheinigung</span>
+                                            <span className="upload-label">Registration Certificate</span>
                                             <span className="upload-hint">PDF • Max. 10 MB</span>
                                         </div>
                                     )}
@@ -397,7 +409,7 @@ function UserPortal() {
                                     {extracting && landlordPdf ? (
                                         <div className="upload-loading">
                                             <div className="loader"></div>
-                                            <span>KI analysiert...</span>
+                                            <span>AI analyzing...</span>
                                         </div>
                                     ) : landlordPdf ? (
                                         <div className="upload-success">
@@ -407,7 +419,7 @@ function UserPortal() {
                                     ) : (
                                         <div className="upload-placeholder">
                                             <span className="upload-icon">🏠</span>
-                                            <span className="upload-label">Wohnungsgeberbestätigung</span>
+                                            <span className="upload-label">Landlord Confirmation</span>
                                             <span className="upload-hint">PDF • Max. 10 MB</span>
                                         </div>
                                     )}
@@ -418,15 +430,15 @@ function UserPortal() {
                                 <div className="feature">
                                     <div className="feature-icon blue">⚡</div>
                                     <div>
-                                        <strong>Blitzschnell</strong>
-                                        <span>In Sekunden fertig</span>
+                                        <strong>Lightning Fast</strong>
+                                        <span>Done in seconds</span>
                                     </div>
                                 </div>
                                 <div className="feature">
                                     <div className="feature-icon green">🛡️</div>
                                     <div>
-                                        <strong>DSGVO-konform</strong>
-                                        <span>Höchste Sicherheit</span>
+                                        <strong>GDPR Compliant</strong>
+                                        <span>Highest security</span>
                                     </div>
                                 </div>
                             </div>
@@ -437,13 +449,13 @@ function UserPortal() {
                             <div className="section-header">
                                 <div className="section-icon">👤</div>
                                 <div className="section-title-group">
-                                    <h3>Persönliche Daten</h3>
-                                    <span>Ihre Identitätsinformationen</span>
+                                    <h3>Personal Data</h3>
+                                    <span>Your identity information</span>
                                 </div>
                                 {isExtracted && (
                                     <div className="ai-filled-badge">
                                         <span>✨</span>
-                                        <span>KI-ausgefüllt</span>
+                                        <span>AI-Filled</span>
                                         <span>✓</span>
                                     </div>
                                 )}
@@ -451,17 +463,17 @@ function UserPortal() {
                             <div className="section-body">
                                 <div className="field-row">
                                     <div className="form-field">
-                                        <label>E-MAIL</label>
+                                        <label>EMAIL</label>
                                         <input
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="ihre.email@example.de"
+                                            placeholder="your.email@example.com"
                                             className={email ? 'has-value' : ''}
                                         />
                                     </div>
                                     <div className="form-field">
-                                        <label>GEBURTSDATUM</label>
+                                        <label>DATE OF BIRTH</label>
                                         <input
                                             type="date"
                                             value={dob}
@@ -473,23 +485,23 @@ function UserPortal() {
                                 </div>
                                 <div className="field-row">
                                     <div className="form-field">
-                                        <label>VORNAME</label>
+                                        <label>FIRST NAME</label>
                                         <input
                                             type="text"
                                             value={firstName}
                                             onChange={(e) => setFirstName(e.target.value)}
-                                            placeholder="Vorname"
+                                            placeholder="First Name"
                                             className={isExtracted && firstName ? 'highlighted' : ''}
                                         />
                                         {isExtracted && firstName && <span className="field-indicator"></span>}
                                     </div>
                                     <div className="form-field">
-                                        <label>NACHNAME</label>
+                                        <label>LAST NAME</label>
                                         <input
                                             type="text"
                                             value={lastName}
                                             onChange={(e) => setLastName(e.target.value)}
-                                            placeholder="Nachname"
+                                            placeholder="Last Name"
                                             className={isExtracted && lastName ? 'highlighted' : ''}
                                         />
                                         {isExtracted && lastName && <span className="field-indicator"></span>}
@@ -504,24 +516,24 @@ function UserPortal() {
                             <div className="form-section address-section">
                                 <div className="section-header">
                                     <div className="section-icon blue">📍</div>
-                                    <h3>Neue Adresse</h3>
+                                    <h3>New Address</h3>
                                     {isExtracted && newAddress && (
-                                        <div className="ai-filled-badge small">✨ KI</div>
+                                        <div className="ai-filled-badge small">✨ AI</div>
                                     )}
                                 </div>
                                 <div className="section-body">
                                     <div className="form-field">
-                                        <label>ADRESSE</label>
+                                        <label>ADDRESS</label>
                                         <input
                                             type="text"
                                             value={newAddress}
                                             onChange={(e) => setNewAddress(e.target.value)}
-                                            placeholder="Straße, Hausnummer, PLZ, Stadt"
+                                            placeholder="Street, House Number, ZIP, City"
                                             className={isExtracted && newAddress ? 'highlighted' : ''}
                                         />
                                     </div>
                                     <div className="form-field">
-                                        <label>EINZUGSDATUM</label>
+                                        <label>MOVE-IN DATE</label>
                                         <input
                                             type="date"
                                             value={moveInDate}
@@ -536,29 +548,29 @@ function UserPortal() {
                             <div className="form-section address-section muted">
                                 <div className="section-header">
                                     <div className="section-icon gray">🏠</div>
-                                    <h3>Bisherige Adresse</h3>
+                                    <h3>Previous Address</h3>
                                     {isExtracted && oldAddress && (
-                                        <div className="ai-filled-badge small">✨ KI</div>
+                                        <div className="ai-filled-badge small">✨ AI</div>
                                     )}
                                 </div>
                                 <div className="section-body">
                                     <div className="form-field">
-                                        <label>ADRESSE</label>
+                                        <label>ADDRESS</label>
                                         <input
                                             type="text"
                                             value={oldAddress}
                                             onChange={(e) => setOldAddress(e.target.value)}
-                                            placeholder="Straße, Hausnummer, PLZ, Stadt"
+                                            placeholder="Street, House Number, ZIP, City"
                                             className={isExtracted && oldAddress ? 'highlighted' : ''}
                                         />
                                     </div>
                                     <div className="form-field">
-                                        <label>VERMIETER</label>
+                                        <label>LANDLORD</label>
                                         <input
                                             type="text"
                                             value={landlordName}
                                             onChange={(e) => setLandlordName(e.target.value)}
-                                            placeholder="Name des Vermieters"
+                                            placeholder="Landlord Name"
                                             className={isExtracted && landlordName ? 'highlighted' : ''}
                                         />
                                     </div>
@@ -570,7 +582,7 @@ function UserPortal() {
                         <div className="form-actions">
                             <button className="btn-secondary">
                                 <span>💾</span>
-                                <span>Entwurf speichern</span>
+                                <span>Save Draft</span>
                             </button>
                             <button
                                 className={`btn-primary ${loading ? 'loading' : ''}`}
@@ -580,11 +592,11 @@ function UserPortal() {
                                 {loading ? (
                                     <>
                                         <div className="btn-loader"></div>
-                                        <span>Wird gesendet...</span>
+                                        <span>Submitting...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <span>Antrag absenden</span>
+                                        <span>Submit Application</span>
                                         <span>→</span>
                                     </>
                                 )}
@@ -599,27 +611,27 @@ function UserPortal() {
                         {/* Quick Info */}
                         <div className="sidebar-card">
                             <div className="card-accent"></div>
-                            <h4><span>✨</span> Wichtige Hinweise</h4>
+                            <h4><span>✨</span> Important Notes</h4>
                             <div className="info-list">
                                 <div className="info-item">
                                     <div className="info-icon orange">⏰</div>
                                     <div>
-                                        <strong>14 Tage Frist</strong>
-                                        <span>Nach Einzug ummelden</span>
+                                        <strong>14-Day Deadline</strong>
+                                        <span>Register after moving in</span>
                                     </div>
                                 </div>
                                 <div className="info-item">
                                     <div className="info-icon blue">📄</div>
                                     <div>
-                                        <strong>Gültiger Ausweis</strong>
-                                        <span>Personalausweis oder Pass</span>
+                                        <strong>Valid ID Required</strong>
+                                        <span>ID Card or Passport</span>
                                     </div>
                                 </div>
                                 <div className="info-item">
                                     <div className="info-icon red">⚠️</div>
                                     <div>
-                                        <strong>Wohnungsgeberbestätigung</strong>
-                                        <span>Bei Bedarf nachreichen</span>
+                                        <strong>Landlord Confirmation</strong>
+                                        <span>Submit if required</span>
                                     </div>
                                 </div>
                             </div>
@@ -630,24 +642,24 @@ function UserPortal() {
                             <div className="help-header">
                                 <div className="help-icon">❓</div>
                                 <div>
-                                    <strong>Hilfe benötigt?</strong>
-                                    <span>Wir sind für Sie da</span>
+                                    <strong>Need Help?</strong>
+                                    <span>We're here for you</span>
                                 </div>
                             </div>
                             <div className="help-contacts">
-                                <div>📞 0800 123 4567 (kostenlos)</div>
-                                <div>✉️ hilfe@buergerportal.de</div>
+                                <div>📞 0800 123 4567 (free)</div>
+                                <div>✉️ help@citizenportal.com</div>
                             </div>
                             <button className="help-btn">
-                                FAQ öffnen <span>→</span>
+                                Open FAQ <span>→</span>
                             </button>
                         </div>
 
                         {/* Processing Time */}
                         <div className="time-card">
-                            <span className="time-label">BEARBEITUNGSZEIT</span>
+                            <span className="time-label">PROCESSING TIME</span>
                             <span className="time-value">2-3</span>
-                            <span className="time-unit">Werktage</span>
+                            <span className="time-unit">Business Days</span>
                         </div>
                     </aside>
                 </div>
@@ -656,11 +668,11 @@ function UserPortal() {
             {/* Footer */}
             <footer className="portal-footer">
                 <div className="footer-content">
-                    <span>© 2025 Bundesrepublik Deutschland. Alle Rechte vorbehalten.</span>
+                    <span>© 2025 Federal Republic of Germany. All rights reserved.</span>
                     <div className="footer-links">
-                        <a href="#">Impressum</a>
-                        <a href="#">Datenschutz</a>
-                        <a href="#">Barrierefreiheit</a>
+                        <a href="#">Imprint</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Accessibility</a>
                     </div>
                 </div>
             </footer>

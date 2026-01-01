@@ -26,48 +26,6 @@ function AppContent() {
 
   return (
     <div className="app">
-      {isAuthenticated && isPortalRoute && (
-        <nav className="gov-navbar">
-          {/* Top Bar */}
-          <div className="navbar-top-bar">
-            <span>{t('federalRepublic')}</span>
-            <div className="top-bar-links">
-              <LanguageSelector />
-              <button className="top-link-btn" onClick={handleHelpClick}>
-                {t('help')}
-              </button>
-              <Link to="/contact" className="top-link">{t('contact')}</Link>
-            </div>
-          </div>
-
-          {/* Main Header */}
-          <div className="navbar-main">
-            <div className="navbar-brand">
-              <span className="brand-icon">🏛️</span>
-              <div className="brand-info">
-                <h1 className="navbar-title">{t('citizenPortal')}</h1>
-                <span className="navbar-subtitle">{t('registrationOffice')}</span>
-              </div>
-            </div>
-            <div className="navbar-links">
-              {user?.role === 'admin' && (
-                <Link to="/admin" className="nav-link">{t('adminDashboard')}</Link>
-              )}
-              <button onClick={logout} className="nav-logout">{t('logout')}</button>
-            </div>
-          </div>
-
-          {/* Breadcrumb - Dynamic based on route */}
-          <div className="navbar-breadcrumb">
-            <a href="#">{t('homepage')}</a>
-            <span>›</span>
-            <a href="#">{t('citizenServices')}</a>
-            <span>›</span>
-            <strong>{t('addressChange')}</strong>
-          </div>
-        </nav>
-      )}
-
       <main>
         <Routes>
           <Route path="/login" element={
