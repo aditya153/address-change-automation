@@ -113,6 +113,12 @@
     letter-spacing: 1.5px;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
 .header-nav {
     display: flex;
     align-items: center;
@@ -151,16 +157,10 @@
     border-radius: 1px;
 }
 
-.header-user {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
 .notification-btn {
     position: relative;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border: none;
     background: transparent;
     border-radius: 50%;
@@ -182,42 +182,38 @@
     height: 20px;
 }
 
-.notif-dot {
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    width: 8px;
-    height: 8px;
-    background: #ef4444;
-    border-radius: 50%;
-    border: 2px solid white;
+.header-divider {
+    width: 1px;
+    height: 32px;
+    background: #e2e8f0;
 }
 
-.user-info {
+.user-profile {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding-left: 16px;
-    border-left: 1px solid var(--border);
+    gap: 12px;
 }
 
 .user-avatar {
     position: relative;
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: #2563eb;
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid #e2e8f0;
+    flex-shrink: 0;
 }
 
 .user-avatar svg {
+    width: 18px;
+    height: 18px;
     color: white;
 }
 
-.avatar-dot {
+.avatar-status {
     position: absolute;
     bottom: 0;
     right: 0;
@@ -231,7 +227,6 @@
 .user-details {
     display: flex;
     flex-direction: column;
-    text-align: right;
 }
 
 .user-name {
@@ -263,34 +258,35 @@
     border-color: var(--primary);
 }
 
-.logout-btn {
+.signout-btn {
     width: 36px;
     height: 36px;
     border: none;
-    background: #dbeafe;
-    border-radius: 50%;
+    background: transparent;
+    border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #2563eb;
+    color: #64748b;
     transition: all 0.2s;
 }
 
-.logout-btn:hover {
-    background: #bfdbfe;
+.signout-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
 }
 
-.logout-btn svg {
-    width: 16px;
-    height: 16px;
+.signout-btn svg {
+    width: 18px;
+    height: 18px;
 }
 
 /* ==================== HERO SECTION ==================== */
 .hero-section {
     position: relative;
     overflow: hidden;
-    padding: 60px 24px 120px;
+    padding: 60px 40px 120px;
 }
 
 .hero-bg {
@@ -498,9 +494,8 @@
 
 /* ==================== MAIN CONTENT ==================== */
 .main-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 48px 24px;
+    width: 100%;
+    padding: 48px 40px;
 }
 
 .content-grid {

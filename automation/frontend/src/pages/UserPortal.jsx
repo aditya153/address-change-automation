@@ -213,7 +213,6 @@ function UserPortal() {
 
     return (
         <div className="portal-page">
-            {/* Header */}
             <header className="portal-header">
                 <div className="header-inner">
                     <div className="header-brand">
@@ -232,38 +231,42 @@ function UserPortal() {
                         </div>
                     </div>
 
-                    <nav className="header-nav">
-                        <button className="nav-btn active">My Applications</button>
-                        <button className="nav-btn">Documents</button>
-                        <button className="nav-btn">Messages</button>
-                        <button className="nav-btn">Help</button>
-                    </nav>
+                    <div className="header-right">
+                        <nav className="header-nav">
+                            <button className="nav-btn active">My Applications</button>
+                            <button className="nav-btn">Documents</button>
+                            <button className="nav-btn">Messages</button>
+                            <button className="nav-btn">Help</button>
+                        </nav>
 
-                    <div className="header-user">
                         <button className="notification-btn">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                             </svg>
-                            <span className="notif-dot"></span>
                         </button>
-                        <div className="user-info">
+
+                        <div className="header-divider"></div>
+
+                        <div className="user-profile">
                             <div className="user-avatar">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                                     <circle cx="12" cy="7" r="4" />
                                 </svg>
-                                <span className="avatar-dot"></span>
+                                <span className="avatar-status"></span>
                             </div>
                             <div className="user-details">
                                 <span className="user-name">{user?.name || 'Max Mustermann'}</span>
                                 <span className="user-id">ID: {user?.id || '12345678'}</span>
                             </div>
                         </div>
+
                         {user?.role === 'admin' && (
                             <button className="admin-btn" onClick={() => navigate('/admin')}>Admin</button>
                         )}
-                        <button className="logout-btn" onClick={handleLogout} title="Logout">
+
+                        <button className="signout-btn" onClick={handleLogout} title="Sign Out">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                                 <polyline points="16 17 21 12 16 7" />

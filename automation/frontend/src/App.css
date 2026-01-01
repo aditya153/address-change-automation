@@ -140,8 +140,8 @@ main {
   width: 100%;
 }
 
-/* Center content for user portal and login pages */
-main:not(:has(.admin-dashboard-root)) {
+/* Center content for login pages only (not portal) */
+main:not(:has(.admin-dashboard-root)):not(:has(.portal-page)) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -149,18 +149,19 @@ main:not(:has(.admin-dashboard-root)) {
   min-height: calc(100vh - 80px);
 }
 
-/* Admin dashboard takes full width without centering */
-main:has(.admin-dashboard-root) {
+/* Admin dashboard and portal take full width */
+main:has(.admin-dashboard-root),
+main:has(.portal-page) {
   display: block;
   padding: 0;
   min-height: auto;
 }
 
-/* User Portal - Wider Card */
-.user-portal {
+/* User Portal - Full Width */
+.user-portal,
+.portal-page {
   width: 100%;
-  max-width: 950px;
-  /* Much wider */
+  max-width: none;
   animation: fadeInUp 0.6s ease-out;
 }
 
