@@ -836,6 +836,84 @@ def pre_validate_case(citizen_data: dict) -> tuple:
     return (is_clean, issues)
 
 
+@app.post("/extract-preview")
+async def extract_preview(
+    landlord_pdf: UploadFile = File(...),
+    address_pdf: UploadFile = File(...)
+):
+    """
+    Extract data from PDFs for preview WITHOUT triggering automation.
+    Returns JSON with extracted fields for user to review/edit before final submission.
+    """
+    import tempfile
+    import os
+    
+    temp_dir = None
+    try:
+        # Create temp directory for preview files
+        temp_dir = tempfile.mkdtemp(prefix="preview_")
+        
+        landlord_path = os.path.join(temp_dir, f"landlord_{landlord_pdf.filename}")
+        address_path = os.path.join(temp_dir, f"address_{address_pdf.filename}")
+        
+        # Save files temporarily
+        with open(landlord_path, "wb") as buffer:
+            shutil.copyfileobj(landlord_pdf.file, buffer)
+        with open(address_path, "wb") as buffer:
+            shutil.copyfileobj(address_pdf.file, buffer)
+        
+        # Run OCR extraction (reusing existing logic)
+        print(f"🔍 Running OCR preview extraction...")
+        try:
+            extracted_data = process_uploaded_pdfs(landlord_path, address_path, "preview@temp.com")
+        except Exception as ocr_error:
+            print(f"OCR Preview Error: {ocr_error}")
+            # Return empty fields for user to fill manually
+            extracted_data = {
+                "citizen_name": "",
+                "dob": "",
+                "old_address_raw": "",
+                "new_address_raw": "",
+                "move_in_date_raw": "",
+                "landlord_name": ""
+            }
+        
+        # Clean up temp files
+        try:
+            os.remove(landlord_path)
+            os.remove(address_path)
+            os.rmdir(temp_dir)
+        except:
+            pass
+        
+        print(f"✅ Preview extraction complete: {extracted_data}")
+        
+        return {
+            "success": True,
+            "extracted_data": extracted_data,
+            "message": "Data extracted successfully. Please review and edit if needed."
+        }
+        
+    except Exception as e:
+        print(f"❌ Preview extraction failed: {e}")
+        # Clean up on error
+        if temp_dir:
+            try:
+                import shutil as sh
+                sh.rmtree(temp_dir, ignore_errors=True)
+            except:
+                pass
+        
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": str(e),
+                "message": "Failed to extract data from documents. Please try again."
+            }
+        )
+
+
 @app.post("/submit-case")
 async def submit_case(
     email: str =Form(...),
