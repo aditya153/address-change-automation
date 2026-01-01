@@ -47,12 +47,11 @@
 
 .header-inner {
     width: 100%;
-    max-width: 100%;
     padding: 0 40px;
     height: 64px;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    justify-content: space-between;
 }
 
 .header-brand {
@@ -113,48 +112,48 @@
     letter-spacing: 1.5px;
 }
 
-.header-right {
+.header-actions {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 16px;
 }
 
 .header-nav {
     display: flex;
     align-items: center;
-    gap: 32px;
+    justify-content: center;
+    justify-self: center;
+    width: fit-content;
+    gap: 8px;
+    padding: 4px 6px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 50px;
 }
 
 .nav-btn {
-    padding: 8px 0;
+    padding: 8px 15px;
     border: none;
+    border-radius: 50px;
     background: transparent;
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-muted);
+    color: #64748b;
     cursor: pointer;
     transition: all 0.2s;
-    position: relative;
+    white-space: nowrap;
 }
 
 .nav-btn:hover {
-    color: var(--text);
+    background: #2563eb;
+    color: white;
 }
 
 .nav-btn.active {
-    color: var(--primary);
+    background: white;
+    color: #2563eb;
     font-weight: 600;
-}
-
-.nav-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--primary);
-    border-radius: 1px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .notification-btn {

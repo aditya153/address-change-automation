@@ -231,14 +231,14 @@ function UserPortal() {
                         </div>
                     </div>
 
-                    <div className="header-right">
-                        <nav className="header-nav">
-                            <button className="nav-btn active">My Applications</button>
-                            <button className="nav-btn">Documents</button>
-                            <button className="nav-btn">Messages</button>
-                            <button className="nav-btn">Help</button>
-                        </nav>
+                    <nav className="header-nav">
+                        <button className="nav-btn active">My Applications</button>
+                        <button className="nav-btn">Documents</button>
+                        <button className="nav-btn">Messages</button>
+                        <button className="nav-btn">Help</button>
+                    </nav>
 
+                    <div className="header-actions">
                         <button className="notification-btn">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -257,8 +257,8 @@ function UserPortal() {
                                 <span className="avatar-status"></span>
                             </div>
                             <div className="user-details">
-                                <span className="user-name">{user?.name || 'Max Mustermann'}</span>
-                                <span className="user-id">ID: {user?.id || '12345678'}</span>
+                                <span className="user-name">{user?.name || 'User'}</span>
+                                <span className="user-id">ID: {user?.id || '888888'}</span>
                             </div>
                         </div>
 
