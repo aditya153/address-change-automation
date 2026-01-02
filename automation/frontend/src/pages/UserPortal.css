@@ -193,8 +193,12 @@
     gap: 12px;
 }
 
-.user-avatar {
+.avatar-wrapper {
     position: relative;
+    display: inline-block;
+}
+
+.user-avatar {
     width: 38px;
     height: 38px;
     border-radius: 50%;
@@ -204,7 +208,6 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    overflow: visible;
 }
 
 .user-avatar svg {
@@ -215,14 +218,14 @@
 
 .avatar-status {
     position: absolute;
-    bottom: -2px;
-    right: -2px;
+    bottom: 0;
+    right: 0;
     width: 12px;
     height: 12px;
     background: #22c55e;
     border-radius: 50%;
     border: 2px solid white;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.05);
+    z-index: 1;
 }
 
 .user-details {

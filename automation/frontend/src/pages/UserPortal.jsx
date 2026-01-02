@@ -250,8 +250,10 @@ function UserPortal() {
                         <div className="header-divider"></div>
 
                         <div className="user-profile">
-                            <div className="user-avatar">
-                                <User color="white" size={20} strokeWidth={2.5} />
+                            <div className="avatar-wrapper">
+                                <div className="user-avatar">
+                                    <User color="white" size={20} strokeWidth={2.5} />
+                                </div>
                                 <span className="avatar-status"></span>
                             </div>
                             <div className="user-details">
