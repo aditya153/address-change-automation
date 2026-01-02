@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, ChevronDown } from 'lucide-react';
+import { User, ChevronDown, Sparkles } from 'lucide-react';
 import NeighborhoodMap from '../components/NeighborhoodMap';
 import './UserPortal.css';
 
@@ -322,8 +322,11 @@ function UserPortal() {
                             { id: 4, title: 'Submit', desc: 'Done' }
                         ].map(step => (
                             <div key={step.id} className={`step ${completedSteps.includes(step.id) ? 'completed' : ''} ${currentStep === step.id ? 'current' : ''}`}>
-                                <div className="step-circle">
-                                    {completedSteps.includes(step.id) ? '✓' : currentStep === step.id ? '✨' : step.id}
+                                <div className="step-circle-wrapper">
+                                    {currentStep === step.id && <div className="step-ping"></div>}
+                                    <div className="step-circle">
+                                        {completedSteps.includes(step.id) ? '✓' : currentStep === step.id ? <Sparkles size={18} /> : step.id}
+                                    </div>
                                 </div>
                                 <span className="step-title">{step.title}</span>
                                 <span className="step-desc">{step.desc}</span>

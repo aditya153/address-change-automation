@@ -396,13 +396,13 @@
 .stepper-container {
     position: relative;
     z-index: 10;
-    margin-top: -80px;
-    padding: 0 24px;
+    margin-top: -30px;
+    padding: 0 40px;
 }
 
 .stepper-card {
-    max-width: 900px;
-    margin: 0 auto;
+    max-width: calc(100% - 372px);
+    margin: 0;
     background: white;
     border-radius: 20px;
     border: 1px solid rgba(0, 0, 0, 0.05);
@@ -442,6 +442,34 @@
     z-index: 1;
 }
 
+.step-circle-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-ping {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.3);
+    animation: stepPing 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes stepPing {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    75%,
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
 .step-circle {
     width: 40px;
     height: 40px;
@@ -454,13 +482,14 @@
     font-size: 14px;
     font-weight: 600;
     transition: all 0.3s;
+    position: relative;
+    z-index: 1;
 }
 
 .step.current .step-circle {
-    background: linear-gradient(135deg, var(--primary), var(--info));
+    background: #2563eb;
     color: white;
-    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
-    animation: stepPulse 2s infinite;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.5);
 }
 
 @keyframes stepPulse {
