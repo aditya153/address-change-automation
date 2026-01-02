@@ -299,8 +299,8 @@ function UserPortal() {
                     </p>
                 </div>
                 <div className="hero-wave">
-                    <svg viewBox="0 0 1440 100" fill="none">
-                        <path d="M0 100V60C240 20 480 0 720 0C960 0 1200 20 1440 60V100H0Z" />
+                    <svg viewBox="0 0 1440 120" fill="none" preserveAspectRatio="none">
+                        <path d="M0 120L0 60C360 60 540 0 900 0C1260 0 1440 40 1440 40L1440 120L0 120Z" />
                     </svg>
                 </div>
             </section>
