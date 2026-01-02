@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { User, ChevronDown } from 'lucide-react';
 import NeighborhoodMap from '../components/NeighborhoodMap';
 import './UserPortal.css';
 
@@ -250,10 +251,7 @@ function UserPortal() {
 
                         <div className="user-profile">
                             <div className="user-avatar">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                    <circle cx="12" cy="7" r="4" />
-                                </svg>
+                                <User color="white" size={20} strokeWidth={2.5} />
                                 <span className="avatar-status"></span>
                             </div>
                             <div className="user-details">
