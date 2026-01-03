@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, ChevronDown, Sparkles, Clock, FileCheck, AlertTriangle, HelpCircle, Phone, Mail, ArrowRight } from 'lucide-react';
+import { User, ChevronDown, Sparkles, Clock, FileCheck, AlertTriangle, HelpCircle, Phone, Mail, ArrowRight, MessageCircle, X, Bot, Send } from 'lucide-react';
 import NeighborhoodMap from '../components/NeighborhoodMap';
 import './UserPortal.css';
 
@@ -561,7 +561,7 @@ function UserPortal() {
 
             {/* Chatbot FAB */}
             <button className={`chat-fab ${chatOpen ? 'active' : ''}`} onClick={() => setChatOpen(!chatOpen)}>
-                {chatOpen ? '✕' : '💬'}
+                {chatOpen ? <X size={24} /> : <MessageCircle size={24} />}
             </button>
 
             {/* Chatbot Window */}
@@ -569,24 +569,34 @@ function UserPortal() {
                 <div className="chat-window">
                     <div className="chat-header">
                         <div className="chat-bot-info">
-                            <span className="bot-avatar">🤖</span>
+                            <span className="bot-avatar">
+                                <Bot size={22} />
+                            </span>
                             <div>
-                                <strong>Bürger-Assistent</strong>
+                                <strong>Assistant</strong>
                                 <span className="bot-status">● Online</span>
                             </div>
                         </div>
-                        <button onClick={handleCloseChatbot}>×</button>
+                        <button onClick={handleCloseChatbot}>
+                            <X size={20} />
+                        </button>
                     </div>
                     <div className="chat-messages">
                         {chatMessages.map((msg, i) => (
                             <div key={i} className={`chat-msg ${msg.sender}`}>
-                                {msg.sender === 'bot' && <span className="msg-avatar">🤖</span>}
+                                {msg.sender === 'bot' && (
+                                    <span className="msg-avatar">
+                                        <Bot size={16} />
+                                    </span>
+                                )}
                                 <div className="msg-bubble">{msg.text}</div>
                             </div>
                         ))}
                         {chatLoading && (
                             <div className="chat-msg bot">
-                                <span className="msg-avatar">🤖</span>
+                                <span className="msg-avatar">
+                                    <Bot size={16} />
+                                </span>
                                 <div className="msg-bubble typing"><span></span><span></span><span></span></div>
                             </div>
                         )}
@@ -598,10 +608,12 @@ function UserPortal() {
                             type="text"
                             value={chatInput}
                             onChange={(e) => setChatInput(e.target.value)}
-                            placeholder="Ihre Nachricht..."
+                            placeholder="Type your message..."
                             disabled={chatLoading}
                         />
-                        <button type="submit" disabled={chatLoading || !chatInput.trim()}>➤</button>
+                        <button type="submit" disabled={chatLoading || !chatInput.trim()}>
+                            <Send size={18} />
+                        </button>
                     </form>
                 </div>
             )}
