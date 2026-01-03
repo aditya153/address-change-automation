@@ -532,13 +532,16 @@
 /* ==================== MAIN CONTENT ==================== */
 .main-content {
     width: 100%;
-    padding: 48px 40px;
+    padding: 32px 40px 48px 40px;
+    margin-top: 24px;
 }
 
 .content-grid {
     display: grid;
-    grid-template-columns: 1fr 340px;
+    grid-template-columns: calc(100% - 372px) 340px;
     gap: 32px;
+    align-items: start;
+    justify-content: start;
 }
 
 .form-column {
