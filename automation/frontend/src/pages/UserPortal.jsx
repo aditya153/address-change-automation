@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, ChevronDown, Sparkles, Clock, FileCheck, AlertTriangle, HelpCircle, Phone, Mail, ArrowRight, MessageCircle, X, Bot, Send, FileText, ExternalLink } from 'lucide-react';
+import { User, ChevronDown, Sparkles, Clock, FileCheck, AlertTriangle, HelpCircle, Phone, Mail, ArrowRight, MessageCircle, X, Bot, Send, FileText, ExternalLink, ChevronRight, Save, Trash2, Check } from 'lucide-react';
 import NeighborhoodMap from '../components/NeighborhoodMap';
 import './UserPortal.css';
 
@@ -41,6 +41,7 @@ function UserPortal() {
     const [chatInput, setChatInput] = useState('');
     const [chatLoading, setChatLoading] = useState(false);
     const [previewImage, setPreviewImage] = useState(null);
+    const [showUploadToast, setShowUploadToast] = useState(false);
     const [showGoodbye, setShowGoodbye] = useState(false);
 
     const messagesEndRef = useRef(null);
@@ -376,6 +377,8 @@ function UserPortal() {
                                             setAddressPdf(e.target.files[0]);
                                             setExtractedData(null);
                                             setIsExtracted(false);
+                                            setShowUploadToast(true);
+                                            setTimeout(() => setShowUploadToast(false), 3000);
                                         }}
                                     />
                                     {extracting && addressPdf ? (
@@ -385,8 +388,24 @@ function UserPortal() {
                                         </div>
                                     ) : addressPdf ? (
                                         <div className="upload-success">
-                                            <span className="success-icon">✓</span>
-                                            <span className="file-name">{addressPdf.name}</span>
+                                            <div className="success-icon-wrapper">
+                                                <span className="success-icon"><Check size={32} strokeWidth={1.5} /></span>
+                                                <button
+                                                    className="remove-file-btn"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setAddressPdf(null);
+                                                        setExtractedData(null);
+                                                        setIsExtracted(false);
+                                                    }}
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                            <div className="success-text-wrapper">
+                                                <span className="success-title">Successfully processed!</span>
+                                                <span className="file-name-subtext">{addressPdf.name}</span>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="upload-placeholder">
@@ -410,6 +429,8 @@ function UserPortal() {
                                             setLandlordPdf(e.target.files[0]);
                                             setExtractedData(null);
                                             setIsExtracted(false);
+                                            setShowUploadToast(true);
+                                            setTimeout(() => setShowUploadToast(false), 3000);
                                         }}
                                     />
                                     {extracting && landlordPdf ? (
@@ -419,8 +440,24 @@ function UserPortal() {
                                         </div>
                                     ) : landlordPdf ? (
                                         <div className="upload-success">
-                                            <span className="success-icon">✓</span>
-                                            <span className="file-name">{landlordPdf.name}</span>
+                                            <div className="success-icon-wrapper">
+                                                <span className="success-icon"><Check size={32} strokeWidth={1.5} /></span>
+                                                <button
+                                                    className="remove-file-btn"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setLandlordPdf(null);
+                                                        setExtractedData(null);
+                                                        setIsExtracted(false);
+                                                    }}
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                            <div className="success-text-wrapper">
+                                                <span className="success-title">Successfully processed!</span>
+                                                <span className="file-name-subtext">{landlordPdf.name}</span>
+                                            </div>
                                         </div>
                                     ) : (
                                         <div className="upload-placeholder">
@@ -454,27 +491,38 @@ function UserPortal() {
 
                         {/* Actions */}
                         <div className="form-actions">
-                            <button className="btn-secondary">
-                                <span>💾</span>
+                            <button className="btn-secondary btn-small">
+                                <Save size={16} />
                                 <span>Save Draft</span>
                             </button>
-                            <button
-                                className={`btn-primary ${loading ? 'loading' : ''}`}
-                                onClick={handleSubmit}
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <>
-                                        <div className="btn-loader"></div>
-                                        <span>Submitting...</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        <span>Submit Application</span>
-                                        <span>→</span>
-                                    </>
-                                )}
-                            </button>
+                            <div className="btn-group">
+                                <button
+                                    className="btn-primary btn-next"
+                                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                                >
+                                    <span>Next</span>
+                                    <ChevronRight size={18} />
+                                </button>
+                                {/* Submit button - hidden for now, will be used later
+                                <button
+                                    className={`btn-submit ${loading ? 'loading' : ''}`}
+                                    onClick={handleSubmit}
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <div className="btn-loader"></div>
+                                            <span>Submitting...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Submit</span>
+                                            <ArrowRight size={16} />
+                                        </>
+                                    )}
+                                </button>
+                                */}
+                            </div>
                         </div>
 
                         {success && <NeighborhoodMap address="Kaiserslautern, Germany" />}
@@ -537,12 +585,7 @@ function UserPortal() {
                             </button>
                         </div>
 
-                        {/* Processing Time */}
-                        <div className="time-card">
-                            <span className="time-label">PROCESSING TIME</span>
-                            <span className="time-value">2-3</span>
-                            <span className="time-unit">Business Days</span>
-                        </div>
+
                     </aside>
                 </div>
             </main>
@@ -668,7 +711,19 @@ function UserPortal() {
                 </div>
             )}
 
-            {/* Toast */}
+            {/* Document Processing Toast */}
+            {showUploadToast && (
+                <div className="upload-toast">
+                    <div className="toast-icon">
+                        <Check size={18} />
+                    </div>
+                    <div className="toast-content">
+                        <div className="toast-title">Document successfully processed!</div>
+                        <div className="toast-subtitle">All data was automatically extracted.</div>
+                    </div>
+                </div>
+            )}
+
             {showGoodbye && (
                 <div className="toast">Goodbye! We're here if you have any questions.</div>
             )}
