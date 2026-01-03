@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, ChevronDown, Sparkles, Clock, FileCheck, AlertTriangle, HelpCircle, Phone, Mail, ArrowRight, MessageCircle, X, Bot, Send } from 'lucide-react';
+import { User, ChevronDown, Sparkles, Clock, FileCheck, AlertTriangle, HelpCircle, Phone, Mail, ArrowRight, MessageCircle, X, Bot, Send, FileText, ExternalLink } from 'lucide-react';
 import NeighborhoodMap from '../components/NeighborhoodMap';
 import './UserPortal.css';
 
@@ -589,7 +589,45 @@ function UserPortal() {
                                         <Bot size={16} />
                                     </span>
                                 )}
-                                <div className="msg-bubble">{msg.text}</div>
+                                {msg.sender === 'user' ? (
+                                    <div className="msg-bubble">{msg.text}</div>
+                                ) : (
+                                    <div className="msg-content">
+                                        <div className="msg-bubble">{msg.text}</div>
+                                        {msg.hasPreview && (
+                                            <div className="doc-previews">
+                                                {msg.documentUrl && (
+                                                    <div
+                                                        className="doc-preview-card"
+                                                        onClick={() => setPreviewImage(`${API_URL}${msg.documentUrl}`)}
+                                                    >
+                                                        <div className="doc-preview-icon">
+                                                            <FileText size={24} />
+                                                        </div>
+                                                        <div className="doc-preview-info">
+                                                            <span className="doc-preview-title">Landlord Certificate</span>
+                                                            <span className="doc-preview-action">Click to view <ExternalLink size={12} /></span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {msg.documentUrl2 && (
+                                                    <div
+                                                        className="doc-preview-card"
+                                                        onClick={() => setPreviewImage(`${API_URL}${msg.documentUrl2}`)}
+                                                    >
+                                                        <div className="doc-preview-icon">
+                                                            <FileText size={24} />
+                                                        </div>
+                                                        <div className="doc-preview-info">
+                                                            <span className="doc-preview-title">Address Change Form</span>
+                                                            <span className="doc-preview-action">Click to view <ExternalLink size={12} /></span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         ))}
                         {chatLoading && (
@@ -618,9 +656,21 @@ function UserPortal() {
                 </div>
             )}
 
+            {/* Document Preview Modal */}
+            {previewImage && (
+                <div className="doc-preview-modal" onClick={() => setPreviewImage(null)}>
+                    <div className="doc-preview-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button className="doc-preview-close" onClick={() => setPreviewImage(null)}>
+                            <X size={24} />
+                        </button>
+                        <img src={previewImage} alt="Document Preview" />
+                    </div>
+                </div>
+            )}
+
             {/* Toast */}
             {showGoodbye && (
-                <div className="toast">🤖 Auf Wiedersehen! Bei Fragen stehen wir Ihnen gerne zur Verfügung.</div>
+                <div className="toast">Goodbye! We're here if you have any questions.</div>
             )}
         </div>
     );
