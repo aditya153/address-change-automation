@@ -401,7 +401,7 @@
 }
 
 .stepper-card {
-    max-width: calc(100% - 600px);
+    max-width: calc(100% - 700px);
     margin: 0;
     background: white;
     border-radius: 20px;
@@ -532,14 +532,14 @@
 /* ==================== MAIN CONTENT ==================== */
 .main-content {
     display: block !important;
-    width: 95%;
+    width: 92%;
     padding: 32px 40px 48px 40px;
     margin-top: 24px;
 }
 
 .content-grid {
     display: grid;
-    grid-template-columns: calc(100% - 380px) 340px;
+    grid-template-columns: calc(100% - 460px) 540px;
     gap: 40px;
     align-items: start;
 }
@@ -1100,6 +1100,10 @@
     gap: 8px;
 }
 
+.sidebar-card h4 .sparkle-icon {
+    color: #f59e0b;
+}
+
 .info-list {
     display: flex;
     flex-direction: column;
@@ -1130,14 +1134,22 @@
 
 .info-icon.orange {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.08));
+    color: #f59e0b;
 }
 
 .info-icon.blue {
     background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.08));
+    color: #06b6d4;
 }
 
 .info-icon.red {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.08));
+    color: #ef4444;
+}
+
+.info-icon.yellow {
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(250, 204, 21, 0.1));
+    color: #eab308;
 }
 
 .info-item div {
@@ -1160,10 +1172,11 @@
 .help-card {
     position: relative;
     border-radius: 20px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark), var(--info));
+    background: linear-gradient(160deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
     padding: 24px;
     color: white;
     overflow: hidden;
+    box-shadow: 0 10px 40px rgba(37, 99, 235, 0.25);
 }
 
 .help-card::before {
@@ -1173,27 +1186,32 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.2), transparent 50%);
+    background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.15), transparent 50%);
+    pointer-events: none;
 }
 
 .help-header {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 14px;
+    margin-bottom: 20px;
+    z-index: 1;
 }
 
 .help-icon {
-    width: 48px;
-    height: 48px;
-    background: rgba(255, 255, 255, 0.2);
+    width: 52px;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(4px);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #ff6b6b;
+    flex-shrink: 0;
 }
 
 .help-header div {
@@ -1202,56 +1220,67 @@
 }
 
 .help-header strong {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
+    color: white;
 }
 
 .help-header span {
-    font-size: 12px;
-    opacity: 0.8;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .help-contacts {
     position: relative;
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.95);
+    z-index: 1;
+}
+
+.help-contacts div {
+    display: flex;
+    align-items: center;
     gap: 8px;
-    margin-bottom: 16px;
-    font-size: 13px;
-    opacity: 0.9;
 }
 
 .help-btn {
     position: relative;
     width: 100%;
-    padding: 12px;
+    padding: 14px 18px;
     background: rgba(255, 255, 255, 0.2);
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     color: white;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: background 0.2s;
+    transition: all 0.2s;
     backdrop-filter: blur(4px);
+    z-index: 1;
 }
 
 .help-btn:hover {
     background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
 }
 
 /* Time Card */
 .time-card {
     position: relative;
-    background: linear-gradient(135deg, rgba(100, 116, 139, 0.05), rgba(100, 116, 139, 0.1));
+    background: #f1f5f9;
     border-radius: 20px;
-    padding: 28px;
+    padding: 32px 28px;
     text-align: center;
     overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .time-card::before {
@@ -1262,32 +1291,34 @@
     transform: translateX(-50%);
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.08), transparent 70%);
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.06), transparent 70%);
     pointer-events: none;
 }
 
 .time-label {
-    font-size: 10px;
+    display: block;
+    font-size: 11px;
     font-weight: 600;
     color: var(--text-muted);
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
+    margin-bottom: 12px;
 }
 
 .time-value {
     display: block;
-    font-size: 48px;
+    font-size: 52px;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--primary), var(--info));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 8px 0;
+    color: #2563eb;
+    line-height: 1;
+    margin-bottom: 8px;
 }
 
 .time-unit {
-    font-size: 14px;
+    display: block;
+    font-size: 15px;
     color: var(--text-muted);
+    font-weight: 500;
 }
 
 /* ==================== FOOTER ==================== */

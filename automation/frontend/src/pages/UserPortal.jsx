@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, ChevronDown, Sparkles } from 'lucide-react';
+import { User, ChevronDown, Sparkles, Clock, FileCheck, AlertTriangle, HelpCircle, Phone, Mail, ArrowRight } from 'lucide-react';
 import NeighborhoodMap from '../components/NeighborhoodMap';
 import './UserPortal.css';
 
@@ -485,24 +485,30 @@ function UserPortal() {
                         {/* Quick Info */}
                         <div className="sidebar-card">
                             <div className="card-accent"></div>
-                            <h4><span>✨</span> Important Notes</h4>
+                            <h4><Sparkles size={18} className="sparkle-icon" /> Important Notes</h4>
                             <div className="info-list">
                                 <div className="info-item">
-                                    <div className="info-icon orange">⏰</div>
+                                    <div className="info-icon orange">
+                                        <Clock size={20} />
+                                    </div>
                                     <div>
                                         <strong>14-Day Deadline</strong>
                                         <span>Register after moving in</span>
                                     </div>
                                 </div>
                                 <div className="info-item">
-                                    <div className="info-icon blue">📄</div>
+                                    <div className="info-icon blue">
+                                        <FileCheck size={20} />
+                                    </div>
                                     <div>
                                         <strong>Valid ID Required</strong>
                                         <span>ID Card or Passport</span>
                                     </div>
                                 </div>
                                 <div className="info-item">
-                                    <div className="info-icon red">⚠️</div>
+                                    <div className="info-icon yellow">
+                                        <AlertTriangle size={20} />
+                                    </div>
                                     <div>
                                         <strong>Landlord Confirmation</strong>
                                         <span>Submit if required</span>
@@ -514,18 +520,20 @@ function UserPortal() {
                         {/* Help Card */}
                         <div className="help-card">
                             <div className="help-header">
-                                <div className="help-icon">❓</div>
+                                <div className="help-icon">
+                                    <HelpCircle size={28} />
+                                </div>
                                 <div>
                                     <strong>Need Help?</strong>
                                     <span>We're here for you</span>
                                 </div>
                             </div>
                             <div className="help-contacts">
-                                <div>📞 0800 123 4567 (free)</div>
-                                <div>✉️ help@citizenportal.com</div>
+                                <div><Phone size={16} /> 0800 123 4567 (free)</div>
+                                <div><Mail size={16} /> help@citizenportal.com</div>
                             </div>
                             <button className="help-btn">
-                                Open FAQ <span>→</span>
+                                Open FAQ <ArrowRight size={16} />
                             </button>
                         </div>
 
