@@ -141,7 +141,7 @@ main {
 }
 
 /* Center content for login pages only (not portal) */
-main:not(:has(.admin-dashboard-root)):not(:has(.portal-page)) {
+main:not(:has(.admin-dashboard-root)):not(:has(.portal-page)):not(.main-content) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -153,7 +153,6 @@ main:not(:has(.admin-dashboard-root)):not(:has(.portal-page)) {
 main:has(.admin-dashboard-root),
 main:has(.portal-page) {
   display: block;
-  padding: 0;
   min-height: auto;
 }
 
